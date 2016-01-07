@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+<head>
+	<meta charset="utf-8"/>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+	<title data-th-text="#{site.name}">title</title>
+
+	<meta name="description" content=""/>
+	<meta name="author" content=""/>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1"/>
+	<meta name="apple-mobile-web-app-capable" content="yes"/>
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+	<!-- BEGIN CORE CSS -->
+	<link rel="stylesheet" href="/resources/css/admin1.css"/>
+	<link rel="stylesheet" href="/resources/globals/css/elements.css"/>
+	<!-- END CORE CSS -->
+
+	<!-- BEGIN PLUGINS CSS -->
+
+	<!-- END PLUGINS CSS -->
+
+	<!-- FIX PLUGINS -->
+	<link rel="stylesheet" href="/resources/globals/css/plugins.css"/>
+	<!-- END FIX PLUGINS -->
+
+	<!-- BEGIN SHORTCUT AND TOUCH ICONS -->
+	<link rel="shortcut icon" href="/resources/globals/img/icons/favicon.ico"/>
+	<link rel="apple-touch-icon" href="/resources/globals/img/icons/apple-touch-icon.png"/>
+	<!-- END SHORTCUT AND TOUCH ICONS -->
+
+	<script src="/resources/globals/plugins/modernizr/modernizr.min.js"></script>
+</head>
+<body class="bg-login">
+
+	<div class="login-screen">
+		<div class="panel-login blur-content">
+			<div class="panel-heading"><img src="/resources/globals/img/teamfox.png" height="100" alt=""/></div><!--.panel-heading-->
+ <form name="f" data-th-action="@{/login}" method="post">
+ <input type="hidden" name="default-target-url" value="http://localhost:8080/home"/>
+			<div id="pane-login" class="panel-body active">
+				<h2 data-th-text="#{login.h2.text}">Login to Dashboard</h2>
+				<div id="success" style="display:none" class="alert alert-success" role="alert">
+				</div>
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input  type="text" required="required" id="username" name="username" class="form-control"
+							th:attr="placeholder=#{username.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="password" required="required" id="password" name="password" class="form-control" th:attr="placeholder=#{password.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-buttons clearfix">
+					<label class="pull-left"><input type="checkbox" name="rememberMe" value="1" data-th-text="#{remember.placeholder}"/></label>
+					<button type="submit" class="btn btn-success pull-right" data-th-text="#{login.button.label}">Login</button>
+				</div><!--.form-buttons-->
+
+				
+
+				<ul class="extra-links">
+					<li><a href="#" class="show-pane-forgot-password" data-th-text="#{forget.link.label}">Forgot your password</a></li>
+					<li><a href="#" class="show-pane-create-account" data-th-text="#{create.link.label}">Create a new account</a></li>
+				</ul>
+			</div><!--#login.panel-body-->
+   </form>
+   <form id="resetForm"  method="post">
+			<div id="pane-forgot-password" class="panel-body">
+				<h2 data-th-text="#{forget.h2.text}">Forgot Your Password</h2>
+				<div class="alert alert-danger" style="display:none" id="resetFormAlertDiv" role="alert" data-th-text="#{info.error}">   
+				</div>
+				
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="text" id="resetUsername" required="required" name="username" maxlength="11" minlength="11" class="form-control" th:attr="placeholder=#{username.placeholder}"/>
+						</div>
+						<div class="input-wrapper">
+							<button type="button" id="sendResetSmsCodeBtn" class="btn-green" data-th-text="#{get.sms.code}"></button>
+						</div>
+						<div class="input-wrapper">
+							<input type="text"  required="required" name="code" class="form-control" th:attr="placeholder=#{validate.code.placeholder}"/>
+						</div>	
+						<div class="input-wrapper">
+							<input type="password" id="resetPasswordOne" name="password" minlength="6" maxlength="50" required="required" class="form-control" th:attr="placeholder=#{password.placeholder}"/>
+						</div>
+						<div class="input-wrapper">
+							<input type="password" id="resetPasswordTwo" name="passwordRepeat" minlength="6" maxlength="50" required="required" class="form-control" th:attr="placeholder=#{password.repeaet.placeholder}"/>
+						</div>														
+					</div>
+				</div><!--.form-group-->
+				<div class="form-buttons clearfix">
+					<button type="button" class="btn btn-white pull-left show-pane-login" data-th-text="#{cancel.button.label}" >Cancel</button>
+					<button type="submit" id="sendButton" class="btn btn-success pull-right" data-th-text="#{reset.password}">Send</button>
+				</div><!--.form-buttons-->
+			</div><!--#pane-forgot-password.panel-body-->
+  </form>
+  <form id="signUpForm" method="post">
+			<div id="pane-create-account" class="panel-body">
+				<h2 data-th-text="#{create.link.label}">Create a New Account</h2>
+				<div class="alert alert-danger " style="display:none" id="signUpAlertDiv" role="alert" data-th-text="#{register.error.text}">		                    
+				</div>
+				
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="text" id="registerUsername" name="username" minlength="11" maxlength="11" required="required" class="form-control" th:attr="placeholder=#{username.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<div class="inputer" >
+						<div class="input-wrapper">
+							<button type="button"  id="sendRegSmsCodeBtn" class="btn-green" data-th-text="#{get.sms.code}"></button>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="text"  required="required" name="code" class="form-control" th:attr="placeholder=#{validate.code.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				
+				
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="text"  name="nickname" required="required" class="form-control" th:attr="placeholder=#{nick.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="password" name="password" minlength="6" maxlength="50" id="passwordRegisterOne" required="required" class="form-control" th:attr="placeholder=#{password.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<div class="inputer">
+						<div class="input-wrapper">
+							<input type="password" name="passwordRepeat" minlentht="6" maxlength="50" id="passwordRegisterTwo" required="required" class="form-control" th:attr="placeholder=#{password.repeaet.placeholder}"/>
+						</div>
+					</div>
+				</div><!--.form-group-->
+				<div class="form-group">
+					<label><input type="checkbox" id="remeber" required="required" name="remember" value="1" data-th-text="#{agree.label}"/></label>
+				</div>
+				<div class="form-buttons clearfix">
+					<button type="button" id="cancel" class="btn btn-white pull-left show-pane-login" data-th-text="#{cancel.button.label}">Cancel</button>
+					<button type="submit" class="btn btn-success pull-right" data-th-text="#{signup.button.label}">Sign Up</button>
+				</div><!--.form-buttons-->
+			</div><!--#login.panel-body-->
+  </form>
+		</div><!--.blur-content-->
+	</div><!--.login-screen-->
+
+	<div class="bg-blur dark">
+		<div class="overlay"></div><!--.overlay-->
+	</div><!--.bg-blur-->
+
+	<svg version="1.1" xmlns='http://www.w3.org/2000/svg'>
+		<filter id='blur'>
+			<feGaussianBlur stdDeviation='7' />
+		</filter>
+	</svg>
+
+	<!-- BEGIN GLOBAL AND THEME VENDORS -->
+	<script src="/resources/globals/js/global-vendors.js"></script>
+	<!-- END GLOBAL AND THEME VENDORS -->
+
+	<!-- BEGIN PLUGINS AREA -->
+	<!-- END PLUGINS AREA -->
+
+	<!-- PLUGINS INITIALIZATION AND SETTINGS -->
+	<script src="/resources/globals/scripts/user-pages.js"></script>
+	<!-- END PLUGINS INITIALIZATION AND SETTINGS -->
+
+	<!-- PLEASURE Initializer -->
+	<script src="/resources/globals/js/pleasure.js"></script>
+	<!-- ADMIN 1 Layout Functions -->
+	<script src="/resources/js/layout.js"></script>
+	<!-- BEGIN INITIALIZATION-->
+	<script type="text/javascript"  th:inline="text">
+	   var checkUsernameUrl ="/auth/checkUsername/";
+	   var registerUrl="/auth/register";
+	   var sendFindPwSmsCodeUrl="/auth/sendFindPwSmsCode/";
+	   var resetPasswordUrl="/auth/resetPassword";
+	   var sendRegSmsCodeUrl="/auth/sendRegisterSmsCode/";
+	   
+	   
+	   var usernameError="[[#{username.error}]]";
+	   var passwordError="[[#{password.error}]]";
+	   var registerErrorText="[[#{register.error.text}]]";
+	   var resetPwError="[[#{reset.pw.error}]]";
+	   var successShowText="[[#{success.show.text}]]";
+	   var accountNotExistError="[[#{account.not.exist.error}]]";
+	   var getSmsCode="[[#{get.sms.code}]]";
+	   var successRegisterText="[[#{success.register.text}]]";
+	   var successResetPw="[[#{success.reset.pw}]]";
+	   var usernameFormatError="[[#{username.format.error}]]";
+	</script>
+	<script src="/resources/jsCustom/register.js"></script>
+	<!-- END INITIALIZATION-->
+
+
+
+</body>
+</html>

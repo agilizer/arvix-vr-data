@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head th:replace="layout/admin :: head (title='用户列表管理--管理员后台')">
+<!-- BEGIN PLUGINS CSS -->
+<!-- END PLUGINS CSS -->
+</head>
+<body>
+	<div id="wrapper">
+		<div class="nav-bar-container" th:replace="layout/admin :: nav">
+		</div>
+		<!--.nav-bar-container-->
+
+		<div id="page-wrapper">
+			<div class="row">
+				<div class="col-lg-12">
+					<h1 class="page-header">管理员中心</h1>
+				</div>
+				<!-- /.col-lg-12 -->
+			</div>
+			<div class="row">
+				<table class="table">
+					<tr>
+						<td>名称</td>
+						<td>描述</td>
+						<td>值</td>
+					</tr>
+					<tr th:each="configDomain,configDomainStat:${configDomainList}">
+						<td th:text="${configDomain.mapName}"></td>
+						<td th:text="${configDomain.description}"></td>
+						<td><a href="#" th:if="${configDomain.valueType.toString()=='HTML'}"
+							data-type="textarea"
+							class="editable"  data-pk="1" data-name='value'
+							data-url="/configDomain/update" data-title="请输入新的值"
+							th:text="${configDomain.mapValue}"
+							th:attr="data-pk=${configDomain.id}">value </a>
+							<a href="#" th:unless="${configDomain.valueType.toString()=='HTML'}"
+							class="editable" data-pk="1" data-name='value' data-type="text"
+							data-url="/configDomain/update" data-title="请输入新的值"
+							th:text="${configDomain.mapValue}"
+							th:attr="data-pk=${configDomain.id}">value </a>
+							</td>
+					</tr>
+				</table>
+
+			</div>
+		</div>
+	</div>
+	<div th:include="layout/admin :: jsEnd"></div>
+	<div th:replace="layout/plugins :: x-editable"></div>
+	<script>
+		$(document).ready(function() {
+			$(".editable").each(function() {
+				$(this).editable();
+			});
+		});
+	</script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"  />
+    <title th:title="${modelData.title}">The book store of Demaotang - Matterport 3D Showcase</title>
+
+<meta property="og:title" content="The book store of Demaotang" />
+    <meta property="og:description" content="3D Showcase" />
+    <meta property="og:type" content="video" />
+    <meta property="og:url" content="https://my.matterport.com/show/?m=MXfJvWQecHT" />
+    <meta property="og:site_name" content="Matterport" />
+    <meta property="og:image" content="https://my.matterport.com/api/v1/player/models/MXfJvWQecHT/thumb" />
+    <meta property="og:image:width" content="" />
+    <meta property="og:image:height" content="" />
+
+
+    <meta name="twitter:card" content="photo" />
+    <meta name="twitter:site" content="@matterport" />
+    <meta name="twitter:title" content="The book store of Demaotang" />
+    <meta name="twitter:image" content="https://my.matterport.com/api/v1/player/models/MXfJvWQecHT/thumb" />
+    <meta name="twitter:image:width" content="" />
+    <meta name="twitter:image:height" content="" />
+    <meta name="twitter:url" content="https://my.matterport.com/show/?m=MXfJvWQecHT" />
+
+
+
+    <link rel="alternate" type="application/json+oembed"    th:title="${modelData.title}"  
+          href="https://my.matterport.com/api/v1/scanmodel/oembed?url=https://my.matterport.com/show/?m=MXfJvWQecHT"
+          title="The book store of Demaotang" />
+
+    <script  th:utext="${'window.MP_PREFETCHED_MODELDATA ='+modelData.modelData+';'}">
+    
+    </script>
+
+    <link rel="icon" type="image/png" sizes="32x32" href="https://my.matterport.com/show/images/icons/favicon.png"
+          class="keep" />
+    <link rel="apple-touch-icon-precomposed" sizes="114x114"
+          href="https://my.matterport.com/show/images/icons/apple-touch-icon-114.png" class="keep" />
+    <link rel="apple-touch-icon-precomposed" sizes="144x144"
+          href="https://my.matterport.com/show/images/icons/apple-touch-icon-144.png" class="keep"   />
+    <link rel="stylesheet" href="/resources/matterport/jsAndCss/main.css" />
+
+</head>
+<body class="player-active">
+<div id="siteUrl" style="display: none;" th:text="${siteUrl}"></div>
+<div id="modelData" style="display: none;" th:utext="${modelData.modelData}"></div>
+<div id="gui-thumb" style="display: none;"></div>
+<div tabindex="-1" id="player" style="">
+    <canvas style="width: 1920px; height: 436px;" height="436" width="1920"></canvas>
+</div>
+<div id="gui-parent">
+    <div id="gui-loading" class="message-outer darkGlass" style="display: none;"><h2 class="model-title">The book store
+        of Demaotang</h2>
+
+        <div class="message-inner">
+            <div id="circleLoader">
+                <div id="loader-cont" data-status="Loading">
+                    <svg id="svg" width="100" height="100" viewport="0 0 100 100" version="1.1"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <circle id="barBg" r="47" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48"
+                                stroke-dashoffset="0"></circle>
+                        <circle id="bar" r="47" cx="50" cy="50" transform="rotate(-90 50 50)" fill="transparent"
+                                stroke-dasharray="295.30" stroke-dashoffset="0"
+                                style="stroke-dashoffset: 0px;"></circle>
+                    </svg>
+                </div>
+            </div>
+            <div style="display: none;" id="loaderCoBrand">
+                <div class="vert-align"><p>PRESENTED BY</p>
+
+                    <h2 id="loaderCoBrandName"></h2></div>
+            </div>
+            <div class="bottom-logo"><img alt="Powered By Matterport"
+                                          src="/resources/matterport/jsAndCss/poweredByLogo.png" />
+            </div>
+        </div>
+    </div>
+    <div id="gui" style="">
+        <div class="pinTop left">
+            <div id="model-title">
+                <div class="title-row">
+                    <div id="title-toggle" class="darkGlass hasHover"><a class="hasHover"><i
+                            class="icon icon-dpad-left"></i></a></div>
+                    <div class="title-container darkGlass meta-toggle hasHover">
+                        <div style="display: none;" class="co-brand">Presented by <span class="title"
+                                                                                        id="cobrandTitle"></span></div>
+                        <a style="display: none;" class="hasHover" id="more-hint">More <i
+                                class="icon icon-dpad-down"></i></a> <a class="hasHover" id="less-hint" style="">Less <i
+                            class="icon icon-dpad-up"></i></a>
+
+                        <div data-original-title="The book store of Demaotang" title="" id="gui-name"
+                             class="gui-text titleText noCoBrand" rel="tooltip" data-placement="bottom"
+                             data-html="true"   th:text="${modelData.title}">The book store of Demaotang
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="meta-info-spacing-fix">
+                <div style="display: block;" id="meta-info" class="darkGlass">
+                    <div id="meta-description"   th:text="${modelData.description}">The book store of Demaotang, Huangshang, Anhui, China</div>
+                    <div style="display: none;" class="contact-info"><i class="icon icon-user pull-left"></i>&nbsp;
+                        <div id="contact-data"></div>
+                    </div>
+                    <div style="display: none;" class="address"><i class="icon icon-pin"></i> <span
+                            id="addressTxt"></span></div>
+                </div>
+            </div>
+        </div>
+        <div class="pinTop right hideTarget hideUnderMeta">
+            <div class="nav-help pull-right"><a class="hasHover"><i class="icon icon-help"></i></a></div>
+            <div class="pull-right terms"><a class="hasHover">Terms</a></div>
+        </div>
+        <div class="pinBottom left">
+            <div class="viewContainer">
+                <div style="display: none;" id="previous" class="previous desktop-only ui-icon"><a class="hasHover"><i
+                        data-original-title="Previous" rel="tooltip" title="" class="icon icon-dpad-left"></i></a></div>
+                <div style="display: none;" id="play" class="ui-icon"><a class="hasHover"><i data-original-title="Play"
+                                                                                             rel="tooltip" title=""
+                                                                                             class="icon icon-play"></i></a>
+                </div>
+                <div id="pause" class="ui-icon" style="display: none;"><a class="hasHover"><i
+                        data-original-title="Pause" rel="tooltip" title="" class="icon icon-pause"></i></a></div>
+                <div style="display: none;" id="next" class="next desktop-only ui-icon double"><a class="hasHover"><i
+                        data-original-title="Next" rel="tooltip" title="" class="icon icon-dpad-right"></i></a></div>
+                <div id="gui-modes-map" class="ui-icon double"><a class="hasHover"><i data-original-title="Change view"
+                                                                                      rel="tooltip" title=""
+                                                                                      class="icon icon-dollhouse"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="pinBottom right hideTarget">
+            <div class="rightViewContainer">
+                <div style="display: none;" class="gui-floor hasHover">
+                    <div class="gui-floor-title">All</div>
+                    <i class="icon icon-dpad-up"></i>
+
+                    <div class="container"></div>
+                </div>
+                <div id="gui-fullscreen" class="ui-icon double" data-placement="top"><a class="hasHover"><i
+                        data-original-title="View Fullscreen" rel="tooltip" title=""
+                        class="icon icon-fullscreen"></i></a></div>
+                <div id="gui-fullscreen-exit" class="ui-icon" data-placement="top" style="display: none;"><a
+                        class="hasHover"><i data-original-title="Exit Fullscreen" rel="tooltip" title=""
+                                            class="icon icon-fullscreen-exit"></i></a></div>
+            </div>
+        </div>
+        <div class="pinBottom center">
+            <div style="display: none;" id="view-controllers">
+                <div id="gui-modes-dollhouse" class="darkGlass active"><span class="mode">Dollhouse</span></div>
+                <div id="gui-modes-floorplan" class="darkGlass"><span class="mode">Floor plan</span></div>
+            </div>
+            <div style="display: none;" id="pullTab" class="darkGlass"><span>Highlights</span> <span
+                    style="display: none">Close</span> <i class="icon icon-dpad-up"></i></div>
+        </div>
+        <div style="display: none;" id="drawer" class="fullWidth">
+            <div class="frame-container darkGlass">
+                <div id="scrollFrame" class="frame">
+                    <ul id="thumb-container" class="slidee"></ul>
+                </div>
+                <div class="scrollbar" id="scroller">
+                    <div class="handle"></div>
+                </div>
+            </div>
+        </div>
+        <div id="playHead">
+            <div id="status"><span class="curIdx">1</span> of <span class="totalSteps"></span></div>
+            <div id="progressBar"></div>
+        </div>
+    </div>
+    <div id="gui-spinner" style="display: none;">
+        <div id="gui-spinner-icon"></div>
+    </div>
+    <div id="gui-message" class="message-outer darkGlass" style="display: none;"><h2 class="model-title" >The book store
+        of Demaotang</h2>
+
+        <div class="message-inner">
+            <div class="message-content"><a class="hasHover" id="button-play"><i class="icon icon-play"></i></a>
+
+                <div>Explore 3D Space</div>
+            </div>
+        </div>
+        <div class="bottom-logo"><img class="onlyLogo" alt="Matterport Logo"
+                                      src="/resources/matterport/jsAndCss/matterportLogoColor.png" />
+            <span>3D Showcase</span></div>
+    </div>
+    <div id="share-modal" style="display: none;">
+        <div class="title">Share Link <i class="icon icon-link"></i></div>
+        <div id="share-close"><i class="icon icon-close"></i></div>
+        <input value="https://my.matterport.com/show/?m=MXfJvWQecHT" id="shareUrl" disabled="disabled" type="text" />
+    </div>
+    <div id="terms-modal" style="display: none;">
+        <div id="terms-text"></div>
+        <button type="button" class="btn btn-default">Close</button>
+    </div>
+    <div class="gui-error message-outer" style="display: none;">
+        <div class="message-inner">
+            <div class="message-content">
+                <div class="error-problem-text"></div>
+                <div class="error-solution-text"></div>
+                <div class="error-explanation"></div>
+                <div class="error-actions"></div>
+            </div>
+        </div>
+    </div>
+    <div class="nav-help-dialog" style="display: none;">
+        <div class="nav-help-elements">
+            <div class="title">How to Navigate</div>
+            <div class="close"><a class="hasHover"><i class="icon icon-close"></i></a></div>
+            <div class="nav-help-content">
+                <div class="nav-icon"></div>
+                <div class="nav-text"></div>
+            </div>
+            <div class="page-count"></div>
+            <div class="next-button hasHover">NEXT</div>
+            <div class="prev-button hasHover">PREVIOUS</div>
+        </div>
+    </div>
+    <!--[if lte IE 9]>
+    <div class="gui-error message-outer darkGlass">
+        <div class='message-inner'>
+            <div class='message-content' style='font-family: Helvetica Neue, sans-serif;'>
+                <div class="error-problem-text">Browser not supported.</div>
+                <div class="error-solution-text">Install a new browser to explore in 3D.</div>
+                <div class="error-actions">For Matterport 3D Showcase support,
+                    <a class="link" target="_blank"
+                       href="https://matterportsupport.zendesk.com/hc/en-us/articles/208220058-Showcase-System-Requirements">see
+                        our troubleshooting guide</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <![endif]--></div>
+<script src="/resources/matterport/jsAndCss/three71.js"
+        class="build keep"></script>
+<script src="/resources/matterport/jsAndCss//three71-shim.js"
+        class="build keep"></script>
+<script src="/resources/matterport/jsAndCss/jquery-2.js"
+        class="build keep"></script>
+<script src="/resources/matterport/jsAndCss/jquery.js"
+        class="build keep"></script>
+<script src="/resources/matterport/jsAndCss/main.js"></script>
+</body>
+</html>
