@@ -95,12 +95,13 @@
 			<div class="row">
 				<div class="col-sm-6">
 					<h1>
-						Arvix <small>3D展示</small>
+						Arvix <small>3D展示</small> <small th:if="${#authentication.name=='anonymousUser'}">登录</small>
 					</h1>
 				</div>
 				<!--.col-->
 				<div class="col-sm-6">
 					<ol class="breadcrumb">
+						<li  th:if="${#authentication.name!='anonymousUser'}" >欢迎<samp  sec:authentication="name" ></samp><a href="/modelData/index">数据管理</a></li>
 						<li><a href="#"><i class="ion-home"></i></a></li>
 						<li><a href="#">页面</a></li>
 						<li><a href="#" class="active">首页</a></li>

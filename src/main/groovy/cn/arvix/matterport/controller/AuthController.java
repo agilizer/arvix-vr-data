@@ -70,5 +70,13 @@ public class AuthController {
 			HttpServletRequest request) {	
 		return authService.resetPassword(userVO, request);
 	}
+	
+	
+	@RequestMapping("/login")
+	public String resetPassword(
+			HttpServletRequest request) {	
+		return "login";
+	}
+
 
 }

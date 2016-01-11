@@ -30,10 +30,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/admin/**","/configDomain/**","/api/v1/fetchData/**","/modelData/index")
-				.hasRole(Role.ROLE_ADMIN).and().formLogin().loginPage("/auth/login")
+		http.authorizeRequests().antMatchers("/admin/**","/configDomain/**","/modelData/index")
+				.hasAnyAuthority(Role.ROLE_ADMIN).and().formLogin().defaultSuccessUrl("/")
+				.loginPage("/login")
 				.permitAll().and().logout().permitAll().and()
-				.authorizeRequests().antMatchers("/resources/**", "/auth/**","/console/**")
+				.authorizeRequests().antMatchers("/resources/**", "/auth/**","/console/**","/login/**")
 				.permitAll().and().csrf().disable();
 	}
 
