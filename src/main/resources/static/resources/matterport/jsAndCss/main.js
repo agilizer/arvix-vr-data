@@ -15312,7 +15312,7 @@ dat.gui = dat.gui || {
                                 l = o.length / 2;
                             if (!(1 > e || e > l)) {
                                 var h = o[2 * e - 1],
-                                    c = '<img class="icon" src="images/' + h + '" title="navigation icon">';
+                                    c = '<img class="icon" src="/resources/images/' + h + '" title="navigation icon">';
                                 r.find('.nav-icon').html(c);
                                 var u = o[2 * e - 2];
                                 r.find('.nav-text').text(u),
