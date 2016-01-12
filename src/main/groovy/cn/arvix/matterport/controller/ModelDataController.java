@@ -4,10 +4,14 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.arvix.matterport.service.FetchDataService;
+import cn.arvix.matterport.service.JdbcPage;
+import cn.arvix.matterport.service.ModelDataService;
 
 
 @Controller
@@ -15,7 +19,8 @@ import cn.arvix.matterport.service.FetchDataService;
 public class ModelDataController {
 	@Autowired
 	FetchDataService fetchDataService;
-	
+	@Autowired
+	ModelDataService modelDataService;
 	
 	@ResponseBody
 	@RequestMapping("/api/v1/fetchData")
@@ -27,5 +32,8 @@ public class ModelDataController {
 	public String index(String sourceUrl) {
 		return "modelData/index";
 	}
+	
+	
+	
 
 }

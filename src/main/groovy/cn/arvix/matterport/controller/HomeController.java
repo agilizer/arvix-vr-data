@@ -29,7 +29,7 @@ public class HomeController {
 	public String index(Model model) {
 		// Collection<?> temp =
 		// SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-		model.addAttribute("modelDataJdbcPage", modelDataService.list(10, 0));
+		model.addAttribute("modelDataJdbcPage", modelDataService.list(100, 0));
 		return "home";
 	}
 
@@ -43,6 +43,7 @@ public class HomeController {
 			System.out.println(modelData.getModelData());
 			model.addAttribute("caseId",caseId );
 			model.addAttribute("siteUrl", configDomainService.getConfig(ArvixMatterportConstants.SITE_URL));
+			model.addAttribute("teamDesc", configDomainService.getConfig(ArvixMatterportConstants.TEAM_DESCRIPTION));
 			viewName = "show";
 			
 		}

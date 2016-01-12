@@ -39,7 +39,7 @@
     
     </script>
 
-    <link rel="icon" type="image/png" sizes="32x32" href="https://my.matterport.com/show/images/icons/favicon.png"
+    <link rel="icon" type="image/png" sizes="32x32" href="/resources/images/favicon-32x32.ico"
           class="keep" />
     <link rel="apple-touch-icon-precomposed" sizes="114x114"
           href="https://my.matterport.com/show/images/icons/apple-touch-icon-114.png" class="keep" />
@@ -51,11 +51,18 @@
 <body class="player-active">
 <div id="siteUrl" style="display: none;" th:text="${siteUrl+'api/player/models/'+modelData.caseId+'/'}"></div>
 <div id="gui-thumb" style="display: none;"></div>
+<div id="termsContent" style="display: none;" th:utext="${teamDesc}">
+<h1>团队介绍</h1><p><h3 style="color:red">北京唯幻科技有限公司</h3>是一家采用3维VR（虚拟现实技术）为房地产行业提供虚拟现实、增强性业务综合解决方案的一家创新型互联网公司。
+
+                            		身由苏黎世大学计算机海归博士郭奕先生及知名投资人成立于2012年，为国内多家央企、国企搭建传统行业的互联网 的平台
+
+                            		和升级方案。 目前与合伙人共同成立"北京唯幻科技有限公司"，并且完成A轮的融资。
+</div>>
 <div tabindex="-1" id="player" style="">
     <canvas style="width: 1920px; height: 436px;" height="436" width="1920"></canvas>
 </div>
 <div id="gui-parent">
-    <div id="gui-loading" class="message-outer darkGlass" style="display: none;"><h2 class="model-title">The book store
+    <div id="gui-loading" class="message-outer darkGlass" style="display: none;"><h2 class="model-title" th:text="${modelData.title}">The book store
         of Demaotang</h2>
 
         <div class="message-inner">
@@ -76,8 +83,8 @@
 
                     <h2 id="loaderCoBrandName"></h2></div>
             </div>
-            <div class="bottom-logo"><img alt="Powered By Matterport"
-                                          src="/resources/matterport/jsAndCss/poweredByLogo.png" />
+            <div class="bottom-logo"><img alt="Arvix 荣誉出品"
+                                          src="/resources/images/poweredByLogo.png" />
             </div>
         </div>
     </div>
@@ -90,8 +97,8 @@
                     <div class="title-container darkGlass meta-toggle hasHover">
                         <div style="display: none;" class="co-brand">Presented by <span class="title"
                                                                                         id="cobrandTitle"></span></div>
-                        <a style="display: none;" class="hasHover" id="more-hint">More <i
-                                class="icon icon-dpad-down"></i></a> <a class="hasHover" id="less-hint" style="">Less <i
+                        <a style="display: none;" class="hasHover" id="more-hint">查看更多信息 <i
+                                class="icon icon-dpad-down"></i></a> <a class="hasHover" id="less-hint" style="">收起 <i
                             class="icon icon-dpad-up"></i></a>
 
                         <div data-original-title="The book store of Demaotang" title="" id="gui-name"
@@ -114,21 +121,21 @@
         </div>
         <div class="pinTop right hideTarget hideUnderMeta">
             <div class="nav-help pull-right"><a class="hasHover"><i class="icon icon-help"></i></a></div>
-            <div class="pull-right terms"><a class="hasHover">Terms</a></div>
+            <div class="pull-right terms"><a class="hasHover">团队</a></div>
         </div>
         <div class="pinBottom left">
             <div class="viewContainer">
                 <div style="display: none;" id="previous" class="previous desktop-only ui-icon"><a class="hasHover"><i
-                        data-original-title="Previous" rel="tooltip" title="" class="icon icon-dpad-left"></i></a></div>
+                        data-original-title="上一个" rel="tooltip" title="" class="icon icon-dpad-left"></i></a></div>
                 <div style="display: none;" id="play" class="ui-icon"><a class="hasHover"><i data-original-title="Play"
                                                                                              rel="tooltip" title=""
                                                                                              class="icon icon-play"></i></a>
                 </div>
                 <div id="pause" class="ui-icon" style="display: none;"><a class="hasHover"><i
-                        data-original-title="Pause" rel="tooltip" title="" class="icon icon-pause"></i></a></div>
+                        data-original-title="暂停" rel="tooltip" title="" class="icon icon-pause"></i></a></div>
                 <div style="display: none;" id="next" class="next desktop-only ui-icon double"><a class="hasHover"><i
-                        data-original-title="Next" rel="tooltip" title="" class="icon icon-dpad-right"></i></a></div>
-                <div id="gui-modes-map" class="ui-icon double"><a class="hasHover"><i data-original-title="Change view"
+                        data-original-title="下一个" rel="tooltip" title="" class="icon icon-dpad-right"></i></a></div>
+                <div id="gui-modes-map" class="ui-icon double"><a class="hasHover"><i data-original-title="更换视图"
                                                                                       rel="tooltip" title=""
                                                                                       class="icon icon-dollhouse"></i></a>
                 </div>
@@ -137,26 +144,26 @@
         <div class="pinBottom right hideTarget">
             <div class="rightViewContainer">
                 <div style="display: none;" class="gui-floor hasHover">
-                    <div class="gui-floor-title">All</div>
+                    <div class="gui-floor-title">全部</div>
                     <i class="icon icon-dpad-up"></i>
 
                     <div class="container"></div>
                 </div>
                 <div id="gui-fullscreen" class="ui-icon double" data-placement="top"><a class="hasHover"><i
-                        data-original-title="View Fullscreen" rel="tooltip" title=""
+                        data-original-title="全屏查看" rel="tooltip" title=""
                         class="icon icon-fullscreen"></i></a></div>
                 <div id="gui-fullscreen-exit" class="ui-icon" data-placement="top" style="display: none;"><a
-                        class="hasHover"><i data-original-title="Exit Fullscreen" rel="tooltip" title=""
+                        class="hasHover"><i data-original-title="退出全屏" rel="tooltip" title=""
                                             class="icon icon-fullscreen-exit"></i></a></div>
             </div>
         </div>
         <div class="pinBottom center">
             <div style="display: none;" id="view-controllers">
-                <div id="gui-modes-dollhouse" class="darkGlass active"><span class="mode">Dollhouse</span></div>
-                <div id="gui-modes-floorplan" class="darkGlass"><span class="mode">Floor plan</span></div>
+                <div id="gui-modes-dollhouse" class="darkGlass active"><span class="mode">模型</span></div>
+                <div id="gui-modes-floorplan" class="darkGlass"><span class="mode">户型</span></div>
             </div>
             <div style="display: none;" id="pullTab" class="darkGlass"><span>Highlights</span> <span
-                    style="display: none">Close</span> <i class="icon icon-dpad-up"></i></div>
+                    style="display: none">关闭</span> <i class="icon icon-dpad-up"></i></div>
         </div>
         <div style="display: none;" id="drawer" class="fullWidth">
             <div class="frame-container darkGlass">
@@ -190,14 +197,14 @@
             <span>3D Showcase</span></div>
     </div>
     <div id="share-modal" style="display: none;">
-        <div class="title">Share Link <i class="icon icon-link"></i></div>
+        <div class="title">分享 <i class="icon icon-link"></i></div>
         <div id="share-close"><i class="icon icon-close"></i></div>
         <input value="https://my.matterport.com/show/?m=MXfJvWQecHT"   
         th:value="${'https://my.matterport.com/show/?m='+modelData.caseId}"   id="shareUrl" disabled="disabled" type="text" />
     </div>
     <div id="terms-modal" style="display: none;">
         <div id="terms-text"></div>
-        <button type="button" class="btn btn-default">Close</button>
+        <button type="button" class="btn btn-default">关闭</button>
     </div>
     <div class="gui-error message-outer" style="display: none;">
         <div class="message-inner">
@@ -211,15 +218,15 @@
     </div>
     <div class="nav-help-dialog" style="display: none;">
         <div class="nav-help-elements">
-            <div class="title">How to Navigate</div>
+            <div class="title">操作指南</div>
             <div class="close"><a class="hasHover"><i class="icon icon-close"></i></a></div>
             <div class="nav-help-content">
                 <div class="nav-icon"></div>
                 <div class="nav-text"></div>
             </div>
             <div class="page-count"></div>
-            <div class="next-button hasHover">NEXT</div>
-            <div class="prev-button hasHover">PREVIOUS</div>
+            <div class="next-button hasHover">下一个</div>
+            <div class="prev-button hasHover">上一个</div>
         </div>
     </div>
     <!--[if lte IE 9]>

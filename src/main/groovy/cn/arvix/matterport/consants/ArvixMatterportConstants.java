@@ -34,4 +34,6 @@ public interface ArvixMatterportConstants {
 	String FILE_STORE_PATH = "fileStroePath";
 	
 	String SITE_URL = "siteUrl";
+	
+	String TEAM_DESCRIPTION = "teamDescription";
 }

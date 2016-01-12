@@ -15263,6 +15263,8 @@ dat.gui = dat.gui || {
                         }), $('.terms').on('mousedown touchstart', function (t) {
                         h(t),
                             l('terms'),
+                            //Terms
+                            /**
                             $.ajax('static/terms.html').done(function (t) {
                                 $('#terms-text').html(t),
                                     z.track('USER', {
@@ -15272,7 +15274,10 @@ dat.gui = dat.gui || {
                                     })
                             }).fail(function () {
                                 $('#terms-text').html('<h1>Terms of Use</h1><p>Could not fetch terms. Please make sure you have an internet connection to view the terms of use.')
-                            }),
+                            })**/
+                            $('#terms-text').html($("#termsContent").html())
+
+                            ,
                             $('#terms-modal').fadeIn(nt)
                     }), $('#terms-modal .btn').on('mousedown touchstart', function (t) {
                         h(t),
@@ -15336,14 +15341,14 @@ dat.gui = dat.gui || {
                                             n(f.player.mode, --e)
                                     }),
                                     s.off(),
-                                    e === l ? $('.nav-help-elements .next-button').text('GOT IT').on('mouseup touchend', function (t) {
+                                    e === l ? $('.nav-help-elements .next-button').text('知道啦').on('mouseup touchend', function (t) {
                                         t.preventDefault(),
                                             t.stopImmediatePropagation(),
                                             p.track('USER', {
                                                 event_type: 'help_done'
                                             }),
                                             i()
-                                    })  : s.text('NEXT').on('mouseup touchend', function (t) {
+                                    })  : s.text('下一个').on('mouseup touchend', function (t) {
                                         t.preventDefault(),
                                             t.stopImmediatePropagation(),
                                             p.track('USER', {
@@ -15385,7 +15390,7 @@ dat.gui = dat.gui || {
                         y || (y = !0, w[u.PANORAMA].splice(4, 0, 'Click the highlights button to see  highlights of the space', 'Nav_Help_Highlights.png'), E[u.PANORAMA].splice(4, 0, 'Click the highlights button to see  highlights of the space', 'Nav_Help_Touch_Highlights.png'))
                     }
                     function l() {
-                        b || (b = !0, w[u.PANORAMA].push('Click the dollhouse icon to see the whole space', 'Nav_Help_New_dollhouse.png'), E[u.PANORAMA].push('Tap the dollhouse icon to see the whole space', 'Nav_Help_Touch_Dollhouse.png'))
+                        b || (b = !0, w[u.PANORAMA].push('点击左下角图标查看全景', 'Nav_Help_New_dollhouse.png'), E[u.PANORAMA].push('点击左下角图标查看全景', 'Nav_Help_Touch_Dollhouse.png'))
                     }
                     function h(t, e) {
                         if (t === u.PANORAMA && e === u.DOLLHOUSE) {
@@ -15438,43 +15443,43 @@ dat.gui = dat.gui || {
                         w = {
                         };
                     w[u.PANORAMA] = [
-                        'Use the arrow keys to move',
+                        '使用方向键走动',
                         'Nav_Help_Arrow_keys.png',
-                        'Click & drag the mouse to move',
+                        '点击或拖动鼠标移动',
                         'Nav_Help_Left_Mouse.png'
                     ],
                         w[u.DOLLHOUSE] = [
-                            'Use the arrow keys to explore the space',
+                            '使用方向键实现旋转',
                             'Nav_Help_Arrow_keys.png',
-                            'Go to a room by clicking on it. Click and drag to pan.',
+                            '通过点击进入一个房间，单击或者拖动实现移动',
                             'Nav_Help_Left_Mouse.png'
                         ],
                         w[u.FLOORPLAN] = [
-                            'Use the Left or Right key to rotate',
+                            '使用左右方向键旋转',
                             'Nav_Help_LeftRight_Keys.png',
-                            'Use the Up or Down key to zoom',
+                            '使用上下方向键缩放',
                             'Nav_Help_UpDown_Keys.png',
-                            'Click to explore',
+                            '浏览请直接点击',
                             'Nav_Help_Left_Mouse.png'
                         ];
                     var E = {
                     };
                     E[u.PANORAMA] = [
-                        'Tap where you want to go',
+                        '点击你想去的地方',
                         'Nav_Help_Tap.png',
-                        'Drag to move',
+                        '拖动实现移动',
                         'Nav_Help_Drag_Turn.png'
                     ],
                         E[u.DOLLHOUSE] = [
-                            'Click "View floor plan" below to see the whole space',
+                            '点击 "户型" 查看 户型视图',
                             'Nav_Help_Tap.png',
-                            'Drag to rotate',
+                            '拖动实现旋转',
                             'Nav_Help_Drag_Rotate.png'
                         ],
                         E[u.FLOORPLAN] = [
-                            'Click "View dollhouse" below to see the whole space',
+                            '点击 "模型" 查看模型视图',
                             'Nav_Help_Tap.png',
-                            'Drag to rotate',
+                            '拖动实现旋转',
                             'Nav_Help_Drag_Pan.png'
                         ];
                     var R = 0,
