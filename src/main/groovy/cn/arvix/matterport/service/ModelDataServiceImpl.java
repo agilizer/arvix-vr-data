@@ -1,5 +1,8 @@
 package cn.arvix.matterport.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +11,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import cn.arvix.matterport.consants.ArvixMatterportConstants;
 import cn.arvix.matterport.domain.ModelData;
+import cn.arvix.matterport.domain.ModelData.FetchStatus;
 import cn.arvix.matterport.repository.ModelDataRepository;
 
 @Service
@@ -38,10 +42,12 @@ public class ModelDataServiceImpl implements ModelDataService{
 	}
 	@Override
 	public JdbcPage list(int max, int offset) {
-		String hql = "select title,caseId From ModelData ";
-		String countHql = "select count(*) from ModelData" ;
+		Map<String,Object>  map = new HashMap<String,Object>();
+		map.put("fetchStatus",FetchStatus.FINISH);
+		String hql = "select title,caseId From ModelData where fetchStatus=:fetchStatus " ;
+		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
-				offset, null);
+				offset, map);
 		return jdbcPage;
 	}
 

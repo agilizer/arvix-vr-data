@@ -27,6 +27,9 @@ class FilesController {
 				"POST, GET, OPTIONS, DELETE");
 		response.setHeader("Access-Control-Max-Age", "3600");
 		response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
+		response.setHeader("Cache-Control", "max-age="+3600000);
+		response.setHeader("Pragma", "max-age="+3600000);
+		response.setDateHeader("Expires", System.currentTimeMillis() + 604800000L);
 		String contentPath = request.getRequestURI() 
 		if(contentPath.endsWith("&")){
 			contentPath = contentPath.substring(0,contentPath.length()-1);

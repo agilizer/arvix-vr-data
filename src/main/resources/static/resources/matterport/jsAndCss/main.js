@@ -16097,7 +16097,7 @@ dat.gui = dat.gui || {
                     g.level = b.logLevel;
                     var V = v.valueFromHash('model') || v.valueFromHash('m');
                     console.log(V)
-                    V = $("#siteUrl").html()+"api/player/models/MXfJvWQecHT/"
+                    V = $("#siteUrl").html()
                  //   console.log(V)
                     console.log(v)
                     I.defaultMaxListeners = 1000,
@@ -16990,7 +16990,7 @@ dat.gui = dat.gui || {
                             this.mesh.visible = !1,
                             this.mesh.updateMatrix(),
                             this.marker = new THREE.Mesh(p, new THREE.MeshBasicMaterial({
-                                map: a.loadTextureFromCache('images/marker-256x256.png'),
+                                map: a.loadTextureFromCache('/resources/matterport/images/marker-256x256.png'),
                                 side: THREE.DoubleSide,
                                 opacity: 0,
                                 transparent: !0,
@@ -17363,7 +17363,7 @@ dat.gui = dat.gui || {
                 'use strict';
                 function n(t) {
                     var e = THREE.UniformsUtils.clone(s.waypoint.uniforms);
-                    e.map.value = THREE.ImageUtils.loadTexture('images/reticule-256x256.png'),
+                    e.map.value = THREE.ImageUtils.loadTexture('/resources/matterport/images/reticule-256x256.png'),
                         e.opacity.value = 0,
                         e.color.value.set(i.reticuleColor),
                         THREE.Mesh.call(this, new THREE.PlaneBufferGeometry(0.4, 0.4, 1, 1), new THREE.ShaderMaterial({

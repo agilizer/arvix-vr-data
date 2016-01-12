@@ -35,3 +35,15 @@ hibernate不同环境配置处理.<br>
 直接运行com.agilemaster.asdtiang.study.GroovyAndJavaApplication
 可以run as Groovy Script 或者 run as Java Application
 
+mysql db ddl;
+
+CREATE USER 'm_data_user'@'localhost'  IDENTIFIED BY '!@#qwe12s@#3456';
+
+CREATE DATABASE IF NOT EXISTS `matterport_data` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
+
+GRANT ALL PRIVILEGES ON matterport_data.* TO 'm_data_user'@'localhost';
+
+FLUSH PRIVILEGES;
+
+
+ gradle clean war   -Dfile.encoding=UTF-8  

@@ -54,8 +54,9 @@ class FetchDataServiceImpl implements FetchDataService{
 			if(subIndex>0){
 				def caseId = sourceUrl.substring(subIndex+3)
 				ModelData modelData = modelDataRepository.findByCaseId(caseId);
-				if(force){
-					modelDataRepository.delete(modelData);
+				log.info("force:--->{}",force)
+				if(force&&modelData!=null){
+					modelDataRepository.delete(modelData.getId());
 					modelData = null;
 				}
 				/**
@@ -179,7 +180,7 @@ class FetchDataServiceImpl implements FetchDataService{
 					fetchSuccessTag = true;
 				}catch(e){
 					log.error("fetch file",e);
-					if((e instanceof java.net.UnknownHostException|| e instanceof  java.net.SocketTimeoutException) && retryTimes < RETRY_TIMES){
+					if((e instanceof java.net.UnknownHostException|| e instanceof  java.net.SocketTimeoutException || e instanceof java.net.SocketException) && retryTimes < RETRY_TIMES){
 						Thread.sleep(3000);
 						if(retryTimes==0){
 							i--
@@ -215,17 +216,21 @@ class FetchDataServiceImpl implements FetchDataService{
 		Response  resultFile
 		File file
 		byte[] tempBytes
-		def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
-		log.info("fetchUrl:"+fetchUrl)
-		resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000)
-				.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
+		def result = 0
+		
 		// output here
 		file = new File(fileSaveDir+fetchFilePath)
-		tempBytes= resultFile.bodyAsBytes()
+		
 		if(!file.exists()){
+			def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
+			log.info("fetchUrl:"+fetchUrl)
+			resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000)
+					.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
+			tempBytes= resultFile.bodyAsBytes()
 			FileUtils.writeByteArrayToFile(file, tempBytes)
+			result = tempBytes.length
 		}
-		return tempBytes.length
+		return result
 	}
 
 	public  JSONObject genFileJson(String caseId){
@@ -251,7 +256,6 @@ class FetchDataServiceImpl implements FetchDataService{
 			if (script.indexOf("window.MP_PREFETCHED_MODELDATA") > -1) {
 				// 只取得script的內容
 				script = ele.childNode(0).toString();
-				script = script.replace("window.MP_PREFETCHED_MODELDATA", "var targetObject")
 				modelData.setModelData(script);
 			}
 		}

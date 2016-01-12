@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
+import cn.arvix.matterport.consants.ArvixMatterportConstants
 import cn.arvix.matterport.domain.ConfigDomain
 import cn.arvix.matterport.repository.ConfigDomainRepository
 import cn.arvix.matterport.util.StaticMethod
@@ -56,12 +57,12 @@ public class ConfigDomainServiceImpl implements ConfigDomainService{
 	@Override
 	public Map<String, Object> update(Long id, String value) {
 		ConfigDomain configDomain = configDomainRepository.findOne(id);
-		Map<String, Object> result = StaticMethod.genResult()
+		Map<String, Object> result = StaticMethod.getResult()
 		if(configDomain!=null){
 			configDomain.setMapValue(value);
 			StaticMethod.addToConfigMap(configMap, configDomain)
 			configDomainRepository.save(configDomain)
-			result.put(ZeroBarConstants.SUCCESS, true)
+			result.put(ArvixMatterportConstants.SUCCESS, true)
 			updateListenerList.each {
 				if(it.getConfigMapName()&&it.getConfigMapName()==configDomain.mapName){
 					it.runNotify(configDomain)
@@ -69,7 +70,7 @@ public class ConfigDomainServiceImpl implements ConfigDomainService{
 				}
 			}
 		}else{
-			result.put(ZeroBarConstants.ERROR_MSG, "没有找到相关配置项！")
+			result.put(ArvixMatterportConstants.ERROR_MSG, "没有找到相关配置项！")
 		}
 		return result
 	}
