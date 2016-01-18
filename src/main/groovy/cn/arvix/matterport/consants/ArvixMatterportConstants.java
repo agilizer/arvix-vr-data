@@ -9,6 +9,8 @@ public interface ArvixMatterportConstants {
 	 * 短信替换
 	 */
 	String SMS_VAR_CHECK_CODE="##smcCode##";
+	
+	String API_UPLOAD_MODELDATA_KEY = "apiUploadModelDataKey";
 	/**
 	 * 注册
 	 */
@@ -36,4 +38,6 @@ public interface ArvixMatterportConstants {
 	String SITE_URL = "siteUrl";
 	
 	String TEAM_DESCRIPTION = "teamDescription";
+	
+	String ERROR_CODE_EXIST = "exist";
 }

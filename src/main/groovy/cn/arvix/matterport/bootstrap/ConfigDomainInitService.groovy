@@ -39,6 +39,15 @@ class ConfigDomainInitService {
 			saveCon(ArvixMatterportConstants.SITE_URL,"http://127.0.0.1:8888/"
 					,true,"网站访问路径",ValueType.String)
 		}
+		
+		if(!configDomainRepository.findByMapName(ArvixMatterportConstants.API_UPLOAD_MODELDATA_KEY)){
+			saveCon(ArvixMatterportConstants.API_UPLOAD_MODELDATA_KEY,"c2654aa9-f432-49a7-9dd6-524518beeea1"
+					,true,"上传数据时访问key",ValueType.String)
+		}
+		
+		
+		
+		
 		if(!configDomainRepository.findByMapName(ArvixMatterportConstants.TEAM_DESCRIPTION)){
 			saveCon(ArvixMatterportConstants.TEAM_DESCRIPTION,"""
 <h1>团队介绍</h1><p><h3 style="color:red">北京唯幻科技有限公司</h3>是一家采用3维VR（虚拟现实技术）为房地产行业提供虚拟现实、增强性业务综合解决方案的一家创新型互联网公司。
