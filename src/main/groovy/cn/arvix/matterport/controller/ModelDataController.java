@@ -3,6 +3,7 @@ package cn.arvix.matterport.controller;
 import java.io.IOException;
 import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
@@ -41,7 +42,7 @@ public class ModelDataController {
 	
 	@ResponseBody
 	@RequestMapping("/api/v1/updateModelData")
-	public JSONResult updateModelData(ModelData modelData,MultipartFile zipFileData,String apiKey,HttpServletResponse response) {
+	public JSONResult updateModelData(ModelData modelData,String  modelDataClient,MultipartFile zipFileData,String apiKey,HttpServletRequest request,HttpServletResponse response) {
 		if(!configDomainService.getConfigString(ArvixMatterportConstants.API_UPLOAD_MODELDATA_KEY).equals(apiKey)){
 			try {
 				response.sendError(403, "apiKey wrong");
@@ -50,6 +51,7 @@ public class ModelDataController {
 			}
 			return null;
 		}
+		modelData.setModelData(modelDataClient);
 		return modelDataService.uploadModelData(modelData, zipFileData);
 	}
 	
