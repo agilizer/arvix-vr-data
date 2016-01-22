@@ -10,13 +10,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import cn.arvix.matterport.been.UserVO;
 import cn.arvix.matterport.domain.Role;
 import cn.arvix.matterport.domain.User;
 import cn.arvix.matterport.domain.UserRole;
 import cn.arvix.matterport.repository.RoleRepository;
 import cn.arvix.matterport.repository.UserRepository;
 import cn.arvix.matterport.repository.UserRoleRepository;
-import cn.arvix.matterport.viewbeen.UserVO;
 
 /**
  * 

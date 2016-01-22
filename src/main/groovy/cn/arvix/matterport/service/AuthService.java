@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import cn.arvix.matterport.viewbeen.UserVO;
+import cn.arvix.matterport.been.UserVO;
 
 public interface AuthService {
 	

@@ -1,5 +1,7 @@
 package cn.arvix.matterport.client;
 
+import javax.swing.JOptionPane;
+
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -41,12 +43,13 @@ public class UploadDataServiceImpl implements UploadDataService{
 					log.info("add key:{},value:{}",key,value);
 				}
 			}
-			HttpEntity reqEntity = multipartEntityBuilder.build();
-			httppost.setEntity(reqEntity);
-			log.info("executing request " + httppost.getRequestLine());
-			CloseableHttpResponse response = httpclient.execute(httppost);
-			UILog.getInstance().log("上传文件完成！");
+			CloseableHttpResponse response = null;
 			try {
+				HttpEntity reqEntity = multipartEntityBuilder.build();
+				httppost.setEntity(reqEntity);
+				log.info("executing request " + httppost.getRequestLine());
+				response = httpclient.execute(httppost);
+				UILog.getInstance().log("上传文件完成！");
 				log.info(response.getStatusLine().toString());
 				int code = response.getStatusLine().getStatusCode()
 				HttpEntity resEntity = response.getEntity();
@@ -57,24 +60,36 @@ public class UploadDataServiceImpl implements UploadDataService{
 						log.info(text);
 						JSONObject jsonObject = JSON.parseObject(text);
 						if(jsonObject.getBoolean("success")){
-							UILog.getInstance().log("数据上传成功，请访问服务器地址查看结果！");
+							UILog.getInstance().log(modelData.getCaseId+" 数据上传成功，请访问服务器地址查看结果！");
+						}else{
+							if(jsonObject.getString("errorCode")=="exist"){
+								UILog.getInstance().log(modelData.getCaseId+" 服务器已经存在相同的数据，请不要重复上传!");
+							}
+							else{
+								UILog.getInstance().log(modelData.getCaseId + " 数据上传失败，请联系管理员，返回结果为:\n"+text);
+							}
 						}
-						if(jsonObject.getString("errorCode")=="exist"){
-							UILog.getInstance().log("服务器已经存在相同的数据，请不要重复上传!");
-						}
-						else{
-							UILog.getInstance().log("数据上传失败，请联系管理员，返回结果为:\n"+text);
-						}
+						
 					}
 				}
 				if(code == 403){
 					UILog.getInstance().log("apiKey不正确！");
+					JOptionPane.showMessageDialog(null, "apiKey不正确！","错误", JOptionPane.ERROR_MESSAGE);
+				}
+				if(code == 404){
+					UILog.getInstance().log("服务器地址不正确！");
+					JOptionPane.showMessageDialog(null, "服务器地址不正确！","错误", JOptionPane.ERROR_MESSAGE);
 				}
 				EntityUtils.consume(resEntity);
 				
 			}catch(e){
 				log.error("upload failed",e);
-				UILog.getInstance().log("数据上传失败,请联系管理员:");
+				if(e instanceof org.apache.http.conn.HttpHostConnectException){
+					UILog.getInstance().log("数据上传失败,服务器地址不正确，连接失败！");
+					JOptionPane.showMessageDialog(null, "数据上传失败,服务器地址不正确，连接失败！ ","错误", JOptionPane.ERROR_MESSAGE);
+				}else{
+					UILog.getInstance().log("数据上传失败,请联系管理员:");
+				}
 			} finally {
 				response.close();
 			}

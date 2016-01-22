@@ -32,7 +32,7 @@ hibernate不同环境配置处理.<br>
 -javaagent:path/springloaded-1.2.3.RELEASE.jar  -noverify   -Dspring.profiles.active=dev  -Ddb.conf.value=dev
 
 #项目启动
-直接运行com.agilemaster.asdtiang.study.GroovyAndJavaApplication
+直接运行cn.arvix.matterport.ArvixApplication
 可以run as Groovy Script 或者 run as Java Application
 
 mysql db ddl;
@@ -47,3 +47,7 @@ FLUSH PRIVILEGES;
 
 
  gradle clean war   -Dfile.encoding=UTF-8  
+ 
+ #项目说明
+ 本项目为matterport展示镜像服务端程序。图片，js不在会去访问matterport服务器，而是访问发布的服务器。
+ 

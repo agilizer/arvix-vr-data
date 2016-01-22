@@ -1,5 +1,7 @@
 package cn.arvix.matterport.util;
 
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -31,6 +33,27 @@ public class StaticMethod {
 		}
 		return configMap
 	}
+	
+	static Map<String,DateFormat> dateFormatMap = new HashMap<String,DateFormat>()
+	public static Date parseDate(String dateStr,String format){
+		if(null==dateStr||dateStr==""){
+			return null;
+		}
+		DateFormat fmt =  dateFormatMap.get(format)
+		if(dateFormatMap.get(format)==null){
+			fmt =new SimpleDateFormat(format);
+			dateFormatMap.put(dateStr,format)
+		}
+		return fmt.parse(dateStr);
+	}
+	/**
+	 * return yyyy-MM-dd
+	 * @param dateStr
+	 * @return
+	 */
+	public static Date parseDate(String dateStr){
+		return parseDate(dateStr,"yyyy-MM-dd");
+	}
 	public static String UnicodeToString(String str) {
 		Pattern pattern = Pattern.compile("(\\\\u(\\w{4}))");
 		Matcher matcher = pattern.matcher(str);
@@ -46,6 +69,41 @@ public class StaticMethod {
 		if(!file.exists()){
 			file.mkdirs()
 		}
+	}
+	
+	public static enum  JunjieFileType{
+		EXCEL(""),
+		WORD(""),
+		GANTT(""),
+		PHOTO(""),
+		PDF(""),
+		OTHERS("")
+		String cssCode
+		JunjieFileType(cssCode){
+			this.cssCode = cssCode
+		}
+		public getCssCode(){
+			return this.cssCode
+		}
+
+	}
+	public static JunjieFileType genFileType(String fileName ){
+		int dotPos = fileName.lastIndexOf(".")
+		def extension = (dotPos) ? fileName[dotPos + 1..fileName.length() - 1] : ""
+		JunjieFileType  result
+		extension  = extension.toLowerCase()
+		if(extension=="xlsx"||extension=="xls"){
+			result =JunjieFileType.EXCEL
+		}else if(extension=="doc" || extension=="docx"){
+			result = JunjieFileType.WORD
+		}else if(extension=="pdf"){
+			result = JunjieFileType.PDF
+		} else if("jpg,jpeg,png,gif".indexOf(extension)!=-1){
+			result = JunjieFileType.PHOTO
+		}else{
+			result =JunjieFileType.OTHERS
+		}
+		return result
 	}
 
 	  

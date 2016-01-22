@@ -259,7 +259,7 @@ class FetchDataServiceImpl implements FetchDataService{
 				modelData.setModelData(script);
 			}
 		}
-		modelData.setDescription(doc.getElementById("meta-description").toString());
+		modelData.setDescription(doc.getElementById("meta-description").text());
 		modelData.setTitle(doc.title());
 	}
 

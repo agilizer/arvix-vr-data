@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cn.arvix.matterport.been.UserVO;
 import cn.arvix.matterport.consants.ArvixMatterportConstants;
 import cn.arvix.matterport.util.StaticMethod;
-import cn.arvix.matterport.viewbeen.UserVO;
 
 @Service
 public class AuthServiceImpl implements AuthService {

@@ -1,7 +1,7 @@
 package cn.arvix.matterport.service;
 
+import cn.arvix.matterport.been.UserVO;
 import cn.arvix.matterport.domain.User;
-import cn.arvix.matterport.viewbeen.UserVO;
 
 /**
  * 

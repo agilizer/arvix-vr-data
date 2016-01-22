@@ -1,5 +1,7 @@
 package cn.arvix.matterport.client;
 
+import java.awt.Toolkit;
+
 import javax.swing.JOptionPane;
 
 /*
@@ -50,6 +52,7 @@ public class MainJFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         sourceUrlTextArea = new javax.swing.JTextArea();
         jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane3 = new javax.swing.JScrollPane();
         logTextArea = new javax.swing.JTextArea();
         jLabel6 = new javax.swing.JLabel();
 
@@ -59,7 +62,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jLabel1.setText("服务器地址：");
 
-        serverUrlTextField.setText("http://localhost:8888/api/v1/updateModelData");
+        serverUrlTextField.setText("http://123.56.182.22:8080/api/v1/updateModelData");
 
         jLabel2.setText("ApiKey   :");
 
@@ -67,7 +70,7 @@ public class MainJFrame extends javax.swing.JFrame {
 
         jLabel3.setText("目标地址  ：");
 
-        workDirTextField.setText("/home/arvix-client/temp/");
+        workDirTextField.setText("D:/arvix-client/temp/");
 
         jLabel4.setText("工作目录  :");
 
@@ -84,21 +87,33 @@ public class MainJFrame extends javax.swing.JFrame {
         sourceUrlTextArea.setColumns(20);
         sourceUrlTextArea.setRows(5);
         sourceUrlTextArea.setText("https://my.matterport.com/show/?m=452aMkAmjrQ");
+        
+        
+        
         jScrollPane1.setViewportView(sourceUrlTextArea);
+
+
+        jLabel6.setText("运行状态");
 
         logTextArea.setColumns(20);
         logTextArea.setRows(5);
+        logTextArea.setLineWrap(true);
+        logTextArea.setWrapStyleWord(true);
         jScrollPane2.setViewportView(logTextArea);
 
-        jLabel6.setText("运行状态");
+        jScrollPane3.setViewportView(jScrollPane2);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addGap(264, 264, 264)
+                .addComponent(submitButton))
+            .addGroup(layout.createSequentialGroup()
                 .addGap(41, 41, 41)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 578, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel1)
@@ -112,11 +127,7 @@ public class MainJFrame extends javax.swing.JFrame {
                             .addComponent(workDirTextField)
                             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 458, javax.swing.GroupLayout.PREFERRED_SIZE)))
                     .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 612, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 578, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6)))
-            .addGroup(layout.createSequentialGroup()
-                .addGap(264, 264, 264)
-                .addComponent(submitButton))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -143,11 +154,10 @@ public class MainJFrame extends javax.swing.JFrame {
                 .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(5, 5, 5)
                 .addComponent(jLabel6)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 299, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
                 .addContainerGap())
         );
-
         pack();
     }// </editor-fold>                        
 
@@ -159,14 +169,16 @@ public class MainJFrame extends javax.swing.JFrame {
             String workDir = workDirTextField.getText();
             String urlText =  sourceUrlTextArea.getText();
             String[] fetchUrlArray = urlText.split("\n");
-            logTextArea.append("serverUrl:"+serverUrl+"\n"+"apiKey:"+apiKey+"\nworkDir:"+workDir);
+            for(String url:fetchUrlArray){
+            	logTextArea.append("serverUrl:"+serverUrl+"\n"+"apiKey:"+apiKey+"\nworkDir:"+workDir+"\nfetchUrl:"+url+"\n\n");
+            }
             fetchService.fetchData(serverUrl, apiKey, workDir, fetchUrlArray);
     	}else{
     		JOptionPane.showMessageDialog(null, "当前正在工作！不要重复点哦？ ","错误", JOptionPane.INFORMATION_MESSAGE); 
     	}
     }                                            
 
-    /**
+    /** 
      * @param args the command line arguments
      */
     public static void main(String args[]) {
@@ -196,7 +208,11 @@ public class MainJFrame extends javax.swing.JFrame {
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new MainJFrame().setVisible(true);
+            	MainJFrame frame = new MainJFrame();
+            	int screenWidth = Toolkit.getDefaultToolkit().getScreenSize().width;  
+                int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;  
+                frame.setLocation((screenWidth - 653)/2, (screenHeight-769)/2);  
+                frame.setVisible(true);
             }
         });
     }
@@ -211,6 +227,7 @@ public class MainJFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
+    private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JTextArea sourceUrlTextArea;
     private javax.swing.JTextArea logTextArea;
     private javax.swing.JTextField serverUrlTextField;

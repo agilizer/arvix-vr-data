@@ -29,8 +29,9 @@
 				<table class="table">
 					<tr>
 						<td>caseId</td>
-						<td>标题（仅用于列表显示）</td>
-						<td>modelData</td>
+						<td>标题</td>
+						<td>描述</td>
+						<td>操作</td>
 					</tr>
 					<!-- 					title,caseId,id,description,4sourceUrl,fileTotalSize,fileSumCount,modelData -->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
@@ -38,10 +39,12 @@
 						<td><a class="editable" href="#" th:text="${modelData[0]}"
 							data-pk="1" data-name='title' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-						<td><a href="#" class="editable" th:text="${modelData[7]}"
-							data-pk="1" data-name='modelData'
-							data-url="/admin/updateModelData" data-title="请输入新的值"
-							th:attr="data-pk=${modelData[2]}"></a></td>
+							<td><a class="editable" href="#" th:text="${modelData[3]}"
+							data-pk="1" data-name='description' data-url="/admin/updateModelData"
+							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+						<td>
+						<a href="http://localhost:8888/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
+						<a href="#" onlick="modelDataDelete()" th:attr="data-id=${modelData[2]}">删除</a></td>
 					</tr>
 				</table>
 

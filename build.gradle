@@ -62,6 +62,8 @@ dependencies {
 	compile("com.alibaba:druid:1.0.13")
 	compile('org.apache.commons:commons-lang3:3.3.2')
 	
+	compile("org.imgscalr:imgscalr-lib:4.2")
+	
 }
 
 eclipse {

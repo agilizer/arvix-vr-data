@@ -35,6 +35,10 @@ public interface ArvixMatterportConstants {
 	
 	String FILE_STORE_PATH = "fileStroePath";
 	
+	String NGINX_URL = "ngnixUrl";
+	
+	String NGINX_FILE_PATH = "nginxPath";
+	
 	String SITE_URL = "siteUrl";
 	
 	String TEAM_DESCRIPTION = "teamDescription";

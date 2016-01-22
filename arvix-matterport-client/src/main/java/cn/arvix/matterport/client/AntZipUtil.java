@@ -214,6 +214,7 @@ public class AntZipUtil {
         if (srcFile.isDirectory()) {
             filePath = filePath.replaceAll("/$", "") + "/";
         }
+        System.out.println("prefixDir"+prefixDir);
         String entryName = filePath.replace(prefixDir, "").replaceAll("/$", "");
         if (srcFile.isDirectory()) {
             if (!"".equals(entryName)) {

@@ -101,11 +101,10 @@
 				<!--.col-->
 				<div class="col-sm-6">
 					<ol class="breadcrumb">
-					 <li th:if="${#authentication.name=='anonymousUser'}"><a href="/login">登录</a></li>
 						<li  th:if="${#authentication.name!='anonymousUser'}" >欢迎<samp  sec:authentication="name" ></samp><a href="/modelData/index">数据管理</a></li>
 						<li><a href="#"><i class="ion-home"></i></a></li>
-						<li><a href="#">页面</a></li>
 						<li><a href="#" class="active">首页</a></li>
+						<li th:if="${#authentication.name=='anonymousUser'}"><a href="/login">登录</a></li>
 					</ol>
 				</div>
 				<!--.col-->
@@ -119,7 +118,6 @@
 		<!-- PUT THE CONTENT HERE -->
 		<!-- content -->
 
-		<div class="footer-links margin-top-40">
 			<div class="row">
 				<ul>
 					<li  th:each="showCase,showCaseStat:${modelDataJdbcPage.pageItems}">
@@ -127,10 +125,76 @@
 					</li>
 				</ul>
 			</div>
+			<div class="row">
+			<div class="col-md-4">
+				<div class="card card-meal card-meal-green card-square card-shadow">
+					<div class="card-heading">
+						<h3 class="card-title">French Cooking</h3>
+						<div class="card-subhead">
+							By <a href="#">Richard Sanders</a>
+						</div><!--.card-subhead-->
+					</div><!--.card-heading-->
+					<div class="card-body">
+						<div class="image">
+							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
+						</div><!--.image-->
+					</div><!--.card-body-->
+					<div class="card-footer hide">
+						<ul>
+							<li>1,378 Students</li>
+							<li><a href="#">Join Them</a></li>
+						</ul>
+					</div><!--.card-footer-->
+				</div><!--.card-->
+			</div><!--.col-md-4-->
+
+			<div class="col-md-4">
+				<div class="card card-meal card-meal-indigo card-square card-hover-shadow">
+					<div class="card-heading">
+						<h3 class="card-title">Nutritious Breakfast</h3>
+						<div class="card-subhead">
+						 By <a href="#">Mary Chapman</a>
+						</div><!--.card-subhead-->
+					</div><!--.card-heading-->
+					<div class="card-body">
+						<div class="image">
+							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
+						</div><!--.image-->
+					</div><!--.card-body-->
+					<div class="card-footer hide">
+						<ul>
+							<li>999 Students</li>
+							<li><a href="#">Join Them</a></li>
+						</ul>
+					</div><!--.card-footer-->
+				</div><!--.card-->
+			</div><!--.col-md-4-->
+
+			<div class="col-md-4">
+				<div class="card card-meal card-meal-orange card-square card-shadow">
+					<div class="card-heading">
+						<h3 class="card-title">Natural Turkish Cuisine</h3>
+						<div class="card-subhead">
+							By <a href="#">Melis Özkan</a>
+						</div><!--.card-subhead-->
+					</div><!--.card-heading-->
+					<div class="card-body">
+						<div class="image">
+							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
+						</div><!--.image-->
+					</div><!--.card-body-->
+					<div class="card-footer hide">
+						<ul>
+							<li>1,378 Students</li>
+							<li><a href="#">Join Them</a></li>
+						</ul>
+					</div><!--.card-footer-->
+				</div><!--.card-->
+			</div><!--.col-md-4-->
+		</div>
 		</div>
 		<!--.footer-links-->
 
-	</div>
 	<!--.content-->
 
 	<!-- BEGIN GLOBAL AND THEME VENDORS -->

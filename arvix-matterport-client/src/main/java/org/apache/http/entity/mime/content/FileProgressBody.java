@@ -128,7 +128,7 @@ public class FileProgressBody extends AbstractContentBody {
             while ((l = in.read(tmp)) != -1) {
                 out.write(tmp, 0, l);
                 uploaded = uploaded +l;
-                UILog.getInstance().logProgress(fileSize, uploaded);
+                UILog.getInstance().logProgress(fileSize, uploaded,filename);
             }
             out.flush();
         } finally {

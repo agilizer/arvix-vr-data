@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import cn.arvix.matterport.been.UserVO;
 import cn.arvix.matterport.service.AuthService;
 import cn.arvix.matterport.service.UserService;
-import cn.arvix.matterport.viewbeen.UserVO;
 
 @Controller
 @RequestMapping("/auth")

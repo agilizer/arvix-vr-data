@@ -19172,7 +19172,7 @@ dat.gui = dat.gui || {
                         brand: n.valueFromHash('brand', !0),
                         debug: !1,
                         version: '2.0.35',
-                        pageTitle: 'Matterport 3D Showcase',
+                        pageTitle: 'Arvix 3D Showcase',
                         token: n.valueFromCookie('token'),
                         autoplay: n.valueFromHash('play', !1) || !n.inIframe(),
                         autohelp: n.valueFromHash('help', null),

@@ -1,4 +1,4 @@
-package cn.arvix.matterport.viewbeen;
+package cn.arvix.matterport.been;
 
 public class UserVO {
 	private String username;

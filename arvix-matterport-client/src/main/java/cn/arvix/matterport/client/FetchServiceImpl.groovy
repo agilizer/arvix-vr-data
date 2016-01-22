@@ -20,7 +20,7 @@ public class FetchServiceImpl implements FetchService{
 	def static Long EXPIRE_TIME = 240000
 	UploadDataService uploadDataService;
 	def RETRY_TIMES = 3;
-	def FETCH_MAP = [:];
+	Map FETCH_MAP = [:];
 	@Override
 	public void fetchData(String serverUrl, String apiKey, String workDir, String[] fetchUrlArray) {
 		fetchUrlArray.each {
@@ -31,6 +31,10 @@ public class FetchServiceImpl implements FetchService{
 	public void fetchData(String serverUrl, String apiKey, String workDir, String sourceUrl) {
 		if(sourceUrl){
 			def subIndex = sourceUrl.indexOf("?m=");
+			if(FETCH_MAP.containsKey(sourceUrl)){
+				UILog.getInstance().log("正在抓取${sourceUrl}，请不要重复提交！");
+				return;
+			}
 			if(subIndex>0){
 				FETCH_MAP.put(sourceUrl,sourceUrl)
 				def caseId = sourceUrl.substring(subIndex+3)
@@ -42,20 +46,26 @@ public class FetchServiceImpl implements FetchService{
 				try{
 					genModelData(caseId,modelData);
 				}catch(e){
-					log.error("fetch caseId {} genModelData error:",caseId,e)
+					log.error("fetch caseId {} genModelData error:",caseId,e);
+					UILog.getInstance().log("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
 				}
 				try{
 					Thread.start {
 						genFiles(caseId,fileSaveDir,modelData,serverUrl,apiKey);
-						MainJFrame.setWorkFlag(false);
+						FETCH_MAP.remove(sourceUrl);
+						if(FETCH_MAP.size()==0){
+							MainJFrame.setWorkFlag(false);
+						}
 					}
 				}catch(e){
 					log.error("fetch caseId {} genFiles error:",caseId,e)
 				}
 			}else{
+				UILog.getInstance().log("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
 				log.warn("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
 			}
 		}else{
+			UILog.getInstance().log("源url不能为空");
 			log.warn("源url不能为空");
 		}
 	} 
@@ -117,7 +127,7 @@ public class FetchServiceImpl implements FetchService{
 					if(log.infoEnabled){
 						log.info("fetch file "+fetchFileCount+"  finish")
 					}
-					UILog.getInstance().log("抓取第 "+fetchFileCount+"/"+fileSumCount+" 文件完成");
+					UILog.getInstance().log("抓取第 "+fetchFileCount+"/"+fileSumCount+" 文件完成，caseId:${caseId}");
 					fetchFileCount ++ ;
 					modelData.setFileFetchedCount(fetchFileCount)
 					modelData.setCurrentFetchFileKey(fetchFilePath)
@@ -211,8 +221,8 @@ public class FetchServiceImpl implements FetchService{
 				modelData.setModelDataClient(script);
 			}
 		}
-		modelData.setDescription(doc.getElementById("meta-description").toString());
-		modelData.setTitle(doc.title());
+		modelData.setDescription(doc.getElementById("meta-description").text());
+		modelData.setTitle(doc.title().replace("Matterport 3D Showcase",""));
 	}
 	
 	public void setUploadDataService(UploadDataService uploadDataService){

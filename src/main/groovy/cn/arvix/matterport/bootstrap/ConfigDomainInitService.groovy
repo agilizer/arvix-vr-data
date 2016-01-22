@@ -35,6 +35,18 @@ class ConfigDomainInitService {
 			saveCon(ArvixMatterportConstants.FILE_STORE_PATH,"/home/abel/arvix-test-files/"
 					,true,"文件存储路径",ValueType.String)
 		}
+		
+		
+		if(!configDomainRepository.findByMapName(ArvixMatterportConstants.NGINX_URL)){
+			saveCon(ArvixMatterportConstants.NGINX_URL,"http://127.0.0.1/"
+					,true,"文件存储路径",ValueType.String)
+		}
+		
+		if(!configDomainRepository.findByMapName(ArvixMatterportConstants.NGINX_FILE_PATH)){
+			saveCon(ArvixMatterportConstants.NGINX_FILE_PATH,"D:/openSource/nginx-1.9.9/html/"
+					,true,"文件存储路径",ValueType.String)
+		}
+		
 		if(!configDomainRepository.findByMapName(ArvixMatterportConstants.SITE_URL)){
 			saveCon(ArvixMatterportConstants.SITE_URL,"http://127.0.0.1:8888/"
 					,true,"网站访问路径",ValueType.String)
