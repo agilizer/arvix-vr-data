@@ -119,13 +119,6 @@
 		<!-- content -->
 
 			<div class="row">
-				<ul>
-					<li  th:each="showCase,showCaseStat:${modelDataJdbcPage.pageItems}">
-					<a href="" target="_blank"  th:href="'/show/?m='+${showCase[1]}" th:text="${showCase[0]}"></a>
-					</li>
-				</ul>
-			</div>
-			<div class="row">
 			
 			<div class="col-md-4" th:each="showCase,showCaseStat:${modelDataJdbcPage.pageItems}">
 				<div class="card card-meal card-meal-green card-square card-shadow">
@@ -138,8 +131,8 @@
 					<div class="card-body">
 						<div class="image">
 							<a href="#" th:href="'/show/?m='+${showCase[1]}">
-							<img alt="" src="/resources/img/21.jpg"  th:if="showCase[2]!=null" th:src="${'/upload'+showCase[2]}" />
-							<img alt="" src="/resources/img/21.jpg"  th:if="showCase[2]==null" src="/resources/img/default.jpg" />
+							<img alt="" src="/resources/img/21.jpg"  th:if="${showCase[2]}" th:src="${'/upload'+showCase[2]}" />
+							<img alt=""   th:unless="${showCase[2]}" src="/resources/img/default.jpg" />
 							
 							
 							</a>
@@ -149,74 +142,7 @@
 				</div><!--.card-->
 			</div><!--.col-md-4-->
 			
-			
-			
-			<div class="col-md-4">
-				<div class="card card-meal card-meal-green card-square card-shadow">
-					<div class="card-heading">
-						<h3 class="card-title">French Cooking</h3>
-						<div class="card-subhead">
-							By <a href="#">Richard Sanders</a>
-						</div><!--.card-subhead-->
-					</div><!--.card-heading-->
-					<div class="card-body">
-						<div class="image">
-							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
-						</div><!--.image-->
-					</div><!--.card-body-->
-					<div class="card-footer hide">
-						<ul>
-							<li>1,378 Students</li>
-							<li><a href="#">Join Them</a></li>
-						</ul>
-					</div><!--.card-footer-->
-				</div><!--.card-->
-			</div><!--.col-md-4-->
-
-			<div class="col-md-4">
-				<div class="card card-meal card-meal-indigo card-square card-hover-shadow">
-					<div class="card-heading">
-						<h3 class="card-title">Nutritious Breakfast</h3>
-						<div class="card-subhead">
-						 By <a href="#">Mary Chapman</a>
-						</div><!--.card-subhead-->
-					</div><!--.card-heading-->
-					<div class="card-body">
-						<div class="image">
-							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
-						</div><!--.image-->
-					</div><!--.card-body-->
-					<div class="card-footer hide">
-						<ul>
-							<li>999 Students</li>
-							<li><a href="#">Join Them</a></li>
-						</ul>
-					</div><!--.card-footer-->
-				</div><!--.card-->
-			</div><!--.col-md-4-->
-
-			<div class="col-md-4">
-				<div class="card card-meal card-meal-orange card-square card-shadow">
-					<div class="card-heading">
-						<h3 class="card-title">Natural Turkish Cuisine</h3>
-						<div class="card-subhead">
-							By <a href="#">Melis Özkan</a>
-						</div><!--.card-subhead-->
-					</div><!--.card-heading-->
-					<div class="card-body">
-						<div class="image">
-							<a href="#"><img alt="" src="/resources/img/21.jpg"></a>
-						</div><!--.image-->
-					</div><!--.card-body-->
-					<div class="card-footer hide">
-						<ul>
-							<li>1,378 Students</li>
-							<li><a href="#">Join Them</a></li>
-						</ul>
-					</div><!--.card-footer-->
-				</div><!--.card-->
-			</div><!--.col-md-4-->
-		</div>
+			</div>
 		</div>
 		<!--.footer-links-->
 
