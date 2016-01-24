@@ -44,4 +44,5 @@ public interface ArvixMatterportConstants {
 	String TEAM_DESCRIPTION = "teamDescription";
 	
 	String ERROR_CODE_EXIST = "exist";
+	String ERROR_CODE = "errorCode";
 }

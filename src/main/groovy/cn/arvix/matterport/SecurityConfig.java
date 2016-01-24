@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.hasAnyAuthority(Role.ROLE_ADMIN).and().formLogin().defaultSuccessUrl("/")
 				.loginPage("/login")
 				.permitAll().and().logout().permitAll().and()
-				.authorizeRequests().antMatchers("/resources/**", "/auth/**","/console/**","/login/**")
+				.authorizeRequests().antMatchers("/resources/**","/upload/**", "/auth/**","/console/**","/login/**")
 				.permitAll().and().csrf().disable();
 	}
 

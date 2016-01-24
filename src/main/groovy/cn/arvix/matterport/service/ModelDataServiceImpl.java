@@ -16,6 +16,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 
 import cn.arvix.matterport.consants.ArvixMatterportConstants;
+import cn.arvix.matterport.domain.FileInfo;
 import cn.arvix.matterport.domain.ModelData;
 import cn.arvix.matterport.domain.ModelData.FetchStatus;
 import cn.arvix.matterport.repository.ModelDataRepository;
@@ -34,6 +35,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 	ConfigDomainService configDomainService;
 	@Autowired
 	JpaShareService jpaShareService;
+	@Autowired
+	FileService fileService;
 	@Override
 	public Object getJsonFileDesc(String caseId) {
 		String fileJson = modelDataRepository.findFileJsonByCaseId(caseId);
@@ -54,7 +57,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage list(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select title,caseId From ModelData where fetchStatus=:fetchStatus " ;
+		String hql = "select m.title,m.caseId,f.storePath,m.description From ModelData m left join m.fileInfo f  where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
 				offset, map);
@@ -64,7 +67,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage listAdmin(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select title,caseId,id,description,sourceUrl,fileTotalSize,fileSumCount,modelData From ModelData where fetchStatus=:fetchStatus " ;
+		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath From "
+				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
 				offset, map);
@@ -117,6 +121,27 @@ public class ModelDataServiceImpl implements ModelDataService{
 		}
 		log.info("jsonResult {}",jsonResult.toString());
 		return jsonResult;
+	}
+	@Override
+	public Map<String, Object> updatePhoto(Long id, MultipartFile photoData) {
+		ModelData modelData = modelDataRepository.findOne(id);
+		Map<String,Object> result = StaticMethod.getResult();
+		if(modelData!=null){
+			 FileInfo fileInfo = modelData.getFileInfo();
+			 FileInfo fileInfoNew = fileService.saveFile(photoData, "/modelDataPhoto/");
+			 if(null!=fileInfoNew){
+				 jpaShareService.executeForHql("update ModelData set fileInfo = ? where id=?",fileInfoNew,id);
+				 if(null!=fileInfo){
+					 fileService.delFile(fileInfo);
+				 }
+				 result.put(ArvixMatterportConstants.DATA, fileInfoNew.getStorePath());
+			 }
+			 result.put(ArvixMatterportConstants.SUCCESS,true);
+		}else{
+			result.put(ArvixMatterportConstants.ERROR_MSG, "没有找到相关数据！");
+			result.put(ArvixMatterportConstants.ERROR_CODE,404);
+		}
+		return result;
 	}
 
 }

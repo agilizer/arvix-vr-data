@@ -55,6 +55,15 @@ public class ModelDataController {
 		return modelDataService.uploadModelData(modelData, zipFileData);
 	}
 	
+	
+	@ResponseBody
+	@RequestMapping("/api/v1/updateModelPhoto")
+	public Map<String,Object> updateModelPhoto(Long id,MultipartFile qqfile,HttpServletRequest request,HttpServletResponse response) {
+		return modelDataService.updatePhoto(id, qqfile);
+	}
+	
+	
+	
 	@RequestMapping("/modelData/index")
 	public String index(String sourceUrl) {
 		return "modelData/index";

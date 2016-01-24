@@ -126,6 +126,31 @@
 				</ul>
 			</div>
 			<div class="row">
+			
+			<div class="col-md-4" th:each="showCase,showCaseStat:${modelDataJdbcPage.pageItems}">
+				<div class="card card-meal card-meal-green card-square card-shadow">
+					<div class="card-heading">
+						<h3 class="card-title" th:text="${showCase[0]}"></h3>
+						<div class="card-subhead" th:utext="${showCase[3]}">
+							
+						</div><!--.card-subhead-->
+					</div><!--.card-heading-->
+					<div class="card-body">
+						<div class="image">
+							<a href="#" th:href="'/show/?m='+${showCase[1]}">
+							<img alt="" src="/resources/img/21.jpg"  th:if="showCase[2]!=null" th:src="${'/upload'+showCase[2]}" />
+							<img alt="" src="/resources/img/21.jpg"  th:if="showCase[2]==null" src="/resources/img/default.jpg" />
+							
+							
+							</a>
+						</div><!--.image-->
+					</div><!--.card-body-->
+					<!--.card-footer-->
+				</div><!--.card-->
+			</div><!--.col-md-4-->
+			
+			
+			
 			<div class="col-md-4">
 				<div class="card card-meal card-meal-green card-square card-shadow">
 					<div class="card-heading">

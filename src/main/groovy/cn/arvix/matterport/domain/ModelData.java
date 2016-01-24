@@ -3,13 +3,16 @@ package cn.arvix.matterport.domain;
 import java.io.Serializable;
 import java.util.Calendar;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
 
 @Entity
 @Table()
@@ -33,6 +36,9 @@ public class ModelData  implements Serializable{
 	private String title;
 	@Column
 	private String sourceUrl;
+	
+	@OneToOne(cascade={CascadeType.REMOVE})
+	private FileInfo fileInfo;
 	/**
 	 * json modelData
 	 */
@@ -182,6 +188,14 @@ public class ModelData  implements Serializable{
 
 	public void setFileJson(String fileJson) {
 		this.fileJson = fileJson;
+	}
+
+	public FileInfo getFileInfo() {
+		return fileInfo;
+	}
+
+	public void setFileInfo(FileInfo fileInfo) {
+		this.fileInfo = fileInfo;
 	}
 
 	public String getCurrentFetchFileKey() {

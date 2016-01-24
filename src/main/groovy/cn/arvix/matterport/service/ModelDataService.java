@@ -19,6 +19,10 @@ public interface ModelDataService {
 	
 	 Map<String, Object> update(String fieldName,Long id,String value);
 	
+	 
+	 Map<String, Object> updatePhoto(Long id,MultipartFile photoData);
+		
+
 	/**
 	 * title , caseId,description
 	 * @param max

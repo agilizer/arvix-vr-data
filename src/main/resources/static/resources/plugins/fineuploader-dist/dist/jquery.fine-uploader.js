@@ -3,7 +3,7 @@
 *
 * Copyright 2015, Widen Enterprises, Inc. info@fineuploader.com
 *
-* Version: 5.2.2
+* Version: 5.4.1
 *
 * Homepage: http://fineuploader.com
 *
@@ -119,11 +119,14 @@ var qq = function(element) {
             return this;
         },
 
-        getByClass: function(className) {
+        getByClass: function(className, first) {
             var candidates,
                 result = [];
 
-            if (element.querySelectorAll) {
+            if (first && element.querySelector) {
+                return element.querySelector("." + className);
+            }
+            else if (element.querySelectorAll) {
                 return element.querySelectorAll("." + className);
             }
 
@@ -134,7 +137,11 @@ var qq = function(element) {
                     result.push(val);
                 }
             });
-            return result;
+            return first ? result[0] : result;
+        },
+
+        getFirstByClass: function(className) {
+            return qq(element).getByClass(className, true);
         },
 
         children: function() {
@@ -894,7 +901,7 @@ var qq = function(element) {
 }());
 
 /*global qq */
-qq.version = "5.2.2";
+qq.version = "5.4.1";
 
 /* globals qq */
 qq.supportedFeatures = (function() {
@@ -982,7 +989,9 @@ qq.supportedFeatures = (function() {
 
     function isLocalStorageSupported() {
         try {
-            return !!window.localStorage;
+            return !!window.localStorage &&
+                // unpatched versions of IE10/11 have buggy impls of localStorage where setItem is a string
+                qq.isFunction(window.localStorage.setItem);
         }
         catch (error) {
             // probably caught a security exception, so no localStorage for you
@@ -1928,6 +1937,10 @@ qq.status = {
             this._endpointStore.set(endpoint, id);
         },
 
+        setForm: function(elementOrId) {
+            this._updateFormSupportAndParams(elementOrId);
+        },
+
         setItemLimit: function(newItemLimit) {
             this._currentItemLimit = newItemLimit;
         },
@@ -1945,16 +1958,11 @@ qq.status = {
         },
 
         uploadStoredFiles: function() {
-            var idToUpload;
-
             if (this._storedIds.length === 0) {
                 this._itemError("noFilesError");
             }
             else {
-                while (this._storedIds.length) {
-                    idToUpload = this._storedIds.shift();
-                    this._uploadFile(idToUpload);
-                }
+                this._uploadStoredFiles();
             }
         }
     };
@@ -2038,10 +2046,11 @@ qq.status = {
             });
         },
 
-        _createStore: function(initialValue, readOnlyValues) {
+        _createStore: function(initialValue, _readOnlyValues_) {
             var store = {},
                 catchall = initialValue,
                 perIdReadOnlyValues = {},
+                readOnlyValues = _readOnlyValues_,
                 copy = function(orig) {
                     if (qq.isObject(orig)) {
                         return qq.extend({}, orig);
@@ -2095,8 +2104,20 @@ qq.status = {
                 addReadOnly: function(id, values) {
                     // Only applicable to Object stores
                     if (qq.isObject(store)) {
-                        perIdReadOnlyValues[id] = perIdReadOnlyValues[id] || {};
-                        qq.extend(perIdReadOnlyValues[id], values);
+                        // If null ID, apply readonly values to all files
+                        if (id === null) {
+                            if (qq.isFunction(values)) {
+                                readOnlyValues = values;
+                            }
+                            else {
+                                readOnlyValues = readOnlyValues || {};
+                                qq.extend(readOnlyValues, values);
+                            }
+                        }
+                        else {
+                            perIdReadOnlyValues[id] = perIdReadOnlyValues[id] || {};
+                            qq.extend(perIdReadOnlyValues[id], values);
+                        }
                     }
                 },
 
@@ -3005,13 +3026,14 @@ qq.status = {
             this._onSubmit.apply(this, arguments);
             this._uploadData.setStatus(id, qq.status.SUBMITTED);
             this._onSubmitted.apply(this, arguments);
-            this._options.callbacks.onSubmitted.apply(this, arguments);
 
             if (this._options.autoUpload) {
+                this._options.callbacks.onSubmitted.apply(this, arguments);
                 this._uploadFile(id);
             }
             else {
                 this._storeForLater(id);
+                this._options.callbacks.onSubmitted.apply(this, arguments);
             }
         },
 
@@ -3181,7 +3203,7 @@ qq.status = {
 
                 setTimeout(function() {
                     self._session.refresh().then(function(response, xhrOrXdr) {
-
+                        self._sessionRequestComplete();
                         self._options.callbacks.onSessionRequestComplete(response, true, xhrOrXdr);
 
                     }, function(response, xhrOrXdr) {
@@ -3191,6 +3213,8 @@ qq.status = {
                 }, 0);
             }
         },
+
+        _sessionRequestComplete: function() {},
 
         _setSize: function(id, newSize) {
             this._uploadData.updateSize(id, newSize);
@@ -3238,6 +3262,23 @@ qq.status = {
             }
         },
 
+        _updateFormSupportAndParams: function(formElementOrId) {
+            this._options.form.element = formElementOrId;
+
+            this._formSupport = qq.FormSupport && new qq.FormSupport(
+                    this._options.form, qq.bind(this.uploadStoredFiles, this), qq.bind(this.log, this)
+                );
+
+            if (this._formSupport && this._formSupport.attachedToForm) {
+                this._paramsStore.addReadOnly(null, this._formSupport.getFormInputsAsObject);
+
+                this._options.autoUpload = this._formSupport.newAutoUpload;
+                if (this._formSupport.newEndpoint) {
+                    this.setEndpoint(this._formSupport.newEndpoint);
+                }
+            }
+        },
+
         _upload: function(id, params, endpoint) {
             var name = this.getName(id);
 
@@ -3261,6 +3302,25 @@ qq.status = {
         _uploadFile: function(id) {
             if (!this._handler.upload(id)) {
                 this._uploadData.setStatus(id, qq.status.QUEUED);
+            }
+        },
+
+        _uploadStoredFiles: function() {
+            var idToUpload, stillSubmitting,
+                self = this;
+
+            while (this._storedIds.length) {
+                idToUpload = this._storedIds.shift();
+                this._uploadFile(idToUpload);
+            }
+
+            // If we are still waiting for some files to clear validation, attempt to upload these again in a bit
+            stillSubmitting = this.getUploads({status: qq.status.SUBMITTING}).length;
+            if (stillSubmitting) {
+                qq.log("Still waiting for " + stillSubmitting + " files to clear submit queue. Will re-parse stored IDs array shortly.");
+                setTimeout(function() {
+                    self._uploadStoredFiles();
+                }, 1000);
             }
         },
 
@@ -3745,6 +3805,11 @@ qq.AjaxRequester = function(o) {
 
             if (xhrOrXdr.withCredentials === undefined) {
                 xhrOrXdr = new XDomainRequest();
+                // Workaround for XDR bug in IE9 - https://social.msdn.microsoft.com/Forums/ie/en-US/30ef3add-767c-4436-b8a9-f1ca19b4812e/ie9-rtm-xdomainrequest-issued-requests-may-abort-if-all-event-handlers-not-specified?forum=iewebdevelopment
+                xhrOrXdr.onload = function() {};
+                xhrOrXdr.onerror = function() {};
+                xhrOrXdr.ontimeout = function() {};
+                xhrOrXdr.onprogress = function() {};
             }
         }
 
@@ -3842,7 +3907,7 @@ qq.AjaxRequester = function(o) {
 
         options.onSend(id);
 
-        url = createUrl(id, params);
+        url = createUrl(id, params, requestData[id].additionalQueryParams);
 
         // XDR and XHR status detection APIs differ a bit.
         if (isXdr(xhr)) {
@@ -3887,7 +3952,7 @@ qq.AjaxRequester = function(o) {
         return xhr;
     }
 
-    function createUrl(id, params) {
+    function createUrl(id, params, additionalQueryParams) {
         var endpoint = options.endpointStore.get(id),
             addToPath = requestData[id].addToPath;
 
@@ -3897,11 +3962,14 @@ qq.AjaxRequester = function(o) {
         }
 
         if (shouldParamsBeInQueryString && params) {
-            return qq.obj2url(params, endpoint);
+            endpoint = qq.obj2url(params, endpoint);
         }
-        else {
-            return endpoint;
+
+        if (additionalQueryParams) {
+            endpoint = qq.obj2url(additionalQueryParams, endpoint);
         }
+
+        return endpoint;
     }
 
     // Invoked by the UA to indicate a number of possible states that describe
@@ -3982,10 +4050,11 @@ qq.AjaxRequester = function(o) {
         return qq.indexOf(options.successfulResponseCodes[options.method], responseCode) >= 0;
     }
 
-    function prepareToSend(id, optXhr, addToPath, additionalParams, additionalHeaders, payload) {
+    function prepareToSend(id, optXhr, addToPath, additionalParams, additionalQueryParams, additionalHeaders, payload) {
         requestData[id] = {
             addToPath: addToPath,
             additionalParams: additionalParams,
+            additionalQueryParams: additionalQueryParams,
             additionalHeaders: additionalHeaders,
             payload: payload
         };
@@ -4003,7 +4072,7 @@ qq.AjaxRequester = function(o) {
     qq.extend(this, {
         // Start the process of sending the request.  The ID refers to the file associated with the request.
         initTransport: function(id) {
-            var path, params, headers, payload, cacheBuster;
+            var path, params, headers, payload, cacheBuster, additionalQueryParams;
 
             return {
                 // Optionally specify the end of the endpoint path for the request.
@@ -4018,6 +4087,11 @@ qq.AjaxRequester = function(o) {
                 // how these parameters should be formatted as well.
                 withParams: function(additionalParams) {
                     params = additionalParams;
+                    return this;
+                },
+
+                withQueryParams: function(_additionalQueryParams_) {
+                    additionalQueryParams = _additionalQueryParams_;
                     return this;
                 },
 
@@ -4045,7 +4119,7 @@ qq.AjaxRequester = function(o) {
                         params.qqtimestamp = new Date().getTime();
                     }
 
-                    return prepareToSend(id, optXhr, path, params, headers, payload);
+                    return prepareToSend(id, optXhr, path, params, additionalQueryParams, headers, payload);
                 }
             };
         },
@@ -5462,7 +5536,7 @@ qq.XhrUploadHandler = function(spec) {
         _iterateResumeRecords: function(callback) {
             if (resumeEnabled) {
                 qq.each(localStorage, function(key, item) {
-                    if (key.indexOf(qq.format("qq{}resume-", namespace)) === 0) {
+                    if (key.indexOf(qq.format("qq{}resume", namespace)) === 0) {
                         var uploadData = JSON.parse(item);
                         callback(key, uploadData);
                     }
@@ -5729,7 +5803,9 @@ qq.WindowReceiveMessage = function(o) {
         },
 
         getItemByFileId: function(id) {
-            return this._templating.getFileContainer(id);
+            if (!this._templating.isHiddenForever(id)) {
+                return this._templating.getFileContainer(id);
+            }
         },
 
         reset: function() {
@@ -5876,8 +5952,6 @@ qq.WindowReceiveMessage = function(o) {
                 },
 
                 onRetry: function(fileId) {
-                    qq(self._templating.getFileContainer(fileId)).removeClass(self._classes.retryable);
-                    self._templating.hideRetry(fileId);
                     self.retry(fileId);
                 },
 
@@ -5955,6 +6029,7 @@ qq.WindowReceiveMessage = function(o) {
             }
 
             if (newStatus === qq.status.UPLOAD_RETRYING) {
+                this._templating.hideRetry(id);
                 this._templating.setStatusText(id);
                 qq(this._templating.getFileContainer(id)).removeClass(this._classes.retrying);
             }
@@ -6239,11 +6314,6 @@ qq.WindowReceiveMessage = function(o) {
                 dontDisplay = this._handler.isProxied(id) && this._options.scaling.hideScaled,
                 record;
 
-            // If we don't want this file to appear in the UI, skip all of this UI-related logic.
-            if (dontDisplay) {
-                return;
-            }
-
             if (this._options.display.prependFiles) {
                 if (this._totalFilesInBatch > 1 && this._filesInBatchAddedToUi > 0) {
                     prependIndex = this._filesInBatchAddedToUi - 1;
@@ -6275,12 +6345,12 @@ qq.WindowReceiveMessage = function(o) {
                 }
             }
 
-            this._templating.addFile(id, this._options.formatFileName(name), prependData);
-
             if (canned) {
+                this._templating.addFileToCache(id, this._options.formatFileName(name), prependData, dontDisplay);
                 this._thumbnailUrls[id] && this._templating.updateThumbnail(id, this._thumbnailUrls[id], true);
             }
             else {
+                this._templating.addFile(id, this._options.formatFileName(name), prependData, dontDisplay);
                 this._templating.generatePreview(id, this.getFile(id));
             }
 
@@ -6418,6 +6488,11 @@ qq.WindowReceiveMessage = function(o) {
             this._parent.prototype._setSize.apply(this, arguments);
 
             this._templating.updateSize(id, this._formatSize(newSize));
+        },
+
+        _sessionRequestComplete: function() {
+            this._templating.addCacheToDom();
+            this._parent.prototype._sessionRequestComplete.apply(this, arguments);
         }
     };
 }());
@@ -6639,6 +6714,11 @@ qq.Templating = function(spec) {
         HIDE_DROPZONE_ATTR = "qq-hide-dropzone",
         DROPZPONE_TEXT_ATTR = "qq-drop-area-text",
         IN_PROGRESS_CLASS = "qq-in-progress",
+        HIDDEN_FOREVER_CLASS = "qq-hidden-forever",
+        fileBatch = {
+            content: document.createDocumentFragment(),
+            map: {}
+        },
         isCancelDisabled = false,
         generatedThumbnails = 0,
         thumbnailQueueMonitorRunning = false,
@@ -6851,7 +6931,7 @@ qq.Templating = function(spec) {
         },
 
         getFile = function(id) {
-            return qq(fileList).getByClass(FILE_CLASS_PREFIX + id)[0];
+            return fileBatch.map[id] || qq(fileList).getFirstByClass(FILE_CLASS_PREFIX + id);
         },
 
         getFilename = function(id) {
@@ -6888,7 +6968,7 @@ qq.Templating = function(spec) {
         },
 
         getTemplateEl = function(context, cssClass) {
-            return context && qq(context).getByClass(cssClass)[0];
+            return context && qq(context).getFirstByClass(cssClass);
         },
 
         getThumbnail = function(id) {
@@ -6993,12 +7073,12 @@ qq.Templating = function(spec) {
             scriptHtml = qq.trimStr(scriptHtml);
             tempTemplateEl = document.createElement("div");
             tempTemplateEl.appendChild(qq.toElement(scriptHtml));
-            uploaderEl = qq(tempTemplateEl).getByClass(selectorClasses.uploader)[0];
+            uploaderEl = qq(tempTemplateEl).getFirstByClass(selectorClasses.uploader);
 
             // Don't include the default template button in the DOM
             // if an alternate button container has been specified.
             if (options.button) {
-                defaultButton = qq(tempTemplateEl).getByClass(selectorClasses.button)[0];
+                defaultButton = qq(tempTemplateEl).getFirstByClass(selectorClasses.button);
                 if (defaultButton) {
                     qq(defaultButton).remove();
                 }
@@ -7010,13 +7090,13 @@ qq.Templating = function(spec) {
             // to support layouts where the drop zone is also a container for visible elements,
             // such as the file list.
             if (!qq.DragAndDrop || !qq.supportedFeatures.fileDrop) {
-                dropProcessing = qq(tempTemplateEl).getByClass(selectorClasses.dropProcessing)[0];
+                dropProcessing = qq(tempTemplateEl).getFirstByClass(selectorClasses.dropProcessing);
                 if (dropProcessing) {
                     qq(dropProcessing).remove();
                 }
             }
 
-            dropArea = qq(tempTemplateEl).getByClass(selectorClasses.drop)[0];
+            dropArea = qq(tempTemplateEl).getFirstByClass(selectorClasses.drop);
 
             // If DnD is not available then remove
             // it from the DOM as well.
@@ -7039,13 +7119,13 @@ qq.Templating = function(spec) {
                 }
             }
             else if (qq(uploaderEl).hasAttribute(DROPZPONE_TEXT_ATTR) && dropArea) {
-                dropTextEl = qq(dropArea).getByClass(selectorClasses.dropText)[0];
+                dropTextEl = qq(dropArea).getFirstByClass(selectorClasses.dropText);
                 dropTextEl && qq(dropTextEl).remove();
             }
 
             // Ensure the `showThumbnails` flag is only set if the thumbnail element
             // is present in the template AND the current UA is capable of generating client-side previews.
-            thumbnail = qq(tempTemplateEl).getByClass(selectorClasses.thumbnail)[0];
+            thumbnail = qq(tempTemplateEl).getFirstByClass(selectorClasses.thumbnail);
             if (!showThumbnails) {
                 thumbnail && qq(thumbnail).remove();
             }
@@ -7061,7 +7141,7 @@ qq.Templating = function(spec) {
             isEditElementsExist = qq(tempTemplateEl).getByClass(selectorClasses.editFilenameInput).length > 0;
             isRetryElementExist = qq(tempTemplateEl).getByClass(selectorClasses.retry).length > 0;
 
-            fileListNode = qq(tempTemplateEl).getByClass(selectorClasses.list)[0];
+            fileListNode = qq(tempTemplateEl).getFirstByClass(selectorClasses.list);
             /*jshint -W116*/
             if (fileListNode == null) {
                 throw new Error("Could not find the file list container in the template!");
@@ -7083,7 +7163,7 @@ qq.Templating = function(spec) {
             };
         },
 
-        prependFile = function(el, index) {
+        prependFile = function(el, index, fileList) {
             var parentEl = fileList,
                 beforeEl = parentEl.firstChild;
 
@@ -7191,7 +7271,7 @@ qq.Templating = function(spec) {
                 progressBarSelector = id == null ? selectorClasses.totalProgressBar : selectorClasses.progressBar;
 
             if (bar && !qq(bar).hasClass(progressBarSelector)) {
-                bar = qq(bar).getByClass(progressBarSelector)[0];
+                bar = qq(bar).getFirstByClass(progressBarSelector);
             }
 
             if (bar) {
@@ -7274,11 +7354,16 @@ qq.Templating = function(spec) {
             isCancelDisabled = true;
         },
 
-        addFile: function(id, name, prependInfo) {
+        addFile: function(id, name, prependInfo, hideForever, batch) {
             var fileEl = qq.toElement(templateHtml.fileTemplate),
                 fileNameEl = getTemplateEl(fileEl, selectorClasses.file),
                 uploaderEl = getTemplateEl(container, selectorClasses.uploader),
+                fileContainer = batch ? fileBatch.content : fileList,
                 thumb;
+
+            if (batch) {
+                fileBatch.map[id] = fileEl;
+            }
 
             qq(fileEl).addClass(FILE_CLASS_PREFIX + id);
             uploaderEl.removeAttribute(DROPZPONE_TEXT_ATTR);
@@ -7291,37 +7376,53 @@ qq.Templating = function(spec) {
             fileEl.setAttribute(FILE_ID_ATTR, id);
 
             if (prependInfo) {
-                prependFile(fileEl, prependInfo.index);
+                prependFile(fileEl, prependInfo.index, fileContainer);
             }
             else {
-                fileList.appendChild(fileEl);
+                fileContainer.appendChild(fileEl);
             }
 
-            hide(getProgress(id));
-            hide(getSize(id));
-            hide(getDelete(id));
-            hide(getRetry(id));
-            hide(getPause(id));
-            hide(getContinue(id));
-
-            if (isCancelDisabled) {
-                this.hideCancel(id);
+            if (hideForever) {
+                fileEl.style.display = "none";
+                qq(fileEl).addClass(HIDDEN_FOREVER_CLASS);
             }
+            else {
+                hide(getProgress(id));
+                hide(getSize(id));
+                hide(getDelete(id));
+                hide(getRetry(id));
+                hide(getPause(id));
+                hide(getContinue(id));
 
-            thumb = getThumbnail(id);
-            if (thumb && !thumb.src) {
-                cachedWaitingForThumbnailImg.then(function(waitingImg) {
-                    thumb.src = waitingImg.src;
-                    if (waitingImg.style.maxHeight && waitingImg.style.maxWidth) {
-                        qq(thumb).css({
-                            maxHeight: waitingImg.style.maxHeight,
-                            maxWidth: waitingImg.style.maxWidth
-                        });
-                    }
+                if (isCancelDisabled) {
+                    this.hideCancel(id);
+                }
 
-                    show(thumb);
-                });
+                thumb = getThumbnail(id);
+                if (thumb && !thumb.src) {
+                    cachedWaitingForThumbnailImg.then(function(waitingImg) {
+                        thumb.src = waitingImg.src;
+                        if (waitingImg.style.maxHeight && waitingImg.style.maxWidth) {
+                            qq(thumb).css({
+                                maxHeight: waitingImg.style.maxHeight,
+                                maxWidth: waitingImg.style.maxWidth
+                            });
+                        }
+
+                        show(thumb);
+                    });
+                }
             }
+        },
+
+        addFileToCache: function(id, name, prependInfo, hideForever) {
+            this.addFile(id, name, prependInfo, hideForever, true);
+        },
+
+        addCacheToDom: function() {
+            fileList.appendChild(fileBatch.content);
+            fileBatch.content = document.createDocumentFragment();
+            fileBatch.map = {};
         },
 
         removeFile: function(id) {
@@ -7412,6 +7513,10 @@ qq.Templating = function(spec) {
             var icon = getEditIcon(id);
 
             icon && qq(icon).addClass(options.classes.editable);
+        },
+
+        isHiddenForever: function(id) {
+            return qq(getFile(id)).hasClass(HIDDEN_FOREVER_CLASS);
         },
 
         hideEditIcon: function(id) {
@@ -7573,13 +7678,17 @@ qq.Templating = function(spec) {
         },
 
         generatePreview: function(id, optFileOrBlob) {
-            thumbGenerationQueue.push({id: id, optFileOrBlob: optFileOrBlob});
-            !thumbnailQueueMonitorRunning && generateNextQueuedPreview();
+            if (!this.isHiddenForever(id)) {
+                thumbGenerationQueue.push({id: id, optFileOrBlob: optFileOrBlob});
+                !thumbnailQueueMonitorRunning && generateNextQueuedPreview();
+            }
         },
 
         updateThumbnail: function(id, thumbnailUrl, showWaitingImg) {
-            thumbGenerationQueue.push({update: true, id: id, thumbnailUrl: thumbnailUrl, showWaitingImg: showWaitingImg});
-            !thumbnailQueueMonitorRunning && generateNextQueuedPreview();
+            if (!this.isHiddenForever(id)) {
+                thumbGenerationQueue.push({update: true, id: id, thumbnailUrl: thumbnailUrl, showWaitingImg: showWaitingImg});
+                !thumbnailQueueMonitorRunning && generateNextQueuedPreview();
+            }
         },
 
         hasDialog: function(type) {
@@ -10107,7 +10216,7 @@ qq.Scaler = function(spec, log) {
     "use strict";
 
     var self = this,
-        includeReference = spec.sendOriginal,
+        includeOriginal = spec.sendOriginal,
         orient = spec.orient,
         defaultType = spec.defaultType,
         defaultQuality = spec.defaultQuality / 100,
@@ -10157,16 +10266,18 @@ qq.Scaler = function(spec, log) {
                     });
                 });
 
-                includeReference && records.push({
+                records.push({
                     uuid: originalFileUuid,
                     name: originalFileName,
-                    blob: originalBlob
+                    size: originalBlob.size,
+                    blob: includeOriginal ? originalBlob : null
                 });
             }
             else {
                 records.push({
                     uuid: originalFileUuid,
                     name: originalFileName,
+                    size: originalBlob.size,
                     blob: originalBlob
                 });
             }
@@ -10185,19 +10296,17 @@ qq.Scaler = function(spec, log) {
                 proxyGroupId = qq.getUniqueId();
 
             qq.each(self.getFileRecords(uuid, name, file), function(idx, record) {
-                var relatedBlob = file,
-                    relatedSize = size,
+                var blobSize = record.size,
                     id;
 
                 if (record.blob instanceof qq.BlobProxy) {
-                    relatedBlob = record.blob;
-                    relatedSize = -1;
+                    blobSize = -1;
                 }
 
                 id = uploadData.addFile({
                     uuid: record.uuid,
                     name: record.name,
-                    size: relatedSize,
+                    size: blobSize,
                     batchId: batchId,
                     proxyGroupId: proxyGroupId
                 });
@@ -10209,10 +10318,13 @@ qq.Scaler = function(spec, log) {
                     originalId = id;
                 }
 
-                addFileToHandler(id, relatedBlob);
-
-                fileList.push({id: id, file: relatedBlob});
-
+                if (record.blob) {
+                    addFileToHandler(id, record.blob);
+                    fileList.push({id: id, file: record.blob});
+                }
+                else {
+                    uploadData.setStatus(id, qq.status.REJECTED);
+                }
             });
 
             // If we are potentially uploading an original file and some scaled versions,
@@ -10225,8 +10337,8 @@ qq.Scaler = function(spec, log) {
                         qqparentsize: uploadData.retrieve({id: originalId}).size
                     };
 
-                    // Make SURE the UUID for each scaled image is sent with the upload request,
-                    // to be consistent (since we need to ensure it is sent for the original file as well).
+                    // Make sure the UUID for each scaled image is sent with the upload request,
+                    // to be consistent (since we may need to ensure it is sent for the original file as well).
                     params[uuidParamName] = uploadData.retrieve({id: scaledId}).uuid;
 
                     uploadData.setParentId(scaledId, originalId);
@@ -11469,4 +11581,4 @@ qq.FilenameEditHandler = function(s, inheritedInternalApi) {
 
 }(jQuery));
 
-/*! 2015-07-29 */
+/*! 2015-12-04 */

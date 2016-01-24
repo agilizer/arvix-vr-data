@@ -9,6 +9,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.Ordered;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -38,6 +40,7 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
     	 * 设置js css文件路径
     	 */
         registry.addResourceHandler("/resources/**").addResourceLocations("classpath:/static/resources/");
+		registry.addResourceHandler("/upload/**").addResourceLocations("classpath:/files/upload/");
     }
 
     @Bean
