@@ -60,16 +60,15 @@ public class UploadDataServiceImpl implements UploadDataService{
 						log.info(text);
 						JSONObject jsonObject = JSON.parseObject(text);
 						if(jsonObject.getBoolean("success")){
-							UILog.getInstance().log(modelData.getCaseId+" 数据上传成功，请访问服务器地址查看结果！");
+							UILog.getInstance().log(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！");
 						}else{
 							if(jsonObject.getString("errorCode")=="exist"){
-								UILog.getInstance().log(modelData.getCaseId+" 服务器已经存在相同的数据，请不要重复上传!");
+								UILog.getInstance().log(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!");
 							}
 							else{
-								UILog.getInstance().log(modelData.getCaseId + " 数据上传失败，请联系管理员，返回结果为:\n"+text);
+								UILog.getInstance().log(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text);
 							}
 						}
-						
 					}
 				}
 				if(code == 403){
@@ -88,7 +87,7 @@ public class UploadDataServiceImpl implements UploadDataService{
 					UILog.getInstance().log("数据上传失败,服务器地址不正确，连接失败！");
 					JOptionPane.showMessageDialog(null, "数据上传失败,服务器地址不正确，连接失败！ ","错误", JOptionPane.ERROR_MESSAGE);
 				}else{
-					UILog.getInstance().log("数据上传失败,请联系管理员:");
+					UILog.getInstance().log("数据上传失败,请联系管理员");
 				}
 			} finally {
 				response.close();
