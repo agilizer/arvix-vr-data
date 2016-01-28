@@ -8,7 +8,7 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<title>arvix-matterport</title>
+<title>arvix|唯幻科技</title>
 <meta name="description" content="" />
 <meta name="author" content="" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -96,7 +96,7 @@
 				<!--.col-->
 				<div class="col-sm-6">
 					<ol class="breadcrumb">
-						<li  th:if="${#authentication.name!='anonymousUser'}" >欢迎<samp  sec:authentication="name" ></samp><a href="/modelData/index">数据管理</a></li>
+						<li  th:if="${#authentication.name!='anonymousUser'}" >欢迎<samp  sec:authentication="name" ></samp><a href="/admin/listModelData/1000/0">数据管理</a></li>
 						<li><a href="#"><i class="ion-home"></i></a></li>
 						<li><a href="#" class="active">首页</a></li>
 						<li th:if="${#authentication.name=='anonymousUser'}"><a href="/login">登录</a></li>
@@ -140,6 +140,14 @@
 			</div>
 		</div>
 		<!--.footer-links-->
+		<div class="row no-gutters bg-blue">
+				<div class="col-xs-6"></div><!--.col-->
+				<div class="col-xs-6">
+					<a href="http://www.arvix.cn" target="_blank">
+						<span>©2015-2016 唯幻科技 京ICP备15066862号-1</span>
+					</a>
+				</div><!--.col-->
+			</div>
 
 	<!--.content-->
 
