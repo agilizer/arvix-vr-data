@@ -1,7 +1,5 @@
 package cn.arvix.matterport.client
 
-import java.security.spec.ECField;
-
 import org.apache.commons.io.FileUtils
 import org.jsoup.Jsoup
 import org.jsoup.Connection.Response
@@ -12,6 +10,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 
 public class FetchServiceImpl implements FetchService{
@@ -44,13 +43,13 @@ public class FetchServiceImpl implements FetchService{
 				modelData.setSourceUrl(sourceUrl);
 				def fileSaveDir = workDir +caseId+"/"
 				try{
-					genModelData(caseId,modelData);
-				}catch(e){
-					log.error("fetch caseId {} genModelData error:",caseId,e);
-					UILog.getInstance().log("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
-				}
-				try{
 					Thread.start {
+						try{
+							genModelData(caseId,modelData,fileSaveDir);
+						}catch(e){
+							log.error("fetch caseId {} genModelData error:",caseId,e);
+							UILog.getInstance().log("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
+						}
 						genFiles(caseId,fileSaveDir,modelData,serverUrl,apiKey);
 						FETCH_MAP.remove(sourceUrl);
 						if(FETCH_MAP.size()==0){
@@ -207,7 +206,7 @@ public class FetchServiceImpl implements FetchService{
 	}
 	
 	
-	public  genModelData(String caseId,ModelDataClient modelData){
+	public  genModelData(String caseId,ModelDataClient modelData,String fileSaveDir){
 		def url = "https://my.matterport.com/show/?m=${caseId}"
 		Document doc = Jsoup.parse(new URL(url), 30000);
 		// 取得所有的script tag
@@ -219,10 +218,51 @@ public class FetchServiceImpl implements FetchService{
 				// 只取得script的內容
 				script = ele.childNode(0).toString();
 				modelData.setModelDataClient(script);
+				
+				script = script.replace("window.MP_PREFETCHED_MODELDATA = ", "")
+				script =script.substring(0,script.length()-1)
+				JSONObject object = JSON.parseObject(script);
+				
+				def objectModel = object.getJSONObject("model")
+				JSONArray objectAr = objectModel.getJSONArray("images")
+				if(objectAr!=null&&objectAr.size()>0){
+					def saveDir  = fileSaveDir+"playerImages/"
+					def fetchFileKeyList = ["signed_src","download_url","src","thumbnail_signed_src"]
+					def sumPlayImage = objectAr.size()*4
+					UILog.getInstance().log("发现自动播放,共要抓取 "+sumPlayImage+" 个文件");
+					def activeReel = []
+					def showIndex = 1
+					objectAr.each  {jsonObject->
+						//{"reel": [{"sid": "3UbRzyE9ic3"}, {"sid": "mEEbq29Eqku"}, {"sid": "rAhHyo6oj5h"}, {"sid": "9qtbuZWrZMr"}, {"sid": "KSo6NahgXpA"}, {"sid": "W3VgF9nTG9n"}, {"sid": "W9yF5jfbjUK"}, {"sid": "weQBQpVU7Bz"}, {"sid": "Ai5Mc2GUfJ6"}, {"sid": "zG4bFnVegiA"}]}
+						activeReel.add(["sid":jsonObject.get("sid")])
+						fetchFileKeyList.each{fileUrlKey->
+							fetchPlayerImage(saveDir,caseId,jsonObject,fileUrlKey)
+							UILog.getInstance().log("自动播放文件${showIndex}/${sumPlayImage}完成");
+							showIndex++;
+						}
+					}
+					modelData.setActiveReel(JSON.toJSONString(["reel":activeReel]))
+					modelData.setModelDataClient("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
+				}
 			}
 		}
 		modelData.setDescription(doc.getElementById("meta-description").text());
 		modelData.setTitle(doc.title().replace("Matterport 3D Showcase",""));
+	}
+	
+	private void fetchPlayerImage(String saveDir,String caseId,JSONObject sourceObject,String filePathKey){
+		if(filePathKey){
+			def fileName = sourceObject.get("sid")+".jpg"
+			def file = new File(saveDir,fileName)
+			if(!file.exists()){
+				Response resultFile = Jsoup.connect(sourceObject.get(filePathKey)).ignoreContentType(true).timeout(300000).execute();
+				// output here
+				if(!file.exists()){
+					FileUtils.writeByteArrayToFile(file, resultFile.bodyAsBytes())
+				}
+				sourceObject.put(filePathKey,ClientStaticVar.SERVER_URL+"upload/playerImage/"+caseId+"/"+fileName)
+			}
+		}
 	}
 	
 	public void setUploadDataService(UploadDataService uploadDataService){

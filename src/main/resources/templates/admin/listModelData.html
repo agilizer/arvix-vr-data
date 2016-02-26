@@ -34,6 +34,7 @@
 						<td>缩略图</td>
 						<td>标题</td>
 						<td>描述</td>
+						<td>modelData</td>
 						<td>操作</td>
 					</tr>
 					<!-- 					m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath -->
@@ -45,6 +46,9 @@
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 							<td><a class="editable" href="#" th:text="${modelData[3]}"
 							data-pk="1" data-name='description' data-url="/admin/updateModelData"
+							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							<td><a class="editable" href="#" th:text="${modelData[7]}"
+							data-pk="1" data-name='modelData' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 						<td>
 						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>

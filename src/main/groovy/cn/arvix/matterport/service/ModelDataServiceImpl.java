@@ -6,9 +6,14 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,6 +42,18 @@ public class ModelDataServiceImpl implements ModelDataService{
 	JpaShareService jpaShareService;
 	@Autowired
 	FileService fileService;
+	private String rootPath = "";
+	@PostConstruct
+	public void init(){
+		Resource resource = new ClassPathResource("application.properties");
+		try {
+			rootPath=resource.getFile().getParentFile().getAbsolutePath()+"/files/upload";
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		log.info("upload file store root path:--->>>>>>>>>>>>>>>\n"+rootPath);
+	}
 	@Override
 	public Object getJsonFileDesc(String caseId) {
 		String fileJson = modelDataRepository.findFileJsonByCaseId(caseId);
@@ -105,16 +122,17 @@ public class ModelDataServiceImpl implements ModelDataService{
 				try {
 					zipFileData.transferTo(file);
 					String unzipResult = AntZipUtil.readByApacheZipFile(uploadFilePath, saveDir);
+					File fileDest = new File(rootPath+"/playerImages/"+modelData.getCaseId());
+					FileUtils.deleteDirectory(fileDest);
+					FileUtils.moveDirectoryToDirectory(new File(saveDir+modelData.getCaseId()+"/playerImages/")
+							,fileDest , true);
 					log.info("unzipResult {}",unzipResult);
 					modelDataRepository.save(modelData);
 					jsonResult.setSuccess(true);
-				} catch (IllegalStateException e) {
-					// TODO Auto-generated catch block
+				} catch (Exception e) {
 					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+					log.error("unzip file error", e);
+				} 
 			}
 		}else{
 			jsonResult.setErrorCode(CASE_ID_NULL);
@@ -142,6 +160,10 @@ public class ModelDataServiceImpl implements ModelDataService{
 			result.put(ArvixMatterportConstants.ERROR_CODE,404);
 		}
 		return result;
+	}
+	@Override
+	public String getActiveReel(String caseId) {
+		return modelDataRepository.findActiveReelByCaseId(caseId);
 	}
 
 }

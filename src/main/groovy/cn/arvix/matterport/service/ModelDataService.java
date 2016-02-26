@@ -14,6 +14,7 @@ public interface ModelDataService {
 	Object getJsonFileDesc(String caseId);
 	
 	ModelData findByCaseId(String caseId);
+	String getActiveReel(String caseId);
 	
 	JSONResult uploadModelData(ModelData modelData,MultipartFile zipFileData);
 	

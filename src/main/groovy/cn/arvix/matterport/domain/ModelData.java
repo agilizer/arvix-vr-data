@@ -65,6 +65,8 @@ public class ModelData  implements Serializable{
 	private  FetchStatus fetchStatus;
 	@Column(columnDefinition = "longtext")
 	private  String  fetchErrorMsg;
+	@Column(columnDefinition = "longtext")
+	private  String  activeReel;
 	@Column
 	private Long userTimeSec;
 	/**
@@ -229,6 +231,12 @@ public class ModelData  implements Serializable{
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
-	
+
+	public String getActiveReel() {
+		return activeReel;
+	}
+
+	public void setActiveReel(String activeReel) {
+		this.activeReel = activeReel;
+	}
 }

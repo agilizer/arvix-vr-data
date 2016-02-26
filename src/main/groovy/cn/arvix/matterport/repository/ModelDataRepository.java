@@ -10,4 +10,6 @@ public interface ModelDataRepository extends JpaRepository<ModelData, Long> {
 	
 	@Query("select fileJson from ModelData where caseId=?1")
 	String findFileJsonByCaseId(String caseId);
+	@Query("select activeReel from ModelData where caseId=?1")
+	String findActiveReelByCaseId(String caseId);
 }

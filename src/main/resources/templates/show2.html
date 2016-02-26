@@ -45,7 +45,7 @@
           href="https://my.matterport.com/show/images/icons/apple-touch-icon-114.png" class="keep" />
     <link rel="apple-touch-icon-precomposed" sizes="144x144"
           href="https://my.matterport.com/show/images/icons/apple-touch-icon-144.png" class="keep"   />
-    <link rel="stylesheet" href="/resources/matterport/jsAndCss/main.css" />
+    <link rel="stylesheet" href="/resources/matterport2/jsAndCss/main.css" />
 
 </head>
 <body class="player-active">
@@ -88,8 +88,7 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
 
                     <h2 id="loaderCoBrandName"></h2></div>
             </div>
-            <div class="bottom-logo"><img alt="Arvix 荣誉出品"
-                                          src="/resources/images/poweredByLogo.png" />
+            <div class="bottom-logo">
             </div>
         </div>
     </div>
@@ -132,13 +131,13 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
             <div class="viewContainer">
                 <div  id="previous" class="previous desktop-only ui-icon"><a class="hasHover"><i
                         data-original-title="上一个" rel="tooltip" title="" class="icon icon-dpad-left"></i></a></div>
-                <div style="display: none;" id="play" class="ui-icon"><a class="hasHover"><i data-original-title="Play"
+                <div  id="play" class="ui-icon"><a class="hasHover"><i data-original-title="Play"
                                                                                              rel="tooltip" title=""
                                                                                              class="icon icon-play"></i></a>
                 </div>
-                <div id="pause" class="ui-icon" ><a class="hasHover"><i
+                <div id="pause" class="ui-icon" style="display:none"><a class="hasHover"><i
                         data-original-title="暂停" rel="tooltip" title="" class="icon icon-pause"></i></a></div>
-                <div  id="next" class="next desktop-only ui-icon double"><a class="hasHover"><i
+                <div id="next" class="next desktop-only ui-icon double"><a class="hasHover"><i
                         data-original-title="下一个" rel="tooltip" title="" class="icon icon-dpad-right"></i></a></div>
                 <div id="gui-modes-map" class="ui-icon double"><a class="hasHover"><i data-original-title="更换视图"
                                                                                       rel="tooltip" title=""
@@ -148,7 +147,7 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
         </div>
         <div class="pinBottom right hideTarget">
             <div class="rightViewContainer">
-                <div class="gui-floor hasHover">
+                <div style="display: none;" class="gui-floor hasHover">
                     <div class="gui-floor-title">全部</div>
                     <i class="icon icon-dpad-up"></i>
 
@@ -163,11 +162,11 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
             </div>
         </div>
         <div class="pinBottom center">
-            <div style="display: none;" id="view-controllers">
+            <div  id="view-controllers">
                 <div id="gui-modes-dollhouse" class="darkGlass active"><span class="mode">模型</span></div>
                 <div id="gui-modes-floorplan" class="darkGlass"><span class="mode">户型</span></div>
             </div>
-            <div  id="pullTab" class="darkGlass"><span>Highlights</span> <span
+            <div  id="pullTab" class="darkGlass"><span>展开</span> <span
                     style="display: none">关闭</span> <i class="icon icon-dpad-up"></i></div>
         </div>
         <div  id="drawer" class="fullWidth">
@@ -185,7 +184,7 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
             <div id="progressBar"></div>
         </div>
     </div>
-    <div id="gui-spinner" >
+    <div id="gui-spinner" style="display: none;">
         <div id="gui-spinner-icon"></div>
     </div>
     <div id="gui-message" class="message-outer darkGlass" style="display: none;"><h2 class="model-title" >The book store
@@ -253,10 +252,10 @@ window.MP_PREFETCHED_MODELDATA.model.name = document.title
         class="build keep"></script>
 <script src="/resources/matterport/jsAndCss//three71-shim.js"
         class="build keep"></script>
-<script src="/resources/matterport/jsAndCss/jquery-2.js"
+<script src="/resources/matterport2/jsAndCss/jquery-2.1.1.min.js"
         class="build keep"></script>
-<script src="/resources/matterport/jsAndCss/jquery.js"
+<script src="/resources/matterport2/jsAndCss/jquery.fracs-0.15.0.min.js"
         class="build keep"></script>
-<script src="/resources/matterport/jsAndCss/main.js"></script>
+<script src="/resources/matterport2/jsAndCss/main.js"></script>
 </body>
 </html>

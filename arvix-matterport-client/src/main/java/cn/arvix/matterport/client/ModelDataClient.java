@@ -30,6 +30,7 @@ public class ModelDataClient  implements Serializable{
 	private Integer fileFetchedCount = 0;
 	private  String  fetchErrorMsg;
 	private Long userTimeSec;
+	private String activeReel;
 	
 	public static enum FetchStatus {
 		FETCHING("正在抓取"),FINISH("完成抓取"),
@@ -114,6 +115,12 @@ public class ModelDataClient  implements Serializable{
 	}
 	public void setUserTimeSec(Long userTimeSec) {
 		this.userTimeSec = userTimeSec;
+	}
+	public String getActiveReel() {
+		return activeReel;
+	}
+	public void setActiveReel(String activeReel) {
+		this.activeReel = activeReel;
 	}
 	
 	

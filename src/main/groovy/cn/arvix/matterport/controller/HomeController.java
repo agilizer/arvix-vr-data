@@ -49,4 +49,9 @@ public class HomeController {
 		}
 		return viewName;
 	}
+	
+	@RequestMapping("/show2/**")
+	public String show2(Model model, HttpServletRequest request) {
+		return "redirect:/show/?m="+request.getParameter("m");
+	}
 }
