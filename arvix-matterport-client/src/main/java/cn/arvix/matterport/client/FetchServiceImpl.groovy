@@ -260,8 +260,9 @@ public class FetchServiceImpl implements FetchService{
 				if(!file.exists()){
 					FileUtils.writeByteArrayToFile(file, resultFile.bodyAsBytes())
 				}
-				sourceObject.put(filePathKey,ClientStaticVar.SERVER_URL+"upload/playerImage/"+caseId+"/"+fileName)
 			}
+			///upload/playerImages/ZujWX1srahK/playerImages/
+			sourceObject.put(filePathKey,ClientStaticVar.SERVER_URL+"upload/playerImages/"+caseId+"/playerImages/"+fileName)
 		}
 	}
 	

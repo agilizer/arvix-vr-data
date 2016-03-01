@@ -32,29 +32,39 @@
 					<tr>
 						<td>caseId</td>
 						<td>缩略图</td>
+						<td>是否显示logo</td>
 						<td>标题</td>
 						<td>描述</td>
-						<td>modelData</td>
 						<td>操作</td>
+						<td>modelData</td>
+						
 					</tr>
-					<!-- 					m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath -->
+					<!-- 					m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath,m.logoShow -->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
 						<td th:text="${modelData[1]}"></td>
 						<td><img th:id="${'img'+modelData[2]}" th:src="${'/upload'+modelData[8]}" width="100"/></td>
+						<td><a class="editable" href="#" th:text="${modelData[9]}"
+							data-pk="1" data-name='logoShow' data-url="/admin/updateModelData"
+							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+						
 						<td><a class="editable" href="#" th:text="${modelData[0]}"
 							data-pk="1" data-name='title' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							
 							<td><a class="editable" href="#" th:text="${modelData[3]}"
 							data-pk="1" data-name='description' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							
+							<td>
+						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>
+						<a href="/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
+						
+						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a></td>
+							
+							
 							<td><a class="editable" href="#" th:text="${modelData[7]}"
 							data-pk="1" data-name='modelData' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-						<td>
-						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>
-						<a href="http://localhost:8888/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
-						
-						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a></td>
 					</tr>
 				</table>
 
@@ -136,6 +146,24 @@
 		function modelUploadPhoto(obj){
 			$("#uploadPhotoId").val($(obj).attr("data-id"));
 			$("#uploadPhotoModal").modal();
+		}
+		
+		function modelDataDelete(obj){
+			var id = $(obj).attr("data-id");
+			if(confirm("确定删除")){
+				$.ajax({
+					url : "/admin/deleteModelData/"+id,
+					type : "POST",
+					success : function(data) {
+						if (data.success) {
+							alert("删除成功");
+							$(obj).parent().parent().remove();
+						} else {
+							alert("删除失败");
+						}
+					}
+				});
+			}
 		}
 		
 	</script>

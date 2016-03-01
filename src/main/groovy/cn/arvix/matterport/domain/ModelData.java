@@ -80,6 +80,10 @@ public class ModelData  implements Serializable{
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar lastUpdated;
+	/**
+	 * 是否显示arvix logo相关信息
+	 */
+	private Boolean logoShow = true;
 	
 	public static enum FetchStatus {
 		FETCHING("正在抓取"),FINISH("完成抓取"),
@@ -239,4 +243,13 @@ public class ModelData  implements Serializable{
 	public void setActiveReel(String activeReel) {
 		this.activeReel = activeReel;
 	}
+
+	public Boolean getLogoShow() {
+		return logoShow;
+	}
+
+	public void setLogoShow(Boolean logoShow) {
+		this.logoShow = logoShow;
+	}
+	
 }

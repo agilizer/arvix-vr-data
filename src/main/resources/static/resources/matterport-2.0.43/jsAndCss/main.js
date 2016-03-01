@@ -2929,7 +2929,7 @@ window.Modernizr = function (n, e, t) {
                         interaction_source: "gui"
                     })
                 }).fail(function () {
-                    $("#terms-text").html("<h1>Terms of Use</h1><p>Could not fetch terms. Please make sure you have an internet connection to view the terms of use.")
+                	 $('#terms-text').html($("#termsContent").html())
                 }), $("#terms-modal").fadeIn(K)
             }), $("#terms-modal .btn").on("mousedown touchstart", function (e) {
                 l(e), $("#terms-modal").fadeOut(K)
@@ -2973,12 +2973,12 @@ window.Modernizr = function (n, e, t) {
                                 event_type: "showcase_gui",
                                 gui_action: "help_prev"
                             }), r(m.player.mode, --t)
-                        }), s.off(), t === h ? $(".nav-help-elements .next-button").text("GOT IT").on("mouseup touchend", function (e) {
+                        }), s.off(), t === h ? $(".nav-help-elements .next-button").text("我知道啦").on("mouseup touchend", function (e) {
                             e.preventDefault(), e.stopImmediatePropagation(), d.track("USER", {
                                 event_type: "showcase_gui",
                                 gui_action: "help_done"
                             }), n()
-                        }) : s.text("NEXT").on("mouseup touchend", function (e) {
+                        }) : s.text("下一步").on("mouseup touchend", function (e) {
                             e.preventDefault(), e.stopImmediatePropagation(), d.track("USER", {
                                 event_type: "showcase_gui",
                                 gui_action: "help_next"
@@ -3006,15 +3006,15 @@ window.Modernizr = function (n, e, t) {
             }
 
             function a() {
-                y || (y = !0, w[c.PANORAMA].splice(4, 0, "Click the play button to get a guided tour", "Nav_Help_Play.png"), _[c.PANORAMA].splice(4, 0, "Click the play button to get a guided tour", "Nav_Help_Touch_Play.png"))
+                y || (y = !0, w[c.PANORAMA].splice(4, 0, "点击播放按钮将进行自动漫游", "Nav_Help_Play.png"), _[c.PANORAMA].splice(4, 0, "点击播放按钮将进行自动漫游", "Nav_Help_Touch_Play.png"))
             }
 
             function s() {
-                v || (v = !0, w[c.PANORAMA].splice(4, 0, "Click the highlights button to see  highlights of the space", "Nav_Help_Highlights.png"), _[c.PANORAMA].splice(4, 0, "Click the highlights button to see  highlights of the space", "Nav_Help_Touch_Highlights.png"))
+                v || (v = !0, w[c.PANORAMA].splice(4, 0, "点击'平视模型'查看平视模型", "Nav_Help_Highlights.png"), _[c.PANORAMA].splice(4, 0, "点击'平视模型'查看平视模型", "Nav_Help_Touch_Highlights.png"))
             }
 
             function h() {
-                b || (b = !0, w[c.PANORAMA].push("Click the dollhouse icon to see the whole space", "Nav_Help_New_dollhouse.png"), _[c.PANORAMA].push("Tap the dollhouse icon to see the whole space", "Nav_Help_Touch_Dollhouse.png"))
+                b || (b = !0, w[c.PANORAMA].push("点击'俯视模型'查看俯视模型", "Nav_Help_New_dollhouse.png"), _[c.PANORAMA].push("点击'俯视模型'查看俯视模型", "Nav_Help_Touch_Dollhouse.png"))
             }
 
             function l(e, t) {
@@ -3045,9 +3045,11 @@ window.Modernizr = function (n, e, t) {
             }
 
             var u = e("./../util/logger"), c = e("./../enum/Viewmode"), d = e("./../analytics"), f = e("./../settings"), p = e("./../util/browser"), m = e("./gui"), g = new u(i), v = !1, y = !1, b = !1, w = {};
-            w[c.PANORAMA] = ["Use the arrow keys to move", "Nav_Help_Arrow_keys.png", "Click & drag the mouse to move", "Nav_Help_Left_Mouse.png"], w[c.DOLLHOUSE] = ["Use the arrow keys to explore the space", "Nav_Help_Arrow_keys.png", "Go to a room by clicking on it. Click and drag to pan.", "Nav_Help_Left_Mouse.png"], w[c.FLOORPLAN] = ["Use the Left or Right key to rotate", "Nav_Help_LeftRight_Keys.png", "Use the Up or Down key to zoom", "Nav_Help_UpDown_Keys.png", "Click to explore", "Nav_Help_Left_Mouse.png"];
+            w[c.PANORAMA] = ["使用方向键走动", "Nav_Help_Arrow_keys.png", "点击或鼠标移动", "Nav_Help_Left_Mouse.png"], 
+            w[c.DOLLHOUSE] = ["使用方向键浏览模型", "Nav_Help_Arrow_keys.png",
+                              "通过点击进入一个房间，单击或者拖动实现移动", "Nav_Help_Left_Mouse.png"], w[c.FLOORPLAN] = ["使用方向键实现旋转", "Nav_Help_LeftRight_Keys.png", "使用上下方向键缩放", "Nav_Help_UpDown_Keys.png", "点击进入模型", "Nav_Help_Left_Mouse.png"];
             var _ = {};
-            _[c.PANORAMA] = ["Tap where you want to go", "Nav_Help_Tap.png", "Drag to move", "Nav_Help_Drag_Turn.png"], _[c.DOLLHOUSE] = ['Click "View floor plan" below to see the whole space', "Nav_Help_Tap.png", "Drag to rotate", "Nav_Help_Drag_Rotate.png"], _[c.FLOORPLAN] = ['Click "View dollhouse" below to see the whole space', "Nav_Help_Tap.png", "Drag to rotate", "Nav_Help_Drag_Pan.png"];
+            _[c.PANORAMA] = ["点击想去的地方", "Nav_Help_Tap.png", "拖拽移动", "Nav_Help_Drag_Turn.png"], _[c.DOLLHOUSE] = ['点击模型查看全景', "Nav_Help_Tap.png", "拖拽旋转", "Nav_Help_Drag_Rotate.png"], _[c.FLOORPLAN] = ['点击', "Nav_Help_Tap.png", "拖拽旋转", "Nav_Help_Drag_Pan.png"];
             var x = 0, S = !1;
             $(".nav-help").on("mouseup touchend", function (e) {
                 e.preventDefault(), e.stopPropagation(), $("#more-menu").removeClass("open"), m.paneControl("help"), d.track("USER", {
@@ -7710,7 +7712,8 @@ window.Modernizr = function (n, e, t) {
             brand: o.valueFromHash("brand", !0),
             debug: !1,
             version: "2.0.43",
-            pageTitle: "Matterport 3D Showcase",
+           // pageTitle: "Matterport 3D Showcase",
+            pageTitle: "3D模型",
             authorizationHeader: r(),
             autoplay: o.valueFromHash("play", !1) || !o.inIframe(),
             autohelp: o.valueFromHash("help", null),

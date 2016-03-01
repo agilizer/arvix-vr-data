@@ -84,7 +84,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage listAdmin(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath From "
+		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow From "
 				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
@@ -94,7 +94,12 @@ public class ModelDataServiceImpl implements ModelDataService{
 	@Override
 	public Map<String, Object> update(String fieldName, Long id, String value) {
 		Map<String, Object> result = StaticMethod.getResult();
-		jpaShareService.executeForHql("update ModelData set "+fieldName+"=? where id=?", value,id);
+		if("logoShow".equals(fieldName)){
+			jpaShareService.executeForHql("update ModelData set "+fieldName+"=? where id=?", Boolean.valueOf(value),id);
+		}else{
+			jpaShareService.executeForHql("update ModelData set "+fieldName+"=? where id=?", value,id);
+		}
+		
 		result.put(ArvixMatterportConstants.SUCCESS, true);
 		return result;
 	}
@@ -124,8 +129,11 @@ public class ModelDataServiceImpl implements ModelDataService{
 					String unzipResult = AntZipUtil.readByApacheZipFile(uploadFilePath, saveDir);
 					File fileDest = new File(rootPath+"/playerImages/"+modelData.getCaseId());
 					FileUtils.deleteDirectory(fileDest);
-					FileUtils.moveDirectoryToDirectory(new File(saveDir+modelData.getCaseId()+"/playerImages/")
-							,fileDest , true);
+					File srcFileDir = new File(saveDir+modelData.getCaseId()+"/playerImages/");
+					if(srcFileDir.exists()){
+						FileUtils.moveDirectoryToDirectory(srcFileDir
+								,fileDest , true);
+					}
 					log.info("unzipResult {}",unzipResult);
 					modelDataRepository.save(modelData);
 					jsonResult.setSuccess(true);
@@ -164,6 +172,32 @@ public class ModelDataServiceImpl implements ModelDataService{
 	@Override
 	public String getActiveReel(String caseId) {
 		return modelDataRepository.findActiveReelByCaseId(caseId);
+	}
+	@Override
+	public Map<String, Object> delete(Long id) {
+		ModelData modelData = modelDataRepository.findOne(id);
+		Map<String,Object> result = StaticMethod.getResult();
+		if(modelData!=null){
+			 FileInfo fileInfo = modelData.getFileInfo();
+			 String caseId = modelData.getCaseId();
+			 String saveDir =  configDomainService.getConfigString(ArvixMatterportConstants.FILE_STORE_PATH);
+			 File delDir = new File(saveDir+caseId);
+			 if(delDir.exists()){
+				 try {
+					FileUtils.deleteDirectory(delDir);
+				} catch (IOException e) {
+					e.printStackTrace();
+					log.error("del file dir error {}",delDir.getAbsolutePath(), e);
+				}
+			 }
+			 modelDataRepository.delete(modelData);
+			 fileService.delFile(fileInfo);
+			 result.put(ArvixMatterportConstants.SUCCESS,true);
+		}else{
+			result.put(ArvixMatterportConstants.ERROR_MSG, "没有找到相关数据！");
+			result.put(ArvixMatterportConstants.ERROR_CODE,404);
+		}
+		return result;
 	}
 
 }

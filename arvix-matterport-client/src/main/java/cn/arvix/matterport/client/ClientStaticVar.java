@@ -1,6 +1,6 @@
 package cn.arvix.matterport.client;
 
-public interface ClientStaticVar {
+public class ClientStaticVar {
 
-	String SERVER_URL = "http://vr.arvix.cn/";
+	public static String SERVER_URL = "http://vr.arvix.cn/";
 }

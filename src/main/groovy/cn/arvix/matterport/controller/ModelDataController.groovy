@@ -68,11 +68,6 @@ public class ModelDataController {
 		return "modelData/index";
 	}
 	
-	@ResponseBody
-	@RequestMapping("/api/v1/jsonstore/model/highlights/ZujWX1srahK/active_reel")
-	public Object highlightsTemp(HttpServletRequest request,HttpServletResponse response) {
-		return '{"reel": [{"sid": "3UbRzyE9ic3"}, {"sid": "mEEbq29Eqku"}, {"sid": "rAhHyo6oj5h"}, {"sid": "9qtbuZWrZMr"}, {"sid": "KSo6NahgXpA"}, {"sid": "W3VgF9nTG9n"}, {"sid": "W9yF5jfbjUK"}, {"sid": "weQBQpVU7Bz"}, {"sid": "Ai5Mc2GUfJ6"}, {"sid": "zG4bFnVegiA"}]}';
-	}
 	
 	
 	@ResponseBody

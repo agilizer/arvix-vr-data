@@ -32,4 +32,12 @@ public class AdminController {
 		return modelDataService.update(name, pk, value);
 	}
 	
+	
+	@Secured({Role.ROLE_ADMIN}) 
+	@ResponseBody
+	@RequestMapping(value = "/deleteModelData/{id}")
+	public Map<String, Object> delete(@PathVariable("id")Long id,String value) {
+		return modelDataService.delete(id);
+	}
+	
 }
