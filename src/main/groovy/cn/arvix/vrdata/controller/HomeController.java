@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import cn.arvix.vrdata.consants.ArvixMatterportConstants;
 import cn.arvix.vrdata.domain.ModelData;
 import cn.arvix.vrdata.service.ConfigDomainService;
+import cn.arvix.vrdata.service.ModelDataListService;
 import cn.arvix.vrdata.service.ModelDataService;
 
 @Controller
@@ -17,6 +18,9 @@ public class HomeController {
 
 	@Autowired
 	ModelDataService modelDataService;
+	
+	@Autowired
+	ModelDataListService modelDataListService;
 	@Autowired
 	ConfigDomainService configDomainService;
 	@RequestMapping("/home")
@@ -29,7 +33,7 @@ public class HomeController {
 	public String index(Model model) {
 		// Collection<?> temp =
 		// SecurityContextHolder.getContext().getAuthentication().getAuthorities();
-		model.addAttribute("modelDataJdbcPage", modelDataService.list(100, 0));
+		model.addAttribute("modelDataJdbcPage", modelDataListService.list(12, 0,""));
 		return "home";
 	}
 

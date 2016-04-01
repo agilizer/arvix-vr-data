@@ -7,6 +7,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
+import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
@@ -17,6 +18,8 @@ import cn.arvix.vrdata.consants.ArvixMatterportConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.service.ConfigDomainService
 import cn.arvix.vrdata.service.FetchDataService
+import cn.arvix.vrdata.service.JdbcPage
+import cn.arvix.vrdata.service.ModelDataListService
 import cn.arvix.vrdata.service.ModelDataService
 import cn.arvix.vrdata.util.JSONResult
 
@@ -32,7 +35,8 @@ public class ModelDataController {
 	ModelDataService modelDataService;
 	@Autowired
 	ConfigDomainService configDomainService;
-	
+	@Autowired
+	ModelDataListService modelDataListService;
 	@ResponseBody
 	@RequestMapping("/api/v1/fetchData")
 	public Map<String,Object> fetchData(String sourceUrl,boolean force) {
@@ -78,6 +82,15 @@ public class ModelDataController {
 	@RequestMapping("/modelData/index")
 	public String index(String sourceUrl) {
 		return "modelData/index";
+	}
+	
+	
+	@RequestMapping("/admin/modelData/list/{max}/{offset}/{searchStr}")
+	public String list(@PathVariable("max")Integer max,
+			@PathVariable("offset")Integer offset,@PathVariable("searchStr")String  searchStr,Model model) {
+		JdbcPage jdbcPage = modelDataListService.list(max,offset,searchStr);
+		model.addAttribute("jdbcPage",jdbcPage);
+		return "modelData/list";
 	}
 	
 	

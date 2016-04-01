@@ -8,9 +8,7 @@
 <head>
 <meta charset="utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-
-<title>arvix-vr-data</title>
-
+<title>ar-vr-data</title>
 <meta name="description" content="" />
 <meta name="author" content="" />
 
@@ -29,8 +27,7 @@
 <!-- END PLUGINS CSS -->
 
 <!-- BEGIN SHORTCUT AND TOUCH ICONS -->
-<link rel="shortcut icon"
-	 href="/resources/images/favicon-32x32.ico" />
+<link rel="shortcut icon" href="/resources/images/favicon-32x32.ico" />
 <link rel="apple-touch-icon"
 	href="/resources/globals/img/icons/apple-touch-icon.png" />
 <!-- END SHORTCUT AND TOUCH ICONS -->
@@ -101,15 +98,21 @@
 				<!--.col-->
 				<div class="col-sm-6">
 					<ol class="breadcrumb">
+						<li th:if="${#authentication.name!='anonymousUser'}">欢迎 <samp
+								sec:authentication="name"></samp>&nbsp;&nbsp;&nbsp; <a
+							href="/admin/listModelData/1000/0">数据管理</a> &nbsp;&nbsp;&nbsp; <a
+							href="/admin/modelData/list/12/0/a">数据列表</a>
+						</li>
 						<li><a href="#"><i class="ion-home"></i></a></li>
-						<li><a href="#">页面</a></li>
-						<li><a href="#" class="active">数据抓取</a></li>
+						<li><a href="#" class="active">首页</a></li>
+						<li th:if="${#authentication.name=='anonymousUser'}"><a
+							href="/login">登录</a></li>
 					</ol>
 				</div>
 				<!--.col-->
 			</div>
 			<!--.row-->
-			
+
 		</div>
 		<!--.page-header-->
 
@@ -117,29 +120,79 @@
 		<!-- PUT THE CONTENT HERE -->
 		<!-- content -->
 
-		<div class="footer-links margin-top-40">
-			<div class="row example-row">
-				<form action="/api/v1/fetchData">
-				<input type="hidden"  name="force" value="false">
-					<div class="col-md-2 col-md-offset-1">目标url</div>
-					<!--.col-md-3-->
-					<div class="col-md-8">
-						<div class="inputer">
-							<div class="input-wrapper">
-								<input type="text" class="form-control" name="sourceUrl"
-									placeholder="例如：https://my.matterport.com/show/?m=MXfJvWQecHT">
-							</div>
-						</div>
-						<button type="submit" class="btn btn-primary btn-ripple">提交</button>
+		<div class="row">
+			<div class="col-md-4"
+				th:each="showCase,showCaseStat:${jdbcPage.pageItems}">
+				<div class="card card-meal card-meal-green card-square card-shadow">
+					<div class="card-heading">
+						<h3 class="card-title" th:text="${showCase[0]}"></h3>
+						<div class="card-subhead" th:utext="${showCase[3]}"></div>
+						<!--.card-subhead-->
 					</div>
-					<!--.col-md-9-->
-				</form>
+					<!--.card-heading-->
+					<div class="card-body">
+						<div class="image">
+							<a href="#" th:href="'/show/?m='+${showCase[1]}"> <img alt=""
+								src="/resources/img/21.jpg" th:if="${showCase[2]}"
+								th:src="${'/upload'+showCase[2]}" /> <img alt=""
+								th:unless="${showCase[2]}" src="/resources/img/default.jpg" />
+
+
+							</a>
+						</div>
+						<!--.image-->
+					</div>
+					<!--.card-body-->
+					<!--.card-footer-->
+				</div>
+				<!--.card-->
 			</div>
+			<!--.col-md-4-->
 		</div>
-		<h3><a href="/admin/listModelData/100/0">管理员首页</a></h3>
+		<div class="row">
+		<input type="hidden" id="max" name="max"
+							th:value="${jdbcPage.max}" /> <input type="hidden"
+							id="offset" name="offset"
+							th:value="${jdbcPage.offset}" />
+			<nav th:fragment="listNav">
+				<div class="c_width" th:if="${jdbcPage.sumItem!=0}">
+					<ul class="pagination">
+						<li th:if="${jdbcPage.pageNumber!=0}"><a
+							href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*(jdbcPage.pageNumber-1)}">上一页</a></li>
+						<li th:unless="${jdbcPage.pageNumber!=0}" class="disabled"><a
+							href="#">上一页</a></li>
+						<li
+							th:each="i : ${#numbers.sequence( 0, jdbcPage.pagesAvailable-1)}">
+							<a href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*i}"
+							index="1" th:text="${i+1}">1</a>
+						</li>
+						<li th:if="${jdbcPage.pageNumber != jdbcPage.pagesAvailable-1}">
+							<a href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*(jdbcPage.pageNumber+1)}">下一页</a>
+						</li>
+						<li class="disabled"
+							th:if="${jdbcPage.pageNumber==jdbcPage.pagesAvailable-1}"><a
+							href="#">下一页</a></li>
+						<li class="disabled"><a href="#" class="all_page"> 共<strong
+								th:text="${jdbcPage.sumItem}"></strong>个任务, 共<span
+								th:text="${jdbcPage.pagesAvailable}">50</span>页, 当前第<span
+								th:text="${jdbcPage.pageNumber+1}">50</span>页
+						</a></li>
+					</ul>
+				</div>
+				<div class="c_width" th:if="${jdbcPage.sumItem==0}">
+					没有查找到相关数据,请重选搜索.</div>
+			</nav>
+		</div>
+		<h3>
+			<a href="/admin/listModelData/100/0">管理员首页</a>
+		</h3>
 		<!--.footer-links-->
 
 	</div>
+	
 	<!--.content-->
 
 	<!-- BEGIN GLOBAL AND THEME VENDORS -->
@@ -163,6 +216,19 @@
 			Pleasure.init();
 			Layout.init();
 		});
+		function loadSearchUrl(){
+			var  listBaseUrl = "/admin/modelData/list/"
+			var newUrl = listBaseUrl+$("#max").val()+"/"+$("#offset").val()+"/a";
+			window.location.href = newUrl;
+		}
+		function changeList(aObj){
+			aObj = $(aObj)
+			var max = aObj.attr('data-max');
+			var offset =  aObj.attr('data-offset');
+			$("#max").val(max);
+			$("#offset").val(offset);
+			 loadSearchUrl();
+		}
 	</script>
 	<!-- END INITIALIZATION-->
 </body>

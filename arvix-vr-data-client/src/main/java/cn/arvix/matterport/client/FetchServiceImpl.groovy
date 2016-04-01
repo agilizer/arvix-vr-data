@@ -37,6 +37,10 @@ public class FetchServiceImpl implements FetchService{
 			if(subIndex>0){
 				FETCH_MAP.put(sourceUrl,sourceUrl)
 				def caseId = sourceUrl.substring(subIndex+3)
+				if(StaticMethod.checkCaseIdServiceExist(caseId)){
+					UILog.getInstance().log("服务器已经存在，忽略："+sourceUrl);
+					return;
+				}
 				ModelDataClient modelData = new ModelDataClient();
 				def calendar = Calendar.getInstance()
 				modelData.setCaseId(caseId);
