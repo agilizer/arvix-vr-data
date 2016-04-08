@@ -5,12 +5,14 @@ import java.text.SimpleDateFormat
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
+import javax.servlet.http.HttpServletResponse;
+
 import cn.arvix.vrdata.consants.ArvixMatterportConstants
 import cn.arvix.vrdata.domain.ConfigDomain
 
 public class StaticMethod {
 	public static Map<String,Object> getResult(){
-		Map<String,Object> result = new HashMap<String,Object>(); 
+		Map<String,Object> result = new HashMap<String,Object>();
 		result.put(ArvixMatterportConstants.SUCCESS, false);
 		return result;
 	}
@@ -33,7 +35,7 @@ public class StaticMethod {
 		}
 		return configMap
 	}
-	
+
 	static Map<String,DateFormat> dateFormatMap = new HashMap<String,DateFormat>()
 	public static Date parseDate(String dateStr,String format){
 		if(null==dateStr||dateStr==""){
@@ -70,7 +72,11 @@ public class StaticMethod {
 			file.mkdirs()
 		}
 	}
-	
+
+	public static void cros(HttpServletResponse response){
+		response.setHeader("X-Frame-OPTIONS", "")
+	}
+
 	public static enum  JunjieFileType{
 		EXCEL(""),
 		WORD(""),
@@ -85,7 +91,6 @@ public class StaticMethod {
 		public getCssCode(){
 			return this.cssCode
 		}
-
 	}
 	public static JunjieFileType genFileType(String fileName ){
 		int dotPos = fileName.lastIndexOf(".")
@@ -105,6 +110,4 @@ public class StaticMethod {
 		}
 		return result
 	}
-
-	  
 }

@@ -98,6 +98,7 @@ public class ModelDataController {
 	@ResponseBody
 	@RequestMapping(value="/api/v1/jsonstore/model/highlights/{caseId}/active_reel",method=RequestMethod.GET)
 	public Object highlights(@PathVariable("caseId") String caseId,HttpServletRequest request,HttpServletResponse response) {
+		StaticMethod.cros(response)
 		return modelDataService.getActiveReel(caseId);
 	}
 

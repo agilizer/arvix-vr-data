@@ -1,6 +1,7 @@
 package cn.arvix.vrdata.controller;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import cn.arvix.vrdata.domain.ModelData;
 import cn.arvix.vrdata.service.ConfigDomainService;
 import cn.arvix.vrdata.service.ModelDataListService;
 import cn.arvix.vrdata.service.ModelDataService;
+import cn.arvix.vrdata.util.StaticMethod;
 
 @Controller
 public class HomeController {
@@ -38,10 +40,11 @@ public class HomeController {
 	}
 
 	@RequestMapping("/show/**")
-	public String show(Model model, HttpServletRequest request) {
+	public String show(Model model, HttpServletRequest request,HttpServletResponse response) {
 		String caseId = request.getParameter("m");
 		ModelData modelData = modelDataService.findByCaseId(caseId);
 		String viewName = "404";
+		StaticMethod.cros(response);
 		if(modelData!=null){
 			model.addAttribute("modelData",modelData );
 			System.out.println(modelData.getModelData());
