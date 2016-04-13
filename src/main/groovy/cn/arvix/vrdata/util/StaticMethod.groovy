@@ -7,13 +7,13 @@ import java.util.regex.Pattern
 
 import javax.servlet.http.HttpServletResponse;
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants
+import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ConfigDomain
 
 public class StaticMethod {
 	public static Map<String,Object> getResult(){
 		Map<String,Object> result = new HashMap<String,Object>();
-		result.put(ArvixMatterportConstants.SUCCESS, false);
+		result.put(ArvixDataConstants.SUCCESS, false);
 		return result;
 	}
 	public static String genUUID(){

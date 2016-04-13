@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestMapping
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants
+import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.service.ConfigDomainService
 
 
@@ -37,8 +37,11 @@ class FilesController {
 		if(contentPath.endsWith("&")){
 			contentPath = contentPath.substring(0,contentPath.length()-1);
 		}
-		String downLoadPath = configDomainService.getConfig(ArvixMatterportConstants.FILE_STORE_PATH)+contentPath.replace("/files/","")
-		log.info("downLoadPath {}",downLoadPath)
+		String downLoadPath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH)+contentPath.replace("/files/","")
+		//log.info("downLoadPath {}",downLoadPath)
+		int startIndex = contentPath.indexOf("/files/")+7
+		String caseId = contentPath.subSequence(startIndex,startIndex+11)
+		log.info("caseId-->"+caseId)
 		response.setContentType("text/html;charset=utf-8");
 		try {
 			request.setCharacterEncoding("UTF-8");

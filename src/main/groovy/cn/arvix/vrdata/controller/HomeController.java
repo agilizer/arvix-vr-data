@@ -3,12 +3,14 @@ package cn.arvix.vrdata.controller;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants;
+import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.ModelData;
 import cn.arvix.vrdata.service.ConfigDomainService;
 import cn.arvix.vrdata.service.ModelDataListService;
@@ -18,6 +20,8 @@ import cn.arvix.vrdata.util.StaticMethod;
 @Controller
 public class HomeController {
 
+	private static final Logger log = LoggerFactory
+			.getLogger(HomeController.class);
 	@Autowired
 	ModelDataService modelDataService;
 	
@@ -46,13 +50,17 @@ public class HomeController {
 		String viewName = "404";
 		StaticMethod.cros(response);
 		if(modelData!=null){
-			model.addAttribute("modelData",modelData );
-			System.out.println(modelData.getModelData());
-			model.addAttribute("caseId",caseId );
-			model.addAttribute("siteUrl", configDomainService.getConfig(ArvixMatterportConstants.SITE_URL));
-			model.addAttribute("teamDesc", configDomainService.getConfig(ArvixMatterportConstants.TEAM_DESCRIPTION));
-			viewName = "show";
-			
+			log.info("modelData.getOnline()-->"+modelData.getOnline());
+			if(null!=modelData.getOnline()&&modelData.getOnline()){
+				model.addAttribute("modelData",modelData );
+				model.addAttribute("caseId",caseId );
+				model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
+				model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
+				model.addAttribute("contactHtml", configDomainService.getConfig(ArvixDataConstants.SERVICE_CONTACT_HTML));
+				viewName = "show";
+			}else{
+				viewName = "404";
+			}
 		}
 		return viewName;
 	}

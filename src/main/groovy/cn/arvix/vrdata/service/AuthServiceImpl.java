@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cn.arvix.vrdata.been.UserVO;
-import cn.arvix.vrdata.consants.ArvixMatterportConstants;
+import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.util.StaticMethod;
 
 @Service
@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
 	public boolean checkSmsCode(HttpSession session, String code) {
 		boolean isRight = false;
 		if (code.equals(session
-				.getAttribute(ArvixMatterportConstants.SMS_CODE_SESSION_NAME))) {
+				.getAttribute(ArvixDataConstants.SMS_CODE_SESSION_NAME))) {
 			isRight = true;
 		}
 		return isRight;
@@ -43,11 +43,11 @@ public class AuthServiceImpl implements AuthService {
 			isRight = true;
 		} else {
 			String captchaSolution = RandomStringUtils.random(
-					ArvixMatterportConstants.DEFAULT_LENGTH,
-					ArvixMatterportConstants.DEFAULT_CAPTCHA_CHARS.toCharArray());
-			String sendStr = content.replace(ArvixMatterportConstants.SMS_VAR_CHECK_CODE,
+					ArvixDataConstants.DEFAULT_LENGTH,
+					ArvixDataConstants.DEFAULT_CAPTCHA_CHARS.toCharArray());
+			String sendStr = content.replace(ArvixDataConstants.SMS_VAR_CHECK_CODE,
 					captchaSolution);
-			session.setAttribute(ArvixMatterportConstants.SMS_CODE_SESSION_NAME,
+			session.setAttribute(ArvixDataConstants.SMS_CODE_SESSION_NAME,
 					captchaSolution);
 			log.info("check code:" + captchaSolution +"   sms content:"+sendStr);
 			// TODO send sms
@@ -80,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
 			isRight = false;
 		}
 		if (isRight) {
-			result.put(ArvixMatterportConstants.SUCCESS, true);
+			result.put(ArvixDataConstants.SUCCESS, true);
 		}
 		return result;
 	}
@@ -90,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
 		Map<String, Object> result = StaticMethod.getResult();
 		if (userService.findByUsername(username) == null
 				&& username.trim().matches("^1[0-9]{10}")) {
-			result.put(ArvixMatterportConstants.SUCCESS, true);
+			result.put(ArvixDataConstants.SUCCESS, true);
 		}
 		return result;
 	}
@@ -101,8 +101,8 @@ public class AuthServiceImpl implements AuthService {
 		Map<String, Object> result = StaticMethod.getResult();
 		if (userService.findByUsername(username) == null) {
 			boolean sendResult = sendSmsCode(request.getSession(), username,
-					ArvixMatterportConstants.SMS_REGISTER_NOTE);
-			result.put(ArvixMatterportConstants.SUCCESS, sendResult);
+					ArvixDataConstants.SMS_REGISTER_NOTE);
+			result.put(ArvixDataConstants.SUCCESS, sendResult);
 		}
 		return result;
 	}
@@ -113,8 +113,8 @@ public class AuthServiceImpl implements AuthService {
 		Map<String, Object> result = StaticMethod.getResult();
 		if (userService.findByUsername(username) != null) {
 			boolean sendResult = sendSmsCode(request.getSession(), username,
-					ArvixMatterportConstants.SMS_FINDPW_NOTE);
-			result.put(ArvixMatterportConstants.SUCCESS, sendResult);
+					ArvixDataConstants.SMS_FINDPW_NOTE);
+			result.put(ArvixDataConstants.SUCCESS, sendResult);
 		}
 		return result;
 	}
@@ -138,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
 			userService.changePassword(
 					userService.findByUsername(userVO.getUsername()),
 					userVO.getPassword());
-			result.put(ArvixMatterportConstants.SUCCESS, true);
+			result.put(ArvixDataConstants.SUCCESS, true);
 		}
 		return result;
 	}

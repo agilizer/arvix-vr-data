@@ -1,6 +1,6 @@
 package cn.arvix.vrdata.consants;
 
-public interface ArvixMatterportConstants {
+public interface ArvixDataConstants {
 	
 	String ERROR_MSG = "errorMsg";
 	String SUCCESS="success";
@@ -11,6 +11,8 @@ public interface ArvixMatterportConstants {
 	String SMS_VAR_CHECK_CODE="##smcCode##";
 	
 	String API_UPLOAD_MODELDATA_KEY = "apiUploadModelDataKey";
+	
+	String SERVICE_CONTACT_HTML="contactHtml";
 	/**
 	 * 注册
 	 */

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.multipart.MultipartFile
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants
+import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.service.ConfigDomainService
 import cn.arvix.vrdata.service.FetchDataService
@@ -22,6 +22,7 @@ import cn.arvix.vrdata.service.JdbcPage
 import cn.arvix.vrdata.service.ModelDataListService
 import cn.arvix.vrdata.service.ModelDataService
 import cn.arvix.vrdata.util.JSONResult
+import cn.arvix.vrdata.util.StaticMethod
 
 
 @Controller
@@ -58,7 +59,7 @@ public class ModelDataController {
 	@ResponseBody
 	@RequestMapping("/api/v1/updateModelData")
 	public JSONResult updateModelData(ModelData modelData,String  modelDataClient,MultipartFile zipFileData,String apiKey,HttpServletRequest request,HttpServletResponse response) {
-		if(!configDomainService.getConfigString(ArvixMatterportConstants.API_UPLOAD_MODELDATA_KEY).equals(apiKey)){
+		if(!configDomainService.getConfigString(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY).equals(apiKey)){
 			try {
 				response.sendError(403, "apiKey wrong");
 			} catch (IOException e) {

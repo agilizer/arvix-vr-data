@@ -30,8 +30,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	}
 
 	protected void configure(HttpSecurity http) throws Exception {
-		http.authorizeRequests().antMatchers("/admin/**","/configDomain/**","/modelData/index","/api/v1/fetchData/**")
-				.hasAnyAuthority(Role.ROLE_ADMIN).and().formLogin().defaultSuccessUrl("/")
+		http.authorizeRequests().antMatchers("/admin/**","/adminUser/**","/configDomain/**","/modelData/index","/api/v1/fetchData/**")
+				.hasAnyAuthority(Role.ROLE_ADMIN).antMatchers("/userCenter/**").hasAnyAuthority(Role.ROLE_USER).and().formLogin().defaultSuccessUrl("/")
 				.loginPage("/login")
 				.permitAll().and().logout().permitAll().and()
 				.authorizeRequests().antMatchers("/resources/**","/upload/**", "/auth/**","/console/**","/login/**")

@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants
+import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.domain.ModelData.FetchStatus
 import cn.arvix.vrdata.repository.ModelDataRepository
@@ -61,10 +61,10 @@ class FetchDataServiceImpl implements FetchDataService{
 				 */
 				if(modelData!=null){
 					if(modelData.getFetchStatus()==FetchStatus.FINISH){
-						result.put(ArvixMatterportConstants.ERROR_MSG, "已经抓取完成，请不要重复抓取！");
+						result.put(ArvixDataConstants.ERROR_MSG, "已经抓取完成，请不要重复抓取！");
 					}
 					if(modelData.getFetchStatus()==FetchStatus.FETCHING){
-						result.put(ArvixMatterportConstants.ERROR_MSG, "正在抓取文件，共"+modelData.getFileSumCount()
+						result.put(ArvixDataConstants.ERROR_MSG, "正在抓取文件，共"+modelData.getFileSumCount()
 								+"文件，当前抓取到"+modelData.getFileFetchedCount()+"！");
 					}
 				}else{
@@ -76,7 +76,7 @@ class FetchDataServiceImpl implements FetchDataService{
 					modelData.setFetchStatus(FetchStatus.FETCHING)
 					modelData.setLastUpdated(calendar)
 					modelData = modelDataRepository.saveAndFlush(modelData);
-					def fileSaveDir =configDomainService.getConfigString(ArvixMatterportConstants.FILE_STORE_PATH)+caseId+"/"
+					def fileSaveDir =configDomainService.getConfigString(ArvixDataConstants.FILE_STORE_PATH)+caseId+"/"
 					if(log.infoEnabled){
 						log.info("fileSaveDir is:{}",fileSaveDir);
 					}
@@ -86,7 +86,7 @@ class FetchDataServiceImpl implements FetchDataService{
 						log.error("fetch caseId {} genModelData error:",caseId,e)
 						modelData.setFetchStatus(FetchStatus.ERROR);
 						modelData.setFetchErrorMsg("抓取modelData时出错，"+e.getMessage());
-						result.put(ArvixMatterportConstants.ERROR_MSG, "抓取网页数据出错");
+						result.put(ArvixDataConstants.ERROR_MSG, "抓取网页数据出错");
 						return result;
 					}
 					try{
@@ -102,14 +102,14 @@ class FetchDataServiceImpl implements FetchDataService{
 						modelData.setFetchErrorMsg("抓取genFiles时出错，"+e.getMessage());
 					}
 					modelData = modelDataRepository.save(modelData);
-					result.put(ArvixMatterportConstants.SUCCESS, true)
-					result.put(ArvixMatterportConstants.DATA, "抓取已经开始，请等待！");
+					result.put(ArvixDataConstants.SUCCESS, true)
+					result.put(ArvixDataConstants.DATA, "抓取已经开始，请等待！");
 				}
 			}else{
-				result.put(ArvixMatterportConstants.ERROR_MSG, "源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
+				result.put(ArvixDataConstants.ERROR_MSG, "源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
 			}
 		}else{
-			result.put(ArvixMatterportConstants.ERROR_MSG, "源url不能为空");
+			result.put(ArvixDataConstants.ERROR_MSG, "源url不能为空");
 		}
 		return result;
 	}
@@ -134,7 +134,7 @@ class FetchDataServiceImpl implements FetchDataService{
 		jsonObject.each{key,value->
 			fileJson.put(key, value)
 		}
-		def newUrl = configDomainService.getConfigString(ArvixMatterportConstants.SITE_URL)+"files/${caseId}/{{filename}}";
+		def newUrl = configDomainService.getConfigString(ArvixDataConstants.SITE_URL)+"files/${caseId}/{{filename}}";
 		fileJson.put("base.url",newUrl );
 		modelData.setFileSumCount(fileSumCount)
 		modelData.setFileJson(JSON.toJSONString(fileJson))

@@ -5,7 +5,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
-import cn.arvix.vrdata.consants.ArvixMatterportConstants
+import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ConfigDomain
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.util.StaticMethod
@@ -62,7 +62,7 @@ public class ConfigDomainServiceImpl implements ConfigDomainService{
 			configDomain.setMapValue(value);
 			StaticMethod.addToConfigMap(configMap, configDomain)
 			configDomainRepository.save(configDomain)
-			result.put(ArvixMatterportConstants.SUCCESS, true)
+			result.put(ArvixDataConstants.SUCCESS, true)
 			updateListenerList.each {
 				if(it.getConfigMapName()&&it.getConfigMapName()==configDomain.mapName){
 					it.runNotify(configDomain)
@@ -70,7 +70,7 @@ public class ConfigDomainServiceImpl implements ConfigDomainService{
 				}
 			}
 		}else{
-			result.put(ArvixMatterportConstants.ERROR_MSG, "没有找到相关配置项！")
+			result.put(ArvixDataConstants.ERROR_MSG, "没有找到相关配置项！")
 		}
 		return result
 	}

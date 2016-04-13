@@ -13,7 +13,7 @@
 
 <link href="/resources/plugins/fineuploader-dist/dist/fine-uploader.min.css" rel="stylesheet"/>
 	<div id="wrapper">
-		<div class="nav-bar-container" th:replace="layout/admin :: nav">
+		<div class="nav-bar-container" th:replace="layout/user :: nav">
 		</div>
 		<!--.nav-bar-container-->
 
@@ -45,17 +45,17 @@
 						<td th:text="${modelData[1]}"></td>
 						<td><img th:id="${'img'+modelData[2]}" th:src="${'/upload'+modelData[8]}" width="100"/></td>
 						<td><a class="editable" href="#" th:text="${modelData[9]}"
-							data-pk="1" data-name='logoShow' data-url="/admin/updateModelData"
+							data-pk="1" data-name='logoShow' data-url="/userCenter/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 						<td><a class="editable" href="#" th:text="${modelData[10]}"
-							data-pk="1" data-name='online' data-url="/admin/updateModelData"
+							data-pk="1" data-name='online' data-url="/userCenter/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 						<td><a class="editable" href="#" th:text="${modelData[0]}"
-							data-pk="1" data-name='title' data-url="/admin/updateModelData"
+							data-pk="1" data-name='title' data-url="/userCenter/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 							
 							<td><a class="editable" href="#" th:text="${modelData[3]}"
-							data-pk="1" data-name='description' data-url="/admin/updateModelData"
+							data-pk="1" data-name='description' data-url="/userCenter/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 							
 							<td>
@@ -92,7 +92,7 @@
 								<label class="col-md-3">请选择缩略图</label>
 								<div class="col-md-6">
 									<div
-										 th:replace="admin/_fineuploader :: fineuploader"></div>
+										 th:replace="userCenter/_fineuploader :: fineuploader"></div>
 								</div>
 							</div>
 						<div class="modal-footer">
@@ -155,7 +155,7 @@
 			var id = $(obj).attr("data-id");
 			if(confirm("确定删除")){
 				$.ajax({
-					url : "/admin/deleteModelData/"+id,
+					url : "/userCenter/deleteModelData/"+id,
 					type : "POST",
 					success : function(data) {
 						if (data.success) {

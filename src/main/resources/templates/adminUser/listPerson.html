@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<head th:replace="layout/admin :: head (title='个人用户列表管理--管理员后台')">
+<!-- BEGIN PLUGINS CSS -->
+<!-- END PLUGINS CSS -->
+</head>
+<body>
+<style>.row{margin-bottom: 10px;}</style>	
+	<div class="nav-bar-container" th:include="layout/admin :: nav">
+	</div>
+	<div id="page-wrapper">
+		<div class="row">
+			<div align="center">
+				<h1>个人用户列表</h1>
+				<input type="text" id="searchStr" name="searchStr" th:value="${searchStr}" /> 
+			<button onclick="searchUser()">过滤 </button>
+			</div>
+			
+			<table class="table  table-bordered" id="dataTable">
+				<thead>
+					<tr>
+						<th>用户id</th>
+						<th>手机号</th>						
+						<th>状态</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="user,userStat:${jdbcPage?.pageItems}">
+						<td th:text="${user.id}" th:id="${'userId'+user.id}"></td>
+						<td th:text="${user.username}" th:id="${'username'+user.id}"></td>				
+						<td><span th:if="${user.enabled}"
+							th:attr="data-enabled=${user.enabled}"
+							th:id="${'userEnabled'+user.id}"> 正常 </span> <span
+							th:unless="${user.enabled}"> 禁用 </span></td>
+						<td><a href="javaScript:void(0)" onclick="userEdit(this)"
+							th:attr="data-id=${user.id}">编辑</a></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" style="min-width: 600px;" id="userEditModal"
+		tabindex="-1" role="dialog" aria-labelledby="userEditModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<input type="hidden" id="type" name="type" th:value="${type}" />
+				<input type="hidden" id="max" name="max" th:value="${max}" /> <input
+							type="hidden" id="offset" name="offset" th:value="${offset}" />
+					<input type="hidden" value="" id="userId" />
+					<div class="modal-header">
+						<button type="button" class="close" data-dismiss="modal"
+							aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+						<h4 class="modal-title" id="myModalLabel">
+							用户编辑&nbsp;
+							<samp id="usernamdSamp"></samp>
+
+						</h4>
+					</div>
+					<div class="modal-body">
+						<div class="form-group">
+							<label class="col-md-3 col-md-offset-1" for="companyName">用户角色</label>
+							<div id="userRoleDiv" class="col-md-6">
+								<label th:each="role,roleStat:${roleList}"> <input
+									type="checkbox" th:id="'role'+${role.id}"
+									onchange="changeRole(this)" name="enabled"
+									th:attr="data-id=${role.id}" value="" /> <span
+									th:text="${role.authority}"></span>
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-md-3 col-md-offset-1"> 禁用帐号 </label>
+							<div id="userRoleDiv" class="col-md-6">
+								<input type="checkbox" id="userEnabledCheckbox" 
+									onchange="userEnabled(this)" name="enabled" />
+							</div>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+					</div>
+			</div>
+		</div>
+	</div>
+	<!-- 			end -->
+	<div th:include="layout/admin :: jsEnd"></div>
+	<script type="text/javascript"
+		src="/resources/jsCustom/user.js"></script>
+		<style>
+checkbox{width:100px;height:100px;}
+</style>
+</body>
+</html>

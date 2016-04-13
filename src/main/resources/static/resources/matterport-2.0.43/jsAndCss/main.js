@@ -2388,7 +2388,7 @@ window.Modernizr = function (n, e, t) {
             }
 
             function n(e) {
-                var t = ['<div class="browser-tiles">', '<div class="tile">', '<a href="https://www.google.com/chrome/browser/" target="_blank">', '<img class="icon" src="/resources/images/icon_Google_Chrome_2011.png" ', 'rel="tiletip" title="Chrome"></a>', "</div>", '<div class="tile">', '<a href="https://www.mozilla.org/en-US/firefox/new/" target="_blank">', '<img class="icon" src="/resources/images/icon_Mozilla_Firefox.png" ', 'rel="tiletip" title="Firefox"></a>', "</div>", '<div class="tile">', '<a href="http://windows.microsoft.com/en-us/internet-explorer/download-ie" target="_blank">', '<img class="icon" src="/resources/images/icon_Internet_Explorer_10.png" ', 'rel="tiletip" title="Internet Explorer"></a>', "</div>", '<div class="tile">', '<a href="https://support.apple.com/en-us/HT204416" target="_blank">', '<img class="icon" src="/resources/images/icon_MacOSX_Safari.png" ', 'rel="tiletip" title="Safari"></a>', "</div>", "</div>"].join("");
+                var t = ['<div class="browser-tiles">', '<div class="tile">', '<a href="https://www.google.com/chrome/browser/" target="_blank">', '<img class="icon" src="/resources/images/icon_Google_Chrome_2011.png" ', 'rel="tiletip" title="Chrome"></a>', "</div>", '<div class="tile">', '<a href="https://www.mozilla.org/" target="_blank">', '<img class="icon" src="/resources/images/icon_Mozilla_Firefox.png" ', 'rel="tiletip" title="Firefox"></a>', "</div>", '<div class="tile">', '<a href="http://windows.microsoft.com/en-us/internet-explorer/download-ie" target="_blank">', '<img class="icon" src="/resources/images/icon_Internet_Explorer_10.png" ', 'rel="tiletip" title="Internet Explorer"></a>', "</div>", '<div class="tile">', '<a href="https://support.apple.com/en-us/HT204416" target="_blank">', '<img class="icon" src="/resources/images/icon_MacOSX_Safari.png" ', 'rel="tiletip" title="Safari"></a>', "</div>", "</div>"].join("");
                 r(e, "Install a new browser to explore in 3D.", "WebGL requires a modern browser.", t), s.isMobile() || $("[rel=tiletip]").tooltip({
                     placement: "bottom",
                     delay: {show: 50, hide: 0},
@@ -2398,8 +2398,8 @@ window.Modernizr = function (n, e, t) {
             }
 
             function o() {
-                var e = s.isMobile() ? "" : '<span class="link install-browser">install a supported browser</span> or ', t = ["If the problem persists, ", e, '<a class="link" target="_blank" href=', d, ">see our troubleshooting guide</a>."].join("");
-                r("Oops, something went wrong.", "Restart your browser.", "", t), s.isMobile() || $(".install-browser").on("click touchstart", function (e) {
+                var e = s.isMobile() ? "" : '<span class="link install-browser">浏览器不支持</span> or ', t = ["如果问题还存在, ", e, '<a class="link" target="_blank" href=', d, ">请联系我们</a>."].join("");
+                r("对不起，模型数据不正确.", "Restart your browser.", "", t), s.isMobile() || $(".install-browser").on("click touchstart", function (e) {
                     e.preventDefault(), e.stopPropagation(), n(" ")
                 })
             }
@@ -2408,13 +2408,15 @@ window.Modernizr = function (n, e, t) {
                 if ($("head title").text(l.pageTitle), $("#gui-message, #gui-loading, #nprogress, #gui-thumb, #bottom-logo").hide(), $("#gui-loading").fadeOut(250), h.track("USER", {
                         event_type: "showcase_error",
                         error_key: e
-                    }), "webgl-unsupported" === e)s.isMobile() ? o() : n("Browser not supported."); else if ("webgl-ios" === e)r("iOS version not supported.", "Upgrade to iOS 8 or higher to explore in 3D.", "", "Tap <strong>Settings > General > Software Update</strong>."); else if ("webgl-safari" === e)r("Enable WebGL to explore in 3D.", "", "", "Click <strong>Preferences > Advanced > Show Develop menu</strong>. Then click <strong>Develop > Enable WebGL</strong>."); else if ("webgl-generic" === e)o(); else if ("missing-urls" === e)r("Oops, there are no panoramas for this model.", "", "This is an older model. The website owner may have a new model on the way."); else if ("loading-failed" === e)r("Oops, model not available.", "", "", 'If the problem persists, <a class="link" target="_blank" href=' + d + ">see our troubleshooting guide</a>."); else {
+                    }), "webgl-unsupported" === e)s.isMobile() ? o() : n("浏览器不支持."); else if ("webgl-ios" === e)r("iOS 版本不被支持.", "升级到ios 8以上版本查看模型.", "", "Tap <strong>Settings > General > Software Update</strong>.");
+                    else if ("webgl-safari" === e)r("浏览3D模型需要开启WebGL.", "", "", "Click <strong>Preferences > Advanced > Show Develop menu</strong>. Then click <strong>Develop > 开启 WebGL</strong>."); else if ("webgl-generic" === e)o(); else if ("missing-urls" === e)r("对不起，模型数据出现错误.", "",
+                    		"这是一个旧的模型，服务器正在创建新的模型."); else if ("loading-failed" === e)r("对不起.模型数据出错", "", "", '<a class="link" target="_blank" href=' + d + ">如果有问题，请联系我们</a>."); else {
                     if ("loading-failed-maintenance" !== e)return void c.error("Unhandled error: " + e);
                     r("Maintenance in progress.", "Please come back in a few minutes.")
                 }
             }
 
-            var s = e("./../util/browser"), h = e("./../analytics"), l = e("./../settings"), u = e("./../util/logger"), c = new u(i), d = '"https://matterportsupport.zendesk.com/hc/en-us/articles/208220058-Showcase-System-Requirements"';
+            var s = e("./../util/browser"), h = e("./../analytics"), l = e("./../settings"), u = e("./../util/logger"), c = new u(i), d = '"http://www.arvix.cn"';
             t.exports.error = a
         }).call(this, "/js/gui/error.js")
     }, {"./../analytics": 1, "./../settings": 68, "./../util/browser": 74, "./../util/logger": 78}],
@@ -2567,7 +2569,7 @@ window.Modernizr = function (n, e, t) {
 
             function w(e) {
                 if (ie.share.visible) {
-                    var t = 580, i = 420, r = "http://www.facebook.com/sharer.php?u=" + window.location + "&t=" + encodeURIComponent(e.data.name.toString()), n = "http://twitter.com/share?text=" + encodeURIComponent(e.data.name.toString()) + "&url=" + window.location + "&related=matterport";
+                    var t = 580, i = 420, r = "http://www.facebook.com/sharer.php?u=" + window.location + "&t=" + encodeURIComponent(e.data.name.toString()), n = "http://twitter.com/share?text=" + encodeURIComponent(e.data.name.toString()) + "&url=" + window.location + "&related=arvix";
                     $(".faceBookLink").on("mousedown touchstart", function (e) {
                         l(e);
                         var n = window.screenY + (window.innerHeight - i) / 2, o = window.screenX + (window.innerWidth - t) / 2, a = "top=" + n + ",left=" + o + ",width=" + t + ",height=" + i;
@@ -7712,7 +7714,7 @@ window.Modernizr = function (n, e, t) {
             brand: o.valueFromHash("brand", !0),
             debug: !1,
             version: "2.0.43",
-           // pageTitle: "Matterport 3D Showcase",
+           // pageTitle: "3D Showcase",
             pageTitle: "3D模型",
             authorizationHeader: r(),
             autoplay: o.valueFromHash("play", !1) || !o.inIframe(),

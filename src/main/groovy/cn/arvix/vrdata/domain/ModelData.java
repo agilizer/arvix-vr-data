@@ -74,7 +74,7 @@ public class ModelData  implements Serializable{
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar dateCreated;
-	
+	private Boolean online = true;
 	/**
 	 * 最后更新时间
 	 */
@@ -251,5 +251,15 @@ public class ModelData  implements Serializable{
 	public void setLogoShow(Boolean logoShow) {
 		this.logoShow = logoShow;
 	}
+
+	public Boolean getOnline() {
+		return online;
+	}
+
+	public void setOnline(Boolean online) {
+		this.online = online;
+	}
+	
+	
 	
 }
