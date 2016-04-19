@@ -5763,6 +5763,7 @@ window.Modernizr = function (n, e, t) {
                 load: function (e, t, i, o, a) {
                     a = a || 0;
                     var s = u[a];
+                    console.log("----->"+s)
                     if (!s)return void(o && o("no suitable model file found..."));
                     var h = s[0], c = s[1], d = s[2], f = new s[3](t), p = t.get(e + h + c);
                     if (p) {
@@ -8039,12 +8040,14 @@ window.Modernizr = function (n, e, t) {
                 PanoramaControls: _,
                 getModel: function (e) {
                     if (!e.url)throw'getModel(): missing parameter "url"';
+                    console.log(e.url)
                     if (e.autoload = void 0 !== e.autoload ? e.autoload : !0, e.url.match(/^https?/)) {
                         var t = n.parse(e.url);
                         this.urlBase = t.protocol + "//" + t.host + "/", this.urlModel = e.url
                     } else this.urlBase = window.location.protocol + "//" + window.location.host + "/", this.urlModel = this.urlBase + "api/player/models/" + e.url;
                     this.urlMaintenance = this.urlBase + "maintenance.json", e.urlFiles = this.urlModel + (this.urlModel.match(/\/$/) ? "files" : "/files");
                     var i = this._getPlatformError();
+                    console.log("----------->"+i)
                     return i ? $.Deferred().reject(i).promise() : (this.options = e, this._loadModel().then(this._buildModel.bind(this)))
                 },
                 _getPlatformError: function () {
@@ -8135,7 +8138,12 @@ window.Modernizr = function (n, e, t) {
                         e.reject("loading-failed")
                     }), e.promise()
                 }, get: function (e) {
-                    return this.cache[e] ? this.baseUrl ? this.baseUrl.replace("{{filename}}", e) + this.cache[e] : this.cache[e] : (a.debug("Did not find signed URL for " + e), null)
+
+                    var result = this.cache[e] ? this.baseUrl ? this.baseUrl.replace("{{filename}}", e) + this.cache[e] : this.cache[e] : (a.debug("Did not find signed URL for " + e), null)
+                    console.log("beforefffffffffffffffffffffffffffffffffffffffffff--->"+result)
+                    result = result.substring(0,result.length-1)
+                    console.log("fffffffffffffffffffffffffffffffffffffffffff--->"+result)
+                    return result
                 }, count: function (e) {
                     for (var t = Object.keys(this.cache), i = 0, r = 0; r < t.length; r++)-1 !== t[r].indexOf(e) && i++;
                     return i

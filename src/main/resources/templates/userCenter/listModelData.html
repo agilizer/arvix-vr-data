@@ -59,10 +59,10 @@
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 							
 							<td>
-						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>
-						<a href="/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
-						
-						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a></td>
+						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a> <br/>
+						<a href="/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a> <br/>
+						<a href=""  taget="_blank" th:href="${modelData[4]}">源地址</a> <br/>
+						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a> <br/></td>
 							
 							
 							<td ><a class="editable hide" href="#" th:text="${modelData[7]}"

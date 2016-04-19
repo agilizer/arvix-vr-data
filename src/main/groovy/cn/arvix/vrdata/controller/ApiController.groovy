@@ -18,7 +18,7 @@ public class ApiController {
 	ModelDataService modelDataService;
 	@ResponseBody
 	@RequestMapping("/player/models/{caseId}/files")
-	public String checkUsername(@PathVariable("caseId") String caseId,HttpServletResponse response) {
+	public Object checkUsername(@PathVariable("caseId") String caseId,HttpServletResponse response) {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods",
 				"POST, GET, OPTIONS, DELETE");

@@ -32,6 +32,20 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	maven{url 'http://maven.oschina.net/content/groups/public/'}
+	maven {
+		credentials {
+			username 'asdtiang'
+			password 'maven123'
+		}
+		url "http://maven.grailsmaster.com/content/repositories/snapshots/"
+	}
+	maven {
+		credentials {
+			username 'asdtiang'
+			password 'maven123'
+		}
+		url "http://maven.grailsmaster.com/content/repositories/releases/"
+	}
 }
 
 configurations {
@@ -45,7 +59,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.thymeleaf.extras:thymeleaf-extras-springsecurity4:2.1.2.RELEASE')
-	compile('org.codehaus.groovy:groovy:2.3.11')
+	compile('org.codehaus.groovy:groovy:2.4.3')
 	
 	compile("com.alibaba:fastjson:1.1.33")
     compile("com.h2database:h2")
@@ -63,7 +77,8 @@ dependencies {
 	compile('org.apache.commons:commons-lang3:3.3.2')
 	
 	compile("org.imgscalr:imgscalr-lib:4.2")
-	
+	//文件存储
+	compile("com.arvix:arvix-cloudstorage:0.0.2-SNAPSHOT")
 }
 
 eclipse {
