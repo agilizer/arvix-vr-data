@@ -74,7 +74,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage list(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select m.title,m.caseId,f.storePath,m.description From ModelData m left join m.fileInfo f  where m.fetchStatus=:fetchStatus order by m.id desc" ;
+		String hql = "select m.title,m.caseId,f.storePath,m.description,m.rightHtml From ModelData m left join m.fileInfo f  where m.fetchStatus=:fetchStatus order by m.id desc" ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
 				offset, map);
@@ -84,7 +84,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage listAdmin(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online From "
+		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml From "
 				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,

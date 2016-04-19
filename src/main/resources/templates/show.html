@@ -168,7 +168,9 @@
 					<a class="hasHover"><i class="icon icon-help"></i></a>
 				</div>
 				<div class="pull-right terms"   th:if="${modelData.logoShow}" >
+				<div style="display:inline" th:if="${modelData.rightHtml}" th:utext="${modelData.rightHtml}"></div>
 					<a class="hasHover">团队</a>
+					
 				</div>
 			</div>
 			<div class="pinBottom left">

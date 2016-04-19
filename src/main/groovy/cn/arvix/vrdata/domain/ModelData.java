@@ -75,6 +75,8 @@ public class ModelData  implements Serializable{
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar dateCreated;
 	private Boolean online = true;
+	@Column(columnDefinition = "longtext")
+	private String rightHtml ; 
 	/**
 	 * 最后更新时间
 	 */
@@ -259,7 +261,13 @@ public class ModelData  implements Serializable{
 	public void setOnline(Boolean online) {
 		this.online = online;
 	}
-	
-	
+
+	public String getRightHtml() {
+		return rightHtml;
+	}
+
+	public void setRightHtml(String rightHtml) {
+		this.rightHtml = rightHtml;
+	}
 	
 }

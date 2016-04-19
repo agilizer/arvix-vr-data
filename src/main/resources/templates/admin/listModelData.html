@@ -35,12 +35,13 @@
 						<td>是否显示logo</td>
 						<td>是否上线</td>
 						<td>标题</td>
+						<td>右侧链接</td>
 						<td>描述</td>
 						<td>操作</td>
 						<td>modelData</td>
 						
 					</tr>
-					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath,m.logoShow,m.online -->
+					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml -->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
 						<td th:text="${modelData[1]}"></td>
 						<td><img th:id="${'img'+modelData[2]}" th:src="${'/upload'+modelData[8]}" width="100"/></td>
@@ -52,6 +53,10 @@
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 						<td><a class="editable" href="#" th:text="${modelData[0]}"
 							data-pk="1" data-name='title' data-url="/admin/updateModelData"
+							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+						
+						<td><a class="editable" href="#" th:text="${modelData[11]}"
+							data-pk="1" data-name='rightHtml' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 							
 							<td><a class="editable" href="#" th:text="${modelData[3]}"
