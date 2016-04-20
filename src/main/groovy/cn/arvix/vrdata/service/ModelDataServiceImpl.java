@@ -33,7 +33,7 @@ import cn.arvix.vrdata.util.StaticMethod;
 public class ModelDataServiceImpl implements ModelDataService{
 	private static final Logger log = LoggerFactory
 			.getLogger(ModelDataServiceImpl.class);
-	
+	private static String defaultDomain = "7xt5gh.com1.z0.glb.clouddn.com";
 	@Autowired
 	ModelDataRepository modelDataRepository;
 	@Autowired
@@ -60,7 +60,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 		Object result = null;
 		if(fileJson!=null){
 			JSONObject jsonObject = JSON.parseObject(fileJson);
-			String baseUrl = configDomainService.getConfigString(ArvixDataConstants.SITE_URL)+"files/"+caseId+"/{{filename}}";
+			//String baseUrl = configDomainService.getConfigString(ArvixDataConstants.SITE_URL)+"files/"+caseId+"/{{filename}}";
+			String baseUrl = "http://7xt5jg.com1.z0.glb.clouddn.com/"+caseId+"/{{filename}}";
 			jsonObject.put(BASE_URL,baseUrl );
 			result = jsonObject;
 		}
