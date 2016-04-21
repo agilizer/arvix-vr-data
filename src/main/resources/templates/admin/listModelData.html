@@ -11,7 +11,9 @@
 </head>
 <body>
 
-<link href="/resources/plugins/fineuploader-dist/dist/fine-uploader.min.css" rel="stylesheet"/>
+	<link
+		href="/resources/plugins/fineuploader-dist/dist/fine-uploader.min.css"
+		rel="stylesheet" />
 	<div id="wrapper">
 		<div class="nav-bar-container" th:replace="layout/admin :: nav">
 		</div>
@@ -22,12 +24,13 @@
 				<div class="col-lg-12">
 					<h1 class="page-header">模型数据管理</h1>
 					<div class="alert alert-danger" role="alert">
-					<strong>标题</strong>更改仅限于列表显示，展示页面标题需要更改modelData里的js，name为显示的标题，summary为显示的描述
+						<strong>标题</strong>更改仅限于列表显示，展示页面标题需要更改modelData里的js，name为显示的标题，summary为显示的描述
 					</div>
 				</div>
 				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
+				<div th:replace="layout/_pageNav :: pageNav"></div>
 				<table class="table">
 					<tr>
 						<td>caseId</td>
@@ -36,131 +39,154 @@
 						<td>是否上线</td>
 						<td>标题</td>
 						<td>右侧链接</td>
+						<td>logo下展示</td>
 						<td>描述</td>
 						<td>操作</td>
-						<td>modelData</td>
-						
 					</tr>
-					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml -->
+					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,
+					m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml ,m.logoDownHtml-->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
 						<td th:text="${modelData[1]}"></td>
-						<td><img th:id="${'img'+modelData[2]}" th:src="${'/upload'+modelData[8]}" width="100"/></td>
+						<td><img th:id="${'img'+modelData[2]}"
+							th:src="${'/upload'+modelData[8]}" width="100" /></td>
 						<td><a class="editable" href="#" th:text="${modelData[9]}"
-							data-pk="1" data-name='logoShow' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							data-pk="1" data-name='logoShow'
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
 						<td><a class="editable" href="#" th:text="${modelData[10]}"
-							data-pk="1" data-name='online' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							data-pk="1" data-name='online'
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
 						<td><a class="editable" href="#" th:text="${modelData[0]}"
-							data-pk="1" data-name='title' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-						
+							data-pk="1" data-name='title'
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+
 						<td><a class="editable" href="#" th:text="${modelData[11]}"
-							data-pk="1" data-name='rightHtml' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-							
-							<td><a class="editable" href="#" th:text="${modelData[3]}"
-							data-pk="1" data-name='description' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-							
-							<td>
-						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>
-						<a href="/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
-						
-						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a></td>
-							
-							
-							<td ><a class="editable hide" href="#" th:text="${modelData[7]}"
-							data-pk="1" data-name='modelData' data-url="/admin/updateModelData"
-							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
+							data-pk="1" data-name='rightHtml' data-type="textarea"
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+						<td><a class="editable" href="#" th:text="${modelData[12]}"
+							data-pk="1" data-name='logoDownHtml'   data-type="textarea"
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+						<td><a class="editable" href="#" th:text="${modelData[3]}"
+							data-pk="1" data-name='description'  data-type="textarea"
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+
+						<td><a href="javascript:;" onclick="modelUploadPhoto(this)"
+							th:attr="data-id=${modelData[2]}">缩略图上传</a> <a
+							href="/show/?m=452aMkAmjrQ" th:href="${'/show/?m='+modelData[1]}">查看</a>
 					</tr>
 				</table>
-
+				<div th:replace="layout/_pageNav :: pageNav"></div>
 			</div>
 		</div>
 	</div>
-	
-	<div class="modal fade" id="uploadPhotoModal" tabindex="-1" role="dialog"
-			aria-labelledby="addAddressLabel" aria-hidden="true">
-			<div class="modal-dialog">
-				<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal"
-								aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-							<h4 class="modal-title" id="myModalLabel">编辑</h4>
 
-						</div>
-						<input type="hidden" id="uploadPhotoId" />
-						<div class="form-group">
-								<label class="col-md-3">请选择缩略图</label>
-								<div class="col-md-6">
-									<div
-										 th:replace="admin/_fineuploader :: fineuploader"></div>
-								</div>
-							</div>
-						<div class="modal-footer">
-						</div>
+	<div class="modal fade" id="uploadPhotoModal" tabindex="-1"
+		role="dialog" aria-labelledby="addAddressLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal"
+						aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+					<h4 class="modal-title" id="myModalLabel">编辑</h4>
+
 				</div>
+				<input type="hidden" id="uploadPhotoId" />
+				<div class="form-group">
+					<label class="col-md-3">请选择缩略图</label>
+					<div class="col-md-6">
+						<div th:replace="admin/_fineuploader :: fineuploader"></div>
+					</div>
+				</div>
+				<div class="modal-footer"></div>
 			</div>
 		</div>
-	
-	
+	</div>
+
+
 	<div th:include="layout/admin :: jsEnd"></div>
 	<div th:replace="layout/plugins :: x-editable"></div>
 	<div th:replace="layout/plugins :: fine-uploader"></div>
 	<script>
-		$(document).ready(function() {
-			$(".editable").each(function() {
-				$(this).editable();
-			});
-			
-			$("#fine-uploader").fineUploader({
-				 validation: {
-					 acceptFiles: 'image/* ',
-		           sizeLimit: 5000000 //bytes
-		   	 },
-		   	 multiple:false,
-		   	callbacks: {
-		        onSubmit: function(id, fileName) {
-		            this.setParams({id:$("#uploadPhotoId").val()});
-		        }
-		    },
-		   	 messages: {
-		            typeError: "{file} 文件类型不正确，请选择图片文件.",
-		            sizeError: "{file} 文件太大，文件大小不能超过 {sizeLimit}.",
-		            minSizeError: "{file} 文件太小，文件大小需要超过 {minSizeLimit}.",
-		            emptyError: "{file} is empty, please select files again without it.",
-		            noFilesError: "No files to upload.",
-		            tooManyItemsError: "Too many items ({netItems}) would be uploaded.  Item limit is {itemLimit}.",
-		            maxHeightImageError: "Image is too tall.",
-		            maxWidthImageError: "Image is too wide.",
-		            minHeightImageError: "Image is not tall enough.",
-		            minWidthImageError: "Image is not wide enough.",
-		            retryFailTooManyItems: "Retry failed - you have reached your file limit.",
-		            onLeave: "The files are being uploaded, if you leave now the upload will be canceled.",
-		            unsupportedBrowserIos8Safari: "Unrecoverable error - this browser does not permit file uploading of any kind due to serious bugs in iOS8 Safari.  Please use iOS8 Chrome until Apple fixes these issues."
-		        },
-		        request: {
-		            endpoint: '/api/v1/updateModelPhoto'
-		        }
-		    }).on('complete', function (event, id, name, responseJSON) {
-		    	$("#img"+$("#uploadPhotoId").val()).attr("src","/upload"+responseJSON.data)
-		    });
-						
-		});
-		
-		function modelUploadPhoto(obj){
+		$(document)
+				.ready(
+						function() {
+							$(".editable").each(function() {
+								$(this).editable();
+							});
+
+							$("#fine-uploader")
+									.fineUploader(
+											{
+												validation : {
+													acceptFiles : 'image/* ',
+													sizeLimit : 5000000
+												//bytes
+												},
+												multiple : false,
+												callbacks : {
+													onSubmit : function(id,
+															fileName) {
+														this
+																.setParams({
+																	id : $(
+																			"#uploadPhotoId")
+																			.val()
+																});
+													}
+												},
+												messages : {
+													typeError : "{file} 文件类型不正确，请选择图片文件.",
+													sizeError : "{file} 文件太大，文件大小不能超过 {sizeLimit}.",
+													minSizeError : "{file} 文件太小，文件大小需要超过 {minSizeLimit}.",
+													emptyError : "{file} is empty, please select files again without it.",
+													noFilesError : "No files to upload.",
+													tooManyItemsError : "Too many items ({netItems}) would be uploaded.  Item limit is {itemLimit}.",
+													maxHeightImageError : "Image is too tall.",
+													maxWidthImageError : "Image is too wide.",
+													minHeightImageError : "Image is not tall enough.",
+													minWidthImageError : "Image is not wide enough.",
+													retryFailTooManyItems : "Retry failed - you have reached your file limit.",
+													onLeave : "The files are being uploaded, if you leave now the upload will be canceled.",
+													unsupportedBrowserIos8Safari : "Unrecoverable error - this browser does not permit file uploading of any kind due to serious bugs in iOS8 Safari.  Please use iOS8 Chrome until Apple fixes these issues."
+												},
+												request : {
+													endpoint : '/api/v1/updateModelPhoto'
+												}
+											})
+									.on(
+											'complete',
+											function(event, id, name,
+													responseJSON) {
+												$(
+														"#img"
+																+ $(
+																		"#uploadPhotoId")
+																		.val())
+														.attr(
+																"src",
+																"/upload"
+																		+ responseJSON.data)
+											});
+
+						});
+
+		function modelUploadPhoto(obj) {
 			$("#uploadPhotoId").val($(obj).attr("data-id"));
 			$("#uploadPhotoModal").modal();
 		}
-		
-		function modelDataDelete(obj){
+
+		function modelDataDelete(obj) {
 			var id = $(obj).attr("data-id");
-			if(confirm("确定删除")){
+			if (confirm("确定删除")) {
 				$.ajax({
-					url : "/admin/deleteModelData/"+id,
+					url : "/admin/deleteModelData/" + id,
 					type : "POST",
 					success : function(data) {
 						if (data.success) {
@@ -173,7 +199,6 @@
 				});
 			}
 		}
-		
 	</script>
 </body>
 </html>

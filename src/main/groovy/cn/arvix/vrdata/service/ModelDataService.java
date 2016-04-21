@@ -21,6 +21,8 @@ public interface ModelDataService {
 	JSONResult uploadModelData(ModelData modelData, MultipartFile zipFileData);
 
 	Map<String, Object> update(String fieldName, Long id, String value);
+	
+	Map<String, Object> update(ModelData modelData);
 
 	Map<String, Object> updatePhoto(Long id, MultipartFile photoData);
 

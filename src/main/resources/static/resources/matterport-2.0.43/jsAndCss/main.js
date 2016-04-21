@@ -2924,15 +2924,7 @@ window.Modernizr = function (n, e, t) {
                 }
                 W.trackAlways("USER", t)
             }), $(".terms").on("mousedown touchstart", function (e) {
-                l(e), h("terms"), $.ajax("static/terms.html").done(function (e) {
-                    $("#terms-text").html(e), W.track("USER", {
-                        event_type: "showcase_gui",
-                        gui_action: "click_terms_button",
-                        interaction_source: "gui"
-                    })
-                }).fail(function () {
-                	 $('#terms-text').html($("#termsContent").html())
-                }), $("#terms-modal").fadeIn(K)
+                l(e), h("terms"),  $('#terms-text').html($("#termsContent").html()), $("#terms-modal").fadeIn(K)
             }), $("#terms-modal .btn").on("mousedown touchstart", function (e) {
                 l(e), $("#terms-modal").fadeOut(K)
             }), $(".icon").on("mouseover", function () {

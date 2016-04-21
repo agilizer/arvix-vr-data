@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.arvix.vrdata.consants.ArvixDataConstants;
+import cn.arvix.vrdata.domain.ModelData;
 import cn.arvix.vrdata.domain.Role;
 import cn.arvix.vrdata.domain.User;
 import cn.arvix.vrdata.repository.RoleRepository;
@@ -45,9 +46,24 @@ public class AdminController {
 	}
 	@Secured({Role.ROLE_ADMIN}) 
 	@ResponseBody
-	@RequestMapping(value = "/updateModelData")
-	public Map<String, Object> update(String name,Long pk,String value) {
+	@RequestMapping(value = "/updateModelDataByField")
+	public Map<String, Object> updateModelDataByField(String name,Long pk,String value) {
 		return modelDataService.update(name, pk, value);
+	}
+	
+	@Secured({Role.ROLE_ADMIN}) 
+	@ResponseBody
+	@RequestMapping(value = "/updateModelData")
+	public Map<String, Object> updateModelData(ModelData modelData) {
+		return modelDataService.update(modelData);
+	}
+	
+	
+	@Secured({Role.ROLE_ADMIN}) 
+	@RequestMapping(value = "/modelEdit/{caseId}")
+	public String modelEdit(@PathVariable("caseId")String caseId,Model model) {
+		model.addAttribute("model", modelDataService.findByCaseId(caseId));
+		return "admin/modelEdit";
 	}
 	
 	

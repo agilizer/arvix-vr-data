@@ -28,6 +28,7 @@
 				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
+			<div  th:replace="layout/_pageNav :: pageNav"></div>
 				<table class="table">
 					<tr>
 						<td>caseId</td>
@@ -37,8 +38,6 @@
 						<td>标题</td>
 						<td>描述</td>
 						<td>操作</td>
-						<td>modelData</td>
-						
 					</tr>
 					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,m.modelData,8f.storePath,m.logoShow,m.online -->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
@@ -57,20 +56,15 @@
 							<td><a class="editable" href="#" th:text="${modelData[3]}"
 							data-pk="1" data-name='description' data-url="/userCenter/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
-							
 							<td>
 						<a href="javascript:;" onclick="modelUploadPhoto(this)" th:attr="data-id=${modelData[2]}">缩略图上传</a>
 						<a href="/show/?m=452aMkAmjrQ"  th:href="${'/show/?m='+modelData[1]}">查看</a>
-						
-						<a href="javascript:;" onclick="modelDataDelete(this)" th:attr="data-id=${modelData[2]}">删除</a></td>
-							
-							
 							<td ><a class="editable hide" href="#" th:text="${modelData[7]}"
 							data-pk="1" data-name='modelData' data-url="/admin/updateModelData"
 							data-title="请输入新的值" th:attr="data-pk=${modelData[2]}"></a></td>
 					</tr>
 				</table>
-
+				<div  th:replace="layout/_pageNav :: pageNav"></div>
 			</div>
 		</div>
 	</div>

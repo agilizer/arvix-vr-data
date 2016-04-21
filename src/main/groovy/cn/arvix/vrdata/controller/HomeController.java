@@ -50,13 +50,13 @@ public class HomeController {
 		String viewName = "404";
 		StaticMethod.cros(response);
 		if(modelData!=null){
-			log.info("modelData.getOnline()-->"+modelData.getOnline());
+			log.info("modelData.getOnline()-->"+modelData.getOnline()+" title:"+modelData.getTitle());
+			
 			if(null!=modelData.getOnline()&&modelData.getOnline()){
 				model.addAttribute("modelData",modelData );
 				model.addAttribute("caseId",caseId );
 				model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
 				model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
-				model.addAttribute("contactHtml", configDomainService.getConfig(ArvixDataConstants.SERVICE_CONTACT_HTML));
 				viewName = "show";
 			}else{
 				viewName = "404";

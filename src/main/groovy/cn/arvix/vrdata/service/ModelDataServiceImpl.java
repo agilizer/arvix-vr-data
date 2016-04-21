@@ -17,9 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-
 import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.FileInfo;
 import cn.arvix.vrdata.domain.ModelData;
@@ -28,6 +25,9 @@ import cn.arvix.vrdata.repository.ModelDataRepository;
 import cn.arvix.vrdata.util.AntZipUtil;
 import cn.arvix.vrdata.util.JSONResult;
 import cn.arvix.vrdata.util.StaticMethod;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 
 @Service
 public class ModelDataServiceImpl implements ModelDataService{
@@ -84,7 +84,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 	public JdbcPage listAdmin(int max, int offset) {
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
-		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml From "
+		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml"
+				+ " ,m.logoDownHtml From "
 				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
@@ -112,6 +113,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 				jsonResult.setErrorCode(ArvixDataConstants.ERROR_CODE_EXIST);
 			}else{
 				Calendar now = Calendar.getInstance();
+				modelData.setLogoDownHtml(configDomainService.getConfigString(ArvixDataConstants.SERVICE_CONTACT_HTML));
 				modelData.setDateCreated(now);
 				modelData.setLastUpdated(now);
 				modelData.setFetchStatus(FetchStatus.FINISH);
@@ -192,6 +194,24 @@ public class ModelDataServiceImpl implements ModelDataService{
 			 }
 			 modelDataRepository.delete(modelData);
 			 fileService.delFile(fileInfo);
+			 result.put(ArvixDataConstants.SUCCESS,true);
+		}else{
+			result.put(ArvixDataConstants.ERROR_MSG, "没有找到相关数据！");
+			result.put(ArvixDataConstants.ERROR_CODE,404);
+		}
+		return result;
+	}
+	@Override
+	public Map<String, Object> update(ModelData modelData) {
+		ModelData modelDataDb = modelDataRepository.findOne(modelData.getId());
+		Map<String,Object> result = StaticMethod.getResult();
+		if(modelDataDb!=null){
+			 modelDataDb.setLogoShow(modelData.getLogoShow());
+			 modelDataDb.setTitle(modelData.getTitle());
+			 modelDataDb.setOnline(modelData.getOnline());
+			 modelDataDb.setRightHtml(modelData.getRightHtml());
+			 modelDataDb.setLogoDownHtml(modelData.getLogoDownHtml());
+			 modelDataRepository.save(modelDataDb);
 			 result.put(ArvixDataConstants.SUCCESS,true);
 		}else{
 			result.put(ArvixDataConstants.ERROR_MSG, "没有找到相关数据！");

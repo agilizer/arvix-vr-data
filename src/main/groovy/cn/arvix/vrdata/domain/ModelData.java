@@ -77,6 +77,9 @@ public class ModelData  implements Serializable{
 	private Boolean online = true;
 	@Column(columnDefinition = "longtext")
 	private String rightHtml ; 
+	
+	@Column(columnDefinition = "longtext")
+	private String logoDownHtml ; 
 	/**
 	 * 最后更新时间
 	 */
@@ -269,5 +272,14 @@ public class ModelData  implements Serializable{
 	public void setRightHtml(String rightHtml) {
 		this.rightHtml = rightHtml;
 	}
+
+	public String getLogoDownHtml() {
+		return logoDownHtml;
+	}
+
+	public void setLogoDownHtml(String logoDownHtml) {
+		this.logoDownHtml = logoDownHtml;
+	}
+	
 	
 }

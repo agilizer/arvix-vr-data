@@ -1,0 +1,53 @@
+<div class="row"   th:fragment="pageNav" >
+		<input type="hidden" id="max" name="max"
+							th:value="${jdbcPage.max}" /> <input type="hidden"
+							id="offset" name="offset"
+							th:value="${jdbcPage.offset}" />
+			<nav th:fragment="listNav">
+				<div class="c_width" th:if="${jdbcPage.sumItem!=0}">
+					<ul class="pagination">
+						<li th:if="${jdbcPage.pageNumber!=0}"><a
+							href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*(jdbcPage.pageNumber-1)}">上一页</a></li>
+						<li th:unless="${jdbcPage.pageNumber!=0}" class="disabled"><a
+							href="#">上一页</a></li>
+						<li
+							th:each="i : ${#numbers.sequence( 0, jdbcPage.pagesAvailable-1)}">
+							<a href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*i}"
+							index="1" th:text="${i+1}">1</a>
+						</li>
+						<li th:if="${jdbcPage.pageNumber != jdbcPage.pagesAvailable-1}">
+							<a href="javascript:void(0);" onclick="changeList(this)"
+							th:attr="data-max=${jdbcPage.max},data-offset=${jdbcPage.max*(jdbcPage.pageNumber+1)}">下一页</a>
+						</li>
+						<li class="disabled"
+							th:if="${jdbcPage.pageNumber==jdbcPage.pagesAvailable-1}"><a
+							href="#">下一页</a></li>
+						<li class="disabled"><a href="#" class="all_page"> 共<strong
+								th:text="${jdbcPage.sumItem}"></strong>个任务, 共<span
+								th:text="${jdbcPage.pagesAvailable}">50</span>页, 当前第<span
+								th:text="${jdbcPage.pageNumber+1}">50</span>页
+						</a></li>
+					</ul>
+				</div>
+				<div class="c_width" th:if="${jdbcPage.sumItem==0}">
+					没有查找到相关数据,请重选搜索.</div>
+			</nav>
+			<script>
+	
+		function loadSearchUrl(){
+			var  listBaseUrl = "/admin/modelData/list/"
+			var newUrl = listBaseUrl+$("#max").val()+"/"+$("#offset").val()+"/a";
+			window.location.href = newUrl;
+		}
+		function changeList(aObj){
+			aObj = $(aObj)
+			var max = aObj.attr('data-max');
+			var offset =  aObj.attr('data-offset');
+			$("#max").val(max);
+			$("#offset").val(offset);
+			 loadSearchUrl();
+		}
+	</script>
+		</div>

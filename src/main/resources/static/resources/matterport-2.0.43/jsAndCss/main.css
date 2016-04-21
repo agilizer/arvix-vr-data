@@ -10,7 +10,10 @@ html {
     -ms-text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%
 }
-
+  .wrap{width:640px; height: 960px; position:relative; background-color: #666; margin:0 auto;}
+        .prompt{position:absolute; right: 20px; height:28px; line-height: 28px; font-size: 14px;
+         vertical-align: bottom;  padding-right: 35px; color:white; font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;  
+         background: url(guide_03.png) right 0px no-repeat;}
 body {
     margin: 0
 }
