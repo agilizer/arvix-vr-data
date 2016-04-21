@@ -15,6 +15,11 @@ import javax.swing.JOptionPane;
  */
 public class MainJFrame extends javax.swing.JFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 978854316777369381L;
+
 	FetchService fetchService = new FetchServiceImpl();
 	
 	private static boolean workFlag = false;

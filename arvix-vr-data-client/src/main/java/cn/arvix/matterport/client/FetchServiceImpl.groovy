@@ -27,18 +27,29 @@ public class FetchServiceImpl implements FetchService{
 		}
 	}
 	
+	private void removeUrlAndFlagCheck(String url){
+		FETCH_MAP.remove(url)
+		if(FETCH_MAP.size()==0){
+			MainJFrame.setWorkFlag(false);
+		}
+	}
+	
 	public void fetchData(String serverUrl, String apiKey, String workDir, String sourceUrl) {
 		if(sourceUrl){
 			def subIndex = sourceUrl.indexOf("?m=");
 			if(FETCH_MAP.containsKey(sourceUrl)){
 				UILog.getInstance().log("正在抓取${sourceUrl}，请不要重复提交！");
+				removeUrlAndFlagCheck(sourceUrl)
 				return;
 			}
 			if(subIndex>0){
 				FETCH_MAP.put(sourceUrl,sourceUrl)
+				println serverUrl
 				def caseId = sourceUrl.substring(subIndex+3)
-				if(StaticMethod.checkCaseIdServiceExist(caseId)){
+				def serviceDomain = serverUrl.replace("api/v1/updateModelData", "")
+				if(StaticMethod.checkCaseIdServiceExist(serviceDomain,caseId)){
 					UILog.getInstance().log("服务器已经存在，忽略："+sourceUrl);
+					removeUrlAndFlagCheck(sourceUrl)
 					return;
 				}
 				ModelDataClient modelData = new ModelDataClient();
@@ -55,21 +66,21 @@ public class FetchServiceImpl implements FetchService{
 							UILog.getInstance().log("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
 						}
 						genFiles(caseId,fileSaveDir,modelData,serverUrl,apiKey);
-						FETCH_MAP.remove(sourceUrl);
-						if(FETCH_MAP.size()==0){
-							MainJFrame.setWorkFlag(false);
-						}
+						removeUrlAndFlagCheck(sourceUrl)
 					}
 				}catch(e){
 					log.error("fetch caseId {} genFiles error:",caseId,e)
+					removeUrlAndFlagCheck(sourceUrl)
 				}
 			}else{
 				UILog.getInstance().log("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
 				log.warn("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
+				removeUrlAndFlagCheck(sourceUrl)
 			}
 		}else{
 			UILog.getInstance().log("源url不能为空");
 			log.warn("源url不能为空");
+			removeUrlAndFlagCheck(sourceUrl)
 		}
 	} 
 	

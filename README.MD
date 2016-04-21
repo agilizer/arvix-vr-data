@@ -39,9 +39,9 @@ mysql db ddl;
 
 CREATE USER 'm_data_user'@'localhost'  IDENTIFIED BY '!@#qwe12s@#3456';
 
-CREATE DATABASE IF NOT EXISTS `matterport_data` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
+CREATE DATABASE IF NOT EXISTS `vr_data` DEFAULT CHARACTER SET `utf8` COLLATE `utf8_unicode_ci`;
 
-GRANT ALL PRIVILEGES ON matterport_data.* TO 'm_data_user'@'localhost';
+GRANT ALL PRIVILEGES ON vr_data.* TO 'm_data_user'@'localhost';
 
 FLUSH PRIVILEGES;
 
