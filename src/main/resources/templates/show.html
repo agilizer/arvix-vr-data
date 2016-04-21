@@ -65,9 +65,7 @@
 
 </head>
 <body class="player-active">
-<div class="wrap"  style="display:none">
-    <p class="prompt">点击···使用浏览器打开</p>
-</div>
+    <p class="prompt"   id="weixinNote"  style="display:none">点击···使用浏览器打开</p>
 	<div id="siteUrl" style="display: none;"
 		th:text="${siteUrl+'api/player/models/'+modelData.caseId+'/'}"></div>
 	<div id="modelDescription" style="display: none;"
@@ -116,13 +114,12 @@
 				<div th:if="${modelData.logoShow}" id="loaderCoBrand">
 					<div class="vert-align">
 						<p>PRESENTED BY</p>
-
 						<h2 id="loaderCoBrandName"></h2>
 					</div>
 				</div>
 				<div th:if="${modelData.logoShow}" class="bottom-logo">
 					<img alt="Arvix 荣誉出品" src="/resources/images/poweredByLogo.png" />
-					<div th:utext="${model?.logoDownHtml}">
+					<div th:utext="${modelData?.logoDownHtml}">
 					<h2>3D虚拟互联网展示</h2>
 					<h3>服务联系人：狄经理  电话：13701243593</h3>
 					</div>
@@ -168,15 +165,14 @@
 				</div>
 			</div>
 			<div class="pinTop right hideTarget hideUnderMeta">
-			     <div class="pull-right prompt"  id="weixinNote">
-					&nbsp;&nbsp;&nbsp;点击···使用浏览器打开
-				</div>
+			    
 				<div class="nav-help pull-right">
 					<a class="hasHover"><i class="icon icon-help"></i></a>
 				</div>
 				<div class="pull-right terms"   th:if="${modelData.logoShow}" >
-				<div style="display:inline" th:if="${modelData.rightHtml}" th:utext="${modelData.rightHtml}"></div>
 					<a class="hasHover">团队</a>
+				</div>
+				<div   class="pull-right " style="font-size: 11px;font-weight: 400;margin: 8px 28px 0 0;" th:if="${modelData.rightHtml}" th:utext="${modelData.rightHtml}">
 				</div>
 			</div>
 			<div class="pinBottom left">
@@ -341,27 +337,17 @@
 		class="build keep"></script>
 	<script src="/resources/matterport-2.0.43/jsAndCss/main.js"></script>
 	<script>
+	function is_weixin(){
+		var ua = navigator.userAgent.toLowerCase();
+		if(ua.match(/MicroMessenger/i)=="micromessenger") {
+			return true;
+	 	} else {
+			return false;
+		}
+	}
 	$(document).ready(function() {
-		if (browser.versions.mobile) {//判断是否是移动设备打开。browser代码在下面
-		    var ua = navigator.userAgent.toLowerCase();//获取判断用的对象
-		    if (ua.match(/MicroMessenger/i) == "micromessenger") {
-		            //在微信中打开
-		            $("#weixinNote").show()
-		    }
-		    if (ua.match(/WeiBo/i) == "weibo") {
-		            //在新浪微博客户端打开
-		    }
-		    if (ua.match(/QQ/i) == "qq") {
-		            //在QQ空间打开
-		    }
-		    if (browser.versions.ios) {
-		            //是否在IOS浏览器打开
-		    } 
-		    if(browser.versions.android){
-		            //是否在安卓浏览器打开
-		    }
-		} else {
-		    //否则就是PC浏览器打开
+		if(is_weixin()){
+			  $("#weixinNote").show()
 		}
 	});
 
