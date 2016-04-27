@@ -35,7 +35,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.loginPage("/login")
 				.permitAll().and().logout().permitAll().and()
 				.authorizeRequests().antMatchers("/resources/**","/upload/**", "/auth/**","/console/**","/login/**")
-				.permitAll().and().csrf().disable();
+				.permitAll().and().csrf().disable().headers().disable();
 	}
 
 	@Bean

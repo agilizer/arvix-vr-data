@@ -61,7 +61,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 		if(fileJson!=null){
 			JSONObject jsonObject = JSON.parseObject(fileJson);
 			String baseUrl = configDomainService.getConfigString(ArvixDataConstants.SITE_URL)+"files/"+caseId+"/{{filename}}";
-			jsonObject.put(BASE_URL,baseUrl );
+			jsonObject.put(BASE_URL,baseUrl);
 			result = jsonObject;
 		}
 		return result;
