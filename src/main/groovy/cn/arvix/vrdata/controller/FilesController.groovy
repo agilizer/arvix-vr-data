@@ -22,17 +22,19 @@ class FilesController {
 	ConfigDomainService configDomainService;
 	@RequestMapping("/**")
 	public String checkUsername(HttpServletRequest request,HttpServletResponse response) {
-		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods",
-				"POST, GET, OPTIONS, DELETE");
-		response.setHeader("Access-Control-Max-Age", "3600");
-		response.setHeader("Access-Control-Allow-Headers", "x-requested-with");
-		//response.setHeader("Cache-Control", "max-age="+3600000);
-		//response.setHeader("Pragma", "max-age="+3600000);
-		//response.setDateHeader("Expires", System.currentTimeMillis() + 604800000L);
-		response.setHeader("Pragma","No-cache");
-		response.setHeader("Cache-Control","no-cache");
-		response.setDateHeader("Expires", 36000);
+		response.setHeader("Accept-Ranges", "bytes");
+		response.setHeader("Access-Control-Allow-Credentials",
+			"true");
+		response.setHeader("Access-Control-Allow-Methods","GET");
+		response.setDateHeader("Age", 0);
+		response.setHeader("Connection", "keep-alive");
+		response.setHeader("Vary", "Origin, Access-Control-Request-Headers, Access-Control-Request-Method");
+		response.setHeader("Via", "1.1 varnish, 1.1 varnish");
+		response.setHeader("X-Cache", "MISS, MISS");
+		response.setHeader("X-Cache-Hits", "0, 0");		
+		response.setHeader("access-control-allow-origin", "*");
+		
+		
 		String contentPath = request.getRequestURI() 
 		if(contentPath.endsWith("&")){
 			contentPath = contentPath.substring(0,contentPath.length()-1);
@@ -59,10 +61,8 @@ class FilesController {
 				if(downLoadPath.endsWith(".jpg")){
 					response.setContentType("image/jpeg;");
 				}else{
-					response.setContentType("application/octet-stream;");
-					response.setHeader("Content-disposition", "attachment; filename="
-						+ new String(file.getName().getBytes("utf-8"),
-								"ISO8859-1"));
+					response.setContentType("application/octet-stream");
+					
 				}
 				
 				response.setHeader("Content-Length", String.valueOf(fileLength));
