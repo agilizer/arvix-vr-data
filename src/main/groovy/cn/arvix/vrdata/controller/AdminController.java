@@ -1,14 +1,14 @@
 package cn.arvix.vrdata.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
+import cn.arvix.vrdata.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.ModelData;
@@ -17,10 +17,6 @@ import cn.arvix.vrdata.domain.User;
 import cn.arvix.vrdata.repository.RoleRepository;
 import cn.arvix.vrdata.repository.UserRepository;
 import cn.arvix.vrdata.repository.UserRoleRepository;
-import cn.arvix.vrdata.service.JdbcPage;
-import cn.arvix.vrdata.service.ModelDataService;
-import cn.arvix.vrdata.service.UserRoleService;
-import cn.arvix.vrdata.service.UserService;
 import cn.arvix.vrdata.util.StaticMethod;
 
 @Controller
@@ -38,6 +34,11 @@ public class AdminController {
 	RoleRepository roleRepository;
 	@Autowired
 	UserRoleService userRoleService;
+	@Autowired
+	FetchDataService fetchDataService;
+	@Autowired
+	UploadDataService uploadDataService;
+
 	@RequestMapping("/listModelData/{max}/{offset}")
 	public String listAdmin(@PathVariable("max")Integer max,@PathVariable("offset")Integer offset,Model model) {
 		JdbcPage jdbcPage = modelDataService.listAdmin(max, offset);
@@ -50,13 +51,57 @@ public class AdminController {
 	public Map<String, Object> updateModelDataByField(String name,Long pk,String value) {
 		return modelDataService.update(name, pk, value);
 	}
-	
-	
-	
+
 	@Secured({Role.ROLE_ADMIN}) 
+	@RequestMapping(value = "/sync", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> sync(@RequestParam("sourceUrl") String sourceUrl, @RequestParam(value = "force", defaultValue = "FALSE") boolean force) {
+		Map<String, Object> resultBody = new HashMap<String, Object>();
+		Map<String, Object> fetchResult = fetchDataService.fetch(sourceUrl, force);
+		resultBody.put("fetchResult", fetchResult);
+		return resultBody;
+	}
+
+	@Secured({Role.ROLE_ADMIN})
 	@RequestMapping(value = "/syncPage")
 	public String syncPage() {
 		return "admin/sync";
+	}
+
+	@Secured({Role.ROLE_ADMIN})
+	@RequestMapping(value = "/checkSyncStatus", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> syncStatus(@RequestParam("sourceUrl") String sourceUrl) {
+		Map<String, Object> resultBody = new HashMap<String, Object>();
+		int subIndex = sourceUrl.indexOf("?m=");
+		String caseId = sourceUrl.substring(subIndex + 3);
+		FetchDataServiceImpl.Status status = fetchDataService.getCaseStatus(caseId);
+		resultBody.put("status", status);
+
+		return resultBody;
+	}
+
+	@Secured({Role.ROLE_ADMIN})
+	@ResponseBody
+	@RequestMapping(value = "/uploadData")
+	public Map<String, Object> uploadModelData(@RequestParam("serverUrl") String serverUrl, @RequestParam("dstUrl") String dstUrl) {
+		Map<String, Object> resultBody = new HashMap<String, Object>();
+		Map<String, Object> uploadResult =  uploadDataService.uploadData(serverUrl, dstUrl);
+		resultBody.put("uploadResult", uploadResult);
+		return resultBody;
+	}
+
+	@Secured({Role.ROLE_ADMIN})
+	@RequestMapping(value = "/checkUploadStatus", method = RequestMethod.POST)
+	@ResponseBody
+	public Map<String, Object> uploadStatus(@RequestParam("serverUrl") String serverUrl) {
+		Map<String, Object> resultBody = new HashMap<String, Object>();
+		int subIndex = serverUrl.indexOf("?m=");
+		String caseId = serverUrl.substring(subIndex + 3);
+		FetchDataServiceImpl.Status status = uploadDataService.getCaseStatus(caseId);
+		resultBody.put("status", status);
+
+		return resultBody;
 	}
 	
 	@Secured({Role.ROLE_ADMIN}) 

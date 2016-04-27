@@ -1,5 +1,8 @@
-package cn.arvix.vrdata.util;
+package cn.arvix.vrdata.util
 
+import org.jsoup.Jsoup
+
+import javax.swing.text.Document;
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.regex.Matcher
@@ -110,4 +113,5 @@ public class StaticMethod {
 		}
 		return result
 	}
+
 }

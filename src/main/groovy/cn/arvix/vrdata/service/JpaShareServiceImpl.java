@@ -65,7 +65,7 @@ public class JpaShareServiceImpl implements JpaShareService {
 				query.setParameter(entry.getKey(), entry.getValue());
 			}
 		}
-		long sumItem = (long)countQuery.getResultList().get(0);
+		long sumItem = (Long)countQuery.getResultList().get(0);
 		jdbcPage.setSumItem(sumItem);
 		jdbcPage.setMax(max);
 		jdbcPage.setOffset(offset);

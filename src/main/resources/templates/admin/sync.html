@@ -3,7 +3,7 @@
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
-<html class="no-js">
+<html class="no-js" xmlns:th="http://www.w3.org/1999/xhtml">
 <!--<![endif]-->
 <head th:replace="layout/admin :: head (title='模型数据管理--管理员后台')">
 <!-- BEGIN PLUGINS CSS -->
@@ -27,12 +27,28 @@
 				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
-			
-		源地址：<input type="text" value="https://my.matterport.com/show/?m=452aMkAmjrQ">
-		目标服务器地址： <input type="text" value="https://http://vr.arvix.cn/">
-		
-		
-		
+
+				<form id="uploadForm" class="form-horizontal">
+					<div class="form-group">
+						<label for="uploadServerUrl" class="col-sm-2 control-label">原地址</label>
+						<div class="col-sm-10">
+							<input type="input" class="form-control" id="uploadServerUrl" placeholder="原地址">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="uploadDstUrl" class="col-sm-2 control-label">目标地址</label>
+						<div class="col-sm-10">
+							<input type="input" class="form-control" id="uploadDstUrl" placeholder="目标地址">
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<button type="submit" id="startUpload" class="btn btn-default">提交</button>
+						</div>
+					</div>
+					<textarea id="uploadStatusBox"  class="form-control" rows="5" disabled="disabled"></textarea>
+				</form>
+
 			</div>
 			<div class="row">
 				<div class="col-lg-12">
@@ -41,17 +57,122 @@
 				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
-			
-		源地址：<input type="text" value="https://my.matterport.com/show/?m=452aMkAmjrQ">
-		
-		
+
+				<form id="syncForm" class="form-horizontal">
+					<div class="form-group">
+						<label for="syncSourceUrl" class="col-sm-2 control-label">原地址</label>
+						<div class="col-sm-10">
+							<input type="input" class="form-control" id="syncSourceUrl" placeholder="原地址">
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<button type="submit" id="startSync" class="btn btn-default">提交</button>
+						</div>
+					</div>
+					<textarea id="syncStatusBox" class="form-control" rows="5" disabled="disabled"></textarea>
+				</form>
 		
 			</div>
 		</div>
 	</div>
+	<link rel="stylesheet" href="/resources/css/dataSync.css"/>
+	<script type="text/javascript" src="/resources/plugins/jquery.js"></script>
+	<script type="text/javascript">
+		var uploadCaseUrl = "";
+		var syncCaseUrl = "";
 
+		$(document).ready(function() {
+			//数据同步
+			$("#uploadForm").submit(function() {
+				return startUpload();
+			});
+
+			//数据抓取
+			$("#syncForm").submit(function() {
+				return startSync();
+			});
+		});
+
+		function startUpload() {
+			var serverUrl = $("#uploadServerUrl").val();
+			var dstUrl = $("#uploadDstUrl").val();
+			var uploadMsgBox = $("#uploadStatusBox");
+			if (serverUrl.length == 0 || dstUrl.length == 0) {
+				alert("地址字段不能为空");
+				return false;
+			}
+			$.ajax({
+				url: "/admin/uploadData",
+				type: "POST",
+				data: {"serverUrl": serverUrl, "dstUrl": dstUrl},
+				dataType: "json",
+				success: function(data) {
+					alert(data.uploadResult.Msg);
+					if (data.uploadResult.Status == 1) {
+						uploadCaseUrl = serverUrl;
+					}
+				}
+			});
+			return false;
+		}
+
+		function startSync() {
+			var sourceUrl = $("#syncSourceUrl").val();
+			var syncMsgBox = $("#syncStatusBox");
+			if (sourceUrl.length == 0) {
+				alert("地址字段不能为空");
+				return false;
+			}
+			$.ajax({
+				url: "/admin/sync",
+				type: "POST",
+				data: {"sourceUrl": sourceUrl},
+				dataType: "json",
+				success: function(data) {
+					alert(data.fetchResult.Msg);
+					if (data.fetchResult.Status == 1) {
+						syncCaseUrl = sourceUrl;
+					}
+				}
+			});
+			return false;
+		}
+
+		setTimeout("startCheckStatus()", 3000);
+
+		function startCheckStatus() {
+			var uploadMsgBox = $("#uploadStatusBox");
+			var syncMsgBox = $("#syncStatusBox");
+			console.log("interval running.");
+			if (uploadCaseUrl != null && uploadCaseUrl.length > 0) {
+				updateStatus(uploadMsgBox, "/admin/checkUploadStatus", uploadCaseUrl);
+			}
+			if (syncCaseUrl != null && syncCaseUrl.length > 0) {
+				updateStatus(syncMsgBox, "/admin/checkSyncStatus", syncCaseUrl);
+			}
+			setTimeout("startCheckStatus()", 3000);
+		}
+
+		function updateStatus(textBox, url, id) {
+			$.ajax({
+				url: url,
+				type: "POST",
+				data: {"sourceUrl": id, "serverUrl": id},
+				dataType: "json",
+				success: function(data) {
+					if (data.status != null) {
+						var message = "";
+						for (var msgIndex in data.status.message) {
+							message += data.status.message[msgIndex] + "\n";
+						}
+						textBox.val(message);
+					}
+				}
+			});
+		}
+	</script>
 
 	<div th:include="layout/admin :: jsEnd"></div>
-
 </body>
 </html>
