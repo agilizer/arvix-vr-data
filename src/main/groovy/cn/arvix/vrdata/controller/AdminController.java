@@ -51,6 +51,14 @@ public class AdminController {
 		return modelDataService.update(name, pk, value);
 	}
 	
+	
+	
+	@Secured({Role.ROLE_ADMIN}) 
+	@RequestMapping(value = "/syncPage")
+	public String syncPage() {
+		return "admin/sync";
+	}
+	
 	@Secured({Role.ROLE_ADMIN}) 
 	@ResponseBody
 	@RequestMapping(value = "/updateModelData")

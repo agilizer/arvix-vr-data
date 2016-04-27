@@ -58,7 +58,8 @@ public class ModelDataController {
 	
 	@ResponseBody
 	@RequestMapping("/api/v1/updateModelData")
-	public JSONResult updateModelData(ModelData modelData,String  modelDataClient,MultipartFile zipFileData,String apiKey,HttpServletRequest request,HttpServletResponse response) {
+	public JSONResult updateModelData(ModelData modelData,String  modelDataClient,MultipartFile zipFileData,
+		String apiKey,HttpServletRequest request,HttpServletResponse response) {
 		if(!configDomainService.getConfigString(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY).equals(apiKey)){
 			try {
 				response.sendError(403, "apiKey wrong");
