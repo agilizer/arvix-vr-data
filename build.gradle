@@ -46,6 +46,7 @@ dependencies {
 	compile('org.springframework.boot:spring-boot-starter-web')
 	compile('org.thymeleaf.extras:thymeleaf-extras-springsecurity4:2.1.2.RELEASE')
 	compile('org.codehaus.groovy:groovy:2.3.11')
+    compile('org.apache.ivy:ivy:2.4.0')
 	
 	compile("com.alibaba:fastjson:1.1.33")
     compile("com.h2database:h2")

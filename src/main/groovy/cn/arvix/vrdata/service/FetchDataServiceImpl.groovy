@@ -1,5 +1,6 @@
 package cn.arvix.vrdata.service
 
+import cn.arvix.vrdata.been.Status
 import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.repository.ModelDataRepository
@@ -60,7 +61,7 @@ public class FetchDataServiceImpl implements FetchDataService {
         return result;
     }
 
-    public FetchDataServiceImpl.Status getCaseStatus(String caseId) {
+    public Status getCaseStatus(String caseId) {
         return deferedMessage.get(caseId);
     }
 
@@ -350,14 +351,4 @@ public class FetchDataServiceImpl implements FetchDataService {
         }
     }
 
-    static class Status {
-        int code = 0;
-        List<String> message = new ArrayList<>();
-
-        public void addMessage(String message) {
-            this.message.add(message);
-        }
-
-        private void setMessage(List<String> message) {}
-    }
 }

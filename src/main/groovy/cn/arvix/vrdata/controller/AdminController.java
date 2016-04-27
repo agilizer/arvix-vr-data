@@ -3,6 +3,7 @@ package cn.arvix.vrdata.controller;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.arvix.vrdata.been.Status;
 import cn.arvix.vrdata.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
@@ -75,7 +76,7 @@ public class AdminController {
 		Map<String, Object> resultBody = new HashMap<String, Object>();
 		int subIndex = sourceUrl.indexOf("?m=");
 		String caseId = sourceUrl.substring(subIndex + 3);
-		FetchDataServiceImpl.Status status = fetchDataService.getCaseStatus(caseId);
+		Status status = fetchDataService.getCaseStatus(caseId);
 		resultBody.put("status", status);
 
 		return resultBody;
@@ -98,7 +99,7 @@ public class AdminController {
 		Map<String, Object> resultBody = new HashMap<String, Object>();
 		int subIndex = serverUrl.indexOf("?m=");
 		String caseId = serverUrl.substring(subIndex + 3);
-		FetchDataServiceImpl.Status status = uploadDataService.getCaseStatus(caseId);
+		Status status = uploadDataService.getCaseStatus(caseId);
 		resultBody.put("status", status);
 
 		return resultBody;

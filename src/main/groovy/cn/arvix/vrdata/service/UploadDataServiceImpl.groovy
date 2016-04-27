@@ -1,5 +1,6 @@
 package cn.arvix.vrdata.service
 
+import cn.arvix.vrdata.been.Status
 import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.repository.ModelDataRepository
@@ -44,7 +45,7 @@ public class UploadDataServiceImpl implements UploadDataService {
     private static final String STATUS = "Status";
     private static ConcurrentHashMap<String, String> caseMap = new ConcurrentHashMap<>();
     // caseId --> status
-    private static ConcurrentHashMap<String, FetchDataServiceImpl.Status> deferedMessage = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<Status>();
 
     @Override
     /**
@@ -106,14 +107,14 @@ public class UploadDataServiceImpl implements UploadDataService {
         }
     }
 
-    public FetchDataServiceImpl.Status getCaseStatus(String caseId) {
+    public Status getCaseStatus(String caseId) {
         return deferedMessage.get(caseId);
     }
 
-    private FetchDataServiceImpl.Status getStatus(String caseId) {
-        FetchDataServiceImpl.Status status = deferedMessage.get(caseId);
+    private Status getStatus(String caseId) {
+        Status status = deferedMessage.get(caseId);
         if (status == null) {
-            status = new FetchDataServiceImpl.Status();
+            status = new Status();
             deferedMessage.put(caseId, status);
         }
         return status;
@@ -138,7 +139,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 
     private void upload(String serverUrl, String apiKey, String filePath, ModelData modelData, String caseId) {
         clearStatus(caseId);
-        FetchDataServiceImpl.Status status = getStatus(caseId);
+        Status status = getStatus(caseId);
         log.info("upload start..,serverUrl:{}",serverUrl);
         status.addMessage("开始上传...");
         Map<String, String> params = toMapValueString(modelData);
@@ -165,7 +166,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                 httppost.setEntity(reqEntity);
                 log.info("executing request " + httppost.getRequestLine());
                 response = httpclient.execute(httppost);
-                status.addMessage("上传文件完成！")
+                status.addMessage("上传文件完成！" + response.getStatusLine().toString())
                 log.info(response.getStatusLine().toString());
                 int code = response.getStatusLine().getStatusCode()
                 HttpEntity resEntity = response.getEntity();
