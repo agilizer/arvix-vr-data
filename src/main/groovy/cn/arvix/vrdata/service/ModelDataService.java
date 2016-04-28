@@ -38,5 +38,7 @@ public interface ModelDataService {
 	JdbcPage list(int max, int offset);
 
 	JdbcPage listAdmin(int max, int offset);
+
+	JdbcPage searchModelData(int max, int offset, String keyword, String title, String caseId, String desc, String tags);
 	
 }

@@ -9,6 +9,6 @@ import java.util.Map;
  */
 public interface UploadDataService {
 
-    public Map<String, Object> uploadData(String serverUrl, String dstUrl);
+    public Map<String, Object> uploadData(String serverUrl, String dstUrl, Status status);
     public Status getCaseStatus(String caseId);
 }

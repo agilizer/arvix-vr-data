@@ -37,6 +37,8 @@ public class BootstrapServiceImpl implements BootstrapService, ApplicationContex
 	UserRoleRepository userRoleRepository;
 	@Autowired
 	ConfigDomainInitService configDomainInitService;
+	@Autowired
+	AutoSyncAndUpdateTask autoSyncAndUpdateTask;
 
 	String ENV ="";
 	boolean isDev = false;
@@ -50,6 +52,7 @@ public class BootstrapServiceImpl implements BootstrapService, ApplicationContex
 		log.info("env---------------->"+ENV);
 		initUsers();
 		configDomainInitService.init(isDev);
+		autoSyncAndUpdateTask.init();
 	}
 	public void initUsers() {
 		if(userRepository.count()==0){

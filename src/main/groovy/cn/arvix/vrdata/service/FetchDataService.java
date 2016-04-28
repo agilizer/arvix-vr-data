@@ -6,7 +6,7 @@ import java.util.Map;
 
 public interface FetchDataService {
 	
-	Map<String,Object> fetch(String sourceUrl,boolean force);
-	Map<String,Object> fetch(String[] sourceUrls,boolean force);
+	Map<String,Object> fetch(String sourceUrl, String dstUrl, boolean force);
+	Map<String,Object> fetch(String[] sourceUrls, String dstUrl, boolean force);
 	Status getCaseStatus(String caseId);
 }

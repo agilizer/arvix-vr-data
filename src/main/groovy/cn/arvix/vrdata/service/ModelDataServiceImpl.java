@@ -92,6 +92,13 @@ public class ModelDataServiceImpl implements ModelDataService{
 				offset, map);
 		return jdbcPage;
 	}
+
+	@Override
+	public  JdbcPage searchModelData(int max, int offset, String keyword, String title, String caseId, String desc, String tags) {
+		JdbcPage jdbcPage = null;
+		return jdbcPage;
+	}
+
 	@Override
 	public Map<String, Object> update(String fieldName, Long id, String value) {
 		Map<String, Object> result = StaticMethod.getResult();
@@ -109,7 +116,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 		JSONResult jsonResult = new JSONResult();
 		if(modelData.getCaseId()!=null){
 			ModelData modelDataFromDb  = modelDataRepository.findByCaseId(modelData.getCaseId());
-			if(modelDataFromDb!=null){
+			//modelDataFromDb!=null
+			if(modelDataFromDb==null){
 				jsonResult.setErrorCode(ArvixDataConstants.ERROR_CODE_EXIST);
 			}else{
 				Calendar now = Calendar.getInstance();
@@ -117,7 +125,8 @@ public class ModelDataServiceImpl implements ModelDataService{
 				modelData.setDateCreated(now);
 				modelData.setLastUpdated(now);
 				modelData.setFetchStatus(FetchStatus.FINISH);
-				String saveDir =  configDomainService.getConfigString(ArvixDataConstants.FILE_STORE_PATH);
+				//
+				String saveDir =  "/tmp/arvix-file/sub/";//configDomainService.getConfigString(ArvixDataConstants.FILE_STORE_PATH);
 				log.info("unzip file ......."+"  saveDir : {}",saveDir);
 				String uploadFilePath =saveDir+"upload/"
 						+System.currentTimeMillis()+".zip";
@@ -137,6 +146,10 @@ public class ModelDataServiceImpl implements ModelDataService{
 								,fileDest , true);
 					}
 					log.info("unzipResult {}",unzipResult);
+					//设置dataVersion为v1
+					modelData.setDataVersion("v1");
+					//设置jsVersion为2.0.43
+					modelData.setJsVersion("2.0.43");
 					modelDataRepository.save(modelData);
 					jsonResult.setSuccess(true);
 				} catch (Exception e) {

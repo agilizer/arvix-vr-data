@@ -2,7 +2,9 @@ package cn.arvix.vrdata.service
 
 import cn.arvix.vrdata.been.Status
 import cn.arvix.vrdata.consants.ArvixDataConstants
+import cn.arvix.vrdata.domain.ConfigDomain
 import cn.arvix.vrdata.domain.ModelData
+import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
 import cn.arvix.vrdata.util.AntZipUtil
 import com.alibaba.fastjson.JSON
@@ -32,9 +34,17 @@ public class FetchDataServiceImpl implements FetchDataService {
     private ConfigDomainService configDomainService;
     @Autowired
     private ModelDataRepository modelDataRepository;
+    @Autowired
+    private UploadDataService uploadDataService;
+    @Autowired
+    private ConfigDomainRepository configDomainRepository;
+    @Autowired
+    JpaShareService jpaShareService;
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
-    public static String SERVER_URL = "http://vr.arvix.cn/";
+    public static final String SERVER_URL = "http://vr.arvix.cn/";
+    public static final String urlSep = ",";
+    public static final String FETCH_PREFIX = "FETCH-SERVICE-";
     // caseId --> status
     private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<>();
 
@@ -42,31 +52,50 @@ public class FetchDataServiceImpl implements FetchDataService {
     def RETRY_TIMES = 3;
     Map FETCH_MAP = [:];
 
+    //增加自动同步功能, 如果需要自动同步(dstUrl不为空), fetch后调用同步接口.
     @Override
-    public Map<String, Object> fetch(String sourceUrl, boolean force) {
+    public Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
-        return fetchData(SERVER_URL, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result);
+        if (sourceUrl.contains(urlSep)) {
+            //多个地址
+            String[] sourceUrls = sourceUrl.split(urlSep);
+            return fetch(sourceUrls, dstUrl, force);
+        } else {
+            //添加configDomain记录
+            addUrlToConfig(sourceUrl, dstUrl);
+            return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result);
+        }
     }
 
     @Override
-    public Map<String, Object> fetch(String[] sourceUrls, boolean force) {
+    public Map<String, Object> fetch(String[] sourceUrls, String dstUrl, boolean force) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
         if (sourceUrls == null || sourceUrls.size() == 0) {
             result.put(ERROR, "Empty sourceUrl.");
         } else {
-            fetchData(SERVER_URL, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrls, force, result);
+            //多个sourceUrl放入configDomain中,依次抓取
+            for (String sourceUrl : sourceUrls) {
+                if (sourceUrl != "") {
+                    addUrlToConfig(sourceUrl,dstUrl);
+                }
+            }
+            for (String sourceUrl : sourceUrls) {
+                if (sourceUrl != "") {
+                    fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result);
+                }
+            }
         }
         return result;
     }
 
     public Status getCaseStatus(String caseId) {
-        return deferedMessage.get(caseId);
+        return deferedMessage.get(caseId.trim());
     }
 
     private Status getStatus(String caseId) {
-        Status status = deferedMessage.get(caseId);
+        Status status = deferedMessage.get(caseId.trim());
         if (status == null) {
             status = new Status();
             deferedMessage.put(caseId, status);
@@ -74,9 +103,44 @@ public class FetchDataServiceImpl implements FetchDataService {
         return status;
     }
 
-    private void fetchData(String serverUrl, String workDir, String[] fetchUrlArray,boolean force, Map<String, Object> result) {
+    private void clearStatus(String caseId) {
+        deferedMessage.remove(caseId);
+    }
+
+    private void addUrlToConfig(String sourceUrl, String dstUrl = null) {
+        if (sourceUrl == null || sourceUrl == "") {
+            return;
+        }
+        sourceUrl = sourceUrl.trim();
+        if (dstUrl != null) {
+            dstUrl = dstUrl.trim();
+        }
+        def configDomain = new ConfigDomain()
+        configDomain.setEditable(true)
+        configDomain.setDescription("fetch source url")
+        configDomain.setMapName(FETCH_PREFIX + sourceUrl)
+        if (dstUrl == null) {
+            configDomain.setMapValue(sourceUrl);
+        } else {
+            //记录自动同步信息
+            configDomain.setMapValue(sourceUrl + "|" + dstUrl);
+        }
+        configDomain.setValueType(ConfigDomain.ValueType.String);
+        //config在服务器启动时加载完成
+        def o = configDomainService.getConfig(FETCH_PREFIX + sourceUrl);
+        if (o == null) {
+            configDomainRepository.saveAndFlush(configDomain)
+        }
+    }
+
+    public void removeConfig(String sourceUrl) {
+        String hql = "delete from ConfigDomain c where c.mapName=:key ";
+        jpaShareService.updateForHql(hql, ["key" : FETCH_PREFIX + sourceUrl]);
+    }
+
+    private void fetchData(String serverUrl, String dstUrl, String workDir, String[] fetchUrlArray,boolean force, Map<String, Object> result) {
         fetchUrlArray.each {
-            fetchData(serverUrl,workDir, it, force,result)
+            fetchData(serverUrl, dstUrl,workDir, it, force,result)
         }
     }
 
@@ -84,7 +148,7 @@ public class FetchDataServiceImpl implements FetchDataService {
         FETCH_MAP.remove(url)
     }
 
-    private Map<String, Object> fetchData(String serverUrl, String workDir, String sourceUrl, boolean force, Map<String, Object> result) {
+    private Map<String, Object> fetchData(String serverUrl, String dstUrl, String workDir, String sourceUrl, boolean force, Map<String, Object> result) {
         StringBuilder errStringBuilder = (StringBuilder)result.get(ERROR);
         if (errStringBuilder == null) {
             errStringBuilder = new StringBuilder();
@@ -92,6 +156,8 @@ public class FetchDataServiceImpl implements FetchDataService {
         }
         if(sourceUrl){
             def subIndex = sourceUrl.indexOf("?m=");
+            def caseId = sourceUrl.substring(subIndex+3).trim()
+            clearStatus(caseId);
             if(FETCH_MAP.containsKey(sourceUrl)){
                 errStringBuilder.append("正在抓取${sourceUrl}，请不要重复提交！");
                 removeUrlAndFlagCheck(sourceUrl)
@@ -100,12 +166,12 @@ public class FetchDataServiceImpl implements FetchDataService {
             if(subIndex>0){
                 FETCH_MAP.put(sourceUrl,sourceUrl)
                 println serverUrl
-                def caseId = sourceUrl.substring(subIndex+3)
-                def serviceDomain = serverUrl;
                 ModelData modelDataExit = modelDataRepository.findByCaseId(caseId);
                 if(modelDataExit){
-                    errStringBuilder.append("服务器已经存在，忽略："+sourceUrl);
+                    errStringBuilder.append("服务器已经存在此数据，忽略："+sourceUrl);
                     removeUrlAndFlagCheck(sourceUrl)
+                    //校验未通过,移除记录
+                    removeConfig(sourceUrl);
                     return result;
                 }
                 ModelData modelData = new ModelData();
@@ -122,11 +188,25 @@ public class FetchDataServiceImpl implements FetchDataService {
                             log.error("fetch caseId {} genModelData error:",caseId,e);
                             status.code = -1;
                             status.addMessage("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
+                            removeUrlAndFlagCheck(sourceUrl)
+                            return;
                         }
                         genFiles(caseId,fileSaveDir,modelData,serverUrl);
                         removeUrlAndFlagCheck(sourceUrl)
-                        //上传成功,修改数据库
+                        //上传成功,修改数据库set
+                        modelData.fetchStatus = ModelData.FetchStatus.FINISH;
                         modelDataRepository.saveAndFlush(modelData);
+                        //移除config中的记录
+                        removeConfig(sourceUrl);
+                        //如果dstUrl不为空,继续同步数据
+                        if (dstUrl && dstUrl != "") {
+                            Map<String, Object> uploadFeedBack = uploadDataService.uploadData(sourceUrl, dstUrl, status);
+                            int uploadStatus = (Integer)uploadFeedBack.get(STATUS);
+                            if (uploadStatus == -1) {
+                                log.warn(sourceUrl + " -> " + dstUrl + ": " + uploadFeedBack);
+                                status.addMessage(uploadFeedBack.get(ERROR).toString());
+                            }
+                        }
                     }
                     result.put(STATUS, 1);
                 }catch(e){
@@ -137,6 +217,8 @@ public class FetchDataServiceImpl implements FetchDataService {
                 errStringBuilder.append("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 log.warn("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 removeUrlAndFlagCheck(sourceUrl)
+                //校验未通过,移除记录
+                removeConfig(sourceUrl);
             }
         }else{
             errStringBuilder.append("源url不能为空");
@@ -301,7 +383,7 @@ public class FetchDataServiceImpl implements FetchDataService {
             if (script.indexOf("window.MP_PREFETCHED_MODELDATA") > -1) {
                 // 只取得script的內容
                 script = ele.childNode(0).toString();
-                //modelData.setModelDataClient(script);
+                //modelData.setModelData(script);
 
                 script = script.replace("window.MP_PREFETCHED_MODELDATA = ", "")
                 script =script.substring(0,script.length()-1)
@@ -326,7 +408,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                         }
                     }
                     modelData.setActiveReel(JSON.toJSONString(["reel":activeReel]))
-                    //modelData.setModelDataClient("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
+                    modelData.setModelData("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
                 }
             }
         }

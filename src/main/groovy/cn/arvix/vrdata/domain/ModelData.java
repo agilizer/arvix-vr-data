@@ -69,6 +69,12 @@ public class ModelData  implements Serializable{
 	private  String  activeReel;
 	@Column
 	private Long userTimeSec;
+	@Column
+	private String dataVersion;
+	@Column
+	private String jsVersion;
+	@Column
+	private String tagStr;
 	/**
 	 * 创建时间
 	 */
@@ -89,7 +95,31 @@ public class ModelData  implements Serializable{
 	 * 是否显示arvix logo相关信息
 	 */
 	private Boolean logoShow = true;
-	
+
+	public String getDataVersion() {
+		return dataVersion;
+	}
+
+	public void setDataVersion(String dataVersion) {
+		this.dataVersion = dataVersion;
+	}
+
+	public String getJsVersion() {
+		return jsVersion;
+	}
+
+	public void setJsVersion(String jsVersion) {
+		this.jsVersion = jsVersion;
+	}
+
+	public String getTagStr() {
+		return tagStr;
+	}
+
+	public void setTagStr(String tagStr) {
+		this.tagStr = tagStr;
+	}
+
 	public static enum FetchStatus {
 		FETCHING("正在抓取"),FINISH("完成抓取"),
 		ERROR("抓取出错");
