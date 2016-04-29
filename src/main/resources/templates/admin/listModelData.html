@@ -31,6 +31,36 @@
 			</div>
 			<div class="row">
 				<div th:replace="layout/_pageNav :: pageNav"></div>
+				<form class="form-inline">
+					<div class="form-group" style="float: right;">
+						<div class="input-group">
+							<select class="form-control" id="searchType" style="width:60px;">
+								<option value="title">标题</option>
+								<option value="caseId">caseId</option>
+								<option value="desc">描述</option>
+								<option value="tags">tags</option>
+							</select>
+							<div class="input-group">
+								<input type="text" type="input" id="searchValue" class="form-control"><span id="searchBtn" class="input-group-addon btn">搜索</span>
+							</div>
+						</div>
+					</div>
+				</form>
+				<script type="text/javascript" src="/resources/plugins/jquery.js"></script>
+				<script type="text/javascript">
+					$(document).ready(function() {
+						var searchValueDom = $("#searchValue");
+						$("#searchBtn").click(function() {
+							var searchType = $("#searchType option:selected").val();
+							var searchValue = searchValueDom.val();
+							if (searchValue != "") {
+								var listBaseUrl = "/admin/searchModelData/";
+								var newUrl = listBaseUrl+$("#max").val()+"/0" + "?" + searchType + "=" + searchValue;
+								window.location.href = newUrl;
+							}
+						});
+					});
+				</script>
 				<table class="table">
 					<tr>
 						<td>caseId</td>

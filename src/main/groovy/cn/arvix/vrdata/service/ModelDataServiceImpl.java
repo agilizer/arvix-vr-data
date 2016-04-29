@@ -94,8 +94,31 @@ public class ModelDataServiceImpl implements ModelDataService{
 	}
 
 	@Override
-	public  JdbcPage searchModelData(int max, int offset, String keyword, String title, String caseId, String desc, String tags) {
-		JdbcPage jdbcPage = null;
+	public  JdbcPage searchModelData(int max, int offset, String title, String caseId, String desc, String tags) {
+		Map<String,Object>  map = new HashMap<String,Object>();
+		map.put("fetchStatus",FetchStatus.FINISH);
+		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml"
+				+ " ,m.logoDownHtml From "
+				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
+		String countHql = "select count(*) from ModelData m where m.fetchStatus=:fetchStatus " ;
+		if (title != null && !(title = title.trim()).equals("")) {
+			hql += " and m.title like '%" + title + "%'";
+			countHql += " and m.title like '%" + title + "%'";
+		}
+		if (caseId != null && !(caseId = caseId.trim()).equals("")) {
+			hql += " and m.caseId like '%" + caseId + "%'";
+			countHql += " and m.caseId like '%" + caseId + "%'";
+		}
+		if (desc != null && !(desc = desc.trim()).equals("")) {
+			hql += " and m.description like '%" + desc + "%'";
+			countHql += " and m.description like '%" + desc + "%'";
+		}
+		if (tags != null && !(tags = tags.trim()).equals("")) {
+			hql += " and m.tagStr like '%" + tags + "%'";
+			countHql += " and m.tagStr like '%" + tags + "%'";
+		}
+		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
+				offset, map);
 		return jdbcPage;
 	}
 
@@ -116,8 +139,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 		JSONResult jsonResult = new JSONResult();
 		if(modelData.getCaseId()!=null){
 			ModelData modelDataFromDb  = modelDataRepository.findByCaseId(modelData.getCaseId());
-			//modelDataFromDb!=null
-			if(modelDataFromDb==null){
+			if(modelDataFromDb!=null){
 				jsonResult.setErrorCode(ArvixDataConstants.ERROR_CODE_EXIST);
 			}else{
 				Calendar now = Calendar.getInstance();
@@ -126,7 +148,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 				modelData.setLastUpdated(now);
 				modelData.setFetchStatus(FetchStatus.FINISH);
 				//
-				String saveDir =  "/tmp/arvix-file/sub/";//configDomainService.getConfigString(ArvixDataConstants.FILE_STORE_PATH);
+				String saveDir =  configDomainService.getConfigString(ArvixDataConstants.FILE_STORE_PATH);
 				log.info("unzip file ......."+"  saveDir : {}",saveDir);
 				String uploadFilePath =saveDir+"upload/"
 						+System.currentTimeMillis()+".zip";

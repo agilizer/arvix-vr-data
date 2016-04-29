@@ -34,11 +34,21 @@
 				<div class="c_width" th:if="${jdbcPage.sumItem==0}">
 					没有查找到相关数据,请重选搜索.</div>
 			</nav>
+			<input type="hidden" id="search_tag" value="1" th:if="${search==1}"/>
+			<input type="hidden" id="search_str" th:value="${searchStr}"/>
 			<script>
 	
 		function loadSearchUrl(){
-			var  listBaseUrl = "/admin/modelData/list/"
-			var newUrl = listBaseUrl+$("#max").val()+"/"+$("#offset").val()+"/a";
+			var searchTag = $("#search_tag");
+			var searchStr = $("#search_str").val();
+			var  listBaseUrl = "/admin/listModelData/";
+			if (searchTag.val() == 1) {
+				listBaseUrl = "/admin/searchModelData/";
+			}
+			var newUrl = listBaseUrl+$("#max").val()+"/"+$("#offset").val();//+"/a";
+			if (searchStr != "?") {
+				newUrl += searchStr;
+			}
 			window.location.href = newUrl;
 		}
 		function changeList(aObj){

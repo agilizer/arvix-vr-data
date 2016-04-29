@@ -51,13 +51,40 @@ public class AdminController {
 	@RequestMapping("/searchModelData/{max}/{offset}")
 	@Secured({Role.ROLE_ADMIN})
 	//TODO: 搜索
-	public JdbcPage searchModelData(@PathVariable("max")Integer max, @PathVariable("offset")Integer offset,
-									@RequestParam(value = "keyword", required = false)String keyword, @RequestParam(value = "title", required = false)String title,
+	public String searchModelData(@PathVariable("max")Integer max, @PathVariable("offset")Integer offset,
+									@RequestParam(value = "title", required = false)String title,
 									@RequestParam(value = "caseId", required = false)String caseId, @RequestParam(value = "desc", required = false)String desc,
-									@RequestParam(value = "tags", required = false)String tags) {
-		JdbcPage jdbcPage = modelDataService.searchModelData(max, offset, keyword, title, caseId, desc, tags);
-
-		return jdbcPage;
+									@RequestParam(value = "tags", required = false)String tags, Model model) {
+		JdbcPage jdbcPage = modelDataService.searchModelData(max, offset, title, caseId, desc, tags);
+		model.addAttribute("jdbcPage", jdbcPage);
+		model.addAttribute("search", 1);
+		String searchStr = "?";
+		if (title != null) {
+			searchStr += "title=" + title;
+		}
+		if (caseId != null) {
+			if (searchStr.equals("?")) {
+				searchStr += "caseId=" + caseId;
+			} else {
+				searchStr += "&caseId=" + caseId;
+			}
+		}
+		if (desc != null) {
+			if (searchStr.equals("?")) {
+				searchStr += "desc=" + desc;
+			} else {
+				searchStr += "&desc=" + desc;
+			}
+		}
+		if (tags != null) {
+			if (searchStr.equals("?")) {
+				searchStr += "tags=" + tags;
+			} else {
+				searchStr += "&tags=" + tags;
+			}
+		}
+		model.addAttribute("searchStr", searchStr);
+		return "admin/listModelData";
 	}
 
 	@Secured({Role.ROLE_ADMIN}) 
