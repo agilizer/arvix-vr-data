@@ -127,15 +127,16 @@ public class FetchDataServiceImpl implements FetchDataService {
         }
         configDomain.setValueType(ConfigDomain.ValueType.String);
         //config在服务器启动时加载完成
-        def o = configDomainService.getConfig(FETCH_PREFIX + sourceUrl);
-        if (o == null) {
+        try {
             configDomainRepository.saveAndFlush(configDomain)
+        } catch (Exception e) {
+            //Duplicate entry, ignore
         }
     }
 
     public void removeConfig(String sourceUrl) {
         String hql = "delete from ConfigDomain c where c.mapName=:key ";
-        jpaShareService.updateForHql(hql, ["key" : FETCH_PREFIX + sourceUrl]);
+        jpaShareService.updateForHql(hql, ["key" : FETCH_PREFIX + sourceUrl.trim()]);
     }
 
     private void fetchData(String serverUrl, String dstUrl, String workDir, String[] fetchUrlArray,boolean force, Map<String, Object> result) {
@@ -179,7 +180,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                 modelData.setSourceUrl(sourceUrl);
                 def fileSaveDir = workDir +caseId+"/"
                 try {
-                    Thread.start {
+                    Thread worker = Thread.start {
                         Status status = getStatus(caseId);
                         status.addMessage("正在抓取: " + sourceUrl);
                         try {
@@ -209,6 +210,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                         }
                     }
                     result.put(STATUS, 1);
+                    result.put("WORKER", worker);
                 }catch(e){
                     log.error("fetch caseId {} genFiles error:",caseId,e)
                     removeUrlAndFlagCheck(sourceUrl)

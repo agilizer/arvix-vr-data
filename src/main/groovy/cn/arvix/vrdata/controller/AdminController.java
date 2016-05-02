@@ -107,6 +107,9 @@ public class AdminController {
 		}
 		Map<String, Object> fetchResult = fetchDataService.fetch(sourceUrl, dstUrl, force);
 		resultBody.put("fetchResult", fetchResult);
+		if (fetchResult != null) {
+			fetchResult.remove("WORKER");
+		}
 		return resultBody;
 	}
 
@@ -158,6 +161,9 @@ public class AdminController {
 		}
 		Map<String, Object> uploadResult =  uploadDataService.uploadData(serverUrl, dstUrl, null);
 		resultBody.put("uploadResult", uploadResult);
+		if (uploadResult != null) {
+			uploadResult.remove("WORKER");
+		}
 		return resultBody;
 	}
 

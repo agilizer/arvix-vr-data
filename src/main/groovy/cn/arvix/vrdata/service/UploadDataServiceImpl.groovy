@@ -122,7 +122,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                 }
                 if (rootFile.exists() && rootFile.isFile()) {
                     String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
-                    Thread.start {
+                    Thread worker = Thread.start {
                         caseMap.put(caseId, caseId);
                         try {
                             upload(dstUrl, apiKey, filePath, modelData, caseId, status);
@@ -131,6 +131,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                         }
                     }
                     result.put(STATUS, 1);
+                    result.put("WORKER", worker);
                     stringBuilder.append("正在同步数据: " + serverUrl);
                 } else {
                     stringBuilder.append("服务器上不存在此数据: " + serverUrl);
@@ -201,15 +202,16 @@ public class UploadDataServiceImpl implements UploadDataService {
         configDomain.setMapValue(sourceUrl + "|" + dstUrl);
         configDomain.setValueType(ConfigDomain.ValueType.String);
         //config在服务器启动时加载完成
-        def o = configDomainService.getConfig(UPDATE_PREFIX + dstUrl);
-        if (o == null) {
+        try {
             configDomainRepository.saveAndFlush(configDomain)
+        } catch (Exception e) {
+            //Duplicate entry, ignore
         }
     }
 
     public void removeConfig(String dstUrl) {
         String hql = "delete from ConfigDomain c where c.mapName=:key ";
-        jpaShareService.updateForHql(hql, ["key" : UPDATE_PREFIX + dstUrl]);
+        jpaShareService.updateForHql(hql, ["key" : UPDATE_PREFIX + dstUrl.trim()]);
     }
 
     private void upload(String serverUrl, String apiKey, String filePath, ModelData modelData, String caseId, Status status = null) {
@@ -270,6 +272,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                         }else{
                             if(jsonObject.getString("errorCode")=="exist"){
                                 status.addMessage(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!")
+                                removeConfig(serverUrl);
                             }
                             else{
                                 status.addMessage(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
