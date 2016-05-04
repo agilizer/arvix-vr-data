@@ -1,0 +1,19 @@
+1、 configDomain.setMapName(UPDATE_PREFIX + dstUrl)   --》 dstUrl应该 用sourceUrl
+2、public Map<String, Object> uploadData(String serverUrl, String dstUrl, Status status);   --》方法签名更改为:
+      public Map<String, Object> uploadData(String sourceUrls, String dstUrl, Status status);
+      同时把实现类的serverUrl更改为 sourceUrls.
+      
+      
+ 3、  String tmpModelData = modelData.getModelData();   //   数据不存在时会报NullPoint
+            //替换成目标服务器域名
+            String dstServerDomain = dstUrl.replace("admin/updateModelData", "")
+            modelData.setModelData(tmpModelData.replaceAll(FetchDataServiceImpl.SERVER_URL,dstServerDomain));
+            //result.put("script", modelData.getModelData());
+            if (modelData == null) {
+           
+ 4、html:原地址---->源地址
+ 5、同步数据之前先得询问目标服务器是否已经存在。即:  /api/v1/isExist/{caseId}    ，ModelDataController   
+            
+            
+      
+    
