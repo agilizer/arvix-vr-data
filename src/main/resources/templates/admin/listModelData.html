@@ -68,6 +68,7 @@
 						<td>是否显示logo</td>
 						<td>是否上线</td>
 						<td>标题</td>
+						<td>标签</td>
 						<td>右侧链接</td>
 						<td>logo下展示</td>
 						<td>描述</td>
@@ -91,6 +92,11 @@
 							data-pk="1" data-name='title'
 							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
 							th:attr="data-pk=${modelData[2]}"></a></td>
+
+						<td><a class="editable" href="#" th:text="${modelData[13]}"
+							   data-pk="1" data-name='tagStr'
+							   data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							   th:attr="data-pk=${modelData[2]}"></a></td>
 
 						<td><a class="editable" href="#" th:text="${modelData[11]}"
 							data-pk="1" data-name='rightHtml' data-type="textarea"
