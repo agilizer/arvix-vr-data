@@ -43,7 +43,8 @@ public class FetchDataServiceImpl implements FetchDataService {
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
     public static final String SERVER_URL = "http://vr.arvix.cn/";
-    public static final String urlSep = ",";
+    public static final String urlSep = "\\n";
+    public static final String curlSep = "\n";
     public static final String FETCH_PREFIX = "FETCH-SERVICE-";
     // caseId --> status
     private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<>();
@@ -57,7 +58,7 @@ public class FetchDataServiceImpl implements FetchDataService {
     public Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
-        if (sourceUrl.contains(urlSep)) {
+        if (sourceUrl.contains(curlSep)) {
             //多个地址
             String[] sourceUrls = sourceUrl.split(urlSep);
             return fetch(sourceUrls, dstUrl, force);
@@ -77,6 +78,7 @@ public class FetchDataServiceImpl implements FetchDataService {
         } else {
             //多个sourceUrl放入configDomain中,依次抓取
             for (String sourceUrl : sourceUrls) {
+                sourceUrl = sourceUrl.trim();
                 if (sourceUrl != "") {
                     addUrlToConfig(sourceUrl,dstUrl);
                 }
