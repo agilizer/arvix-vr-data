@@ -58,14 +58,14 @@ public class UploadDataServiceImpl implements UploadDataService {
     private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<String, Status>();
 
     /**
-     * @Param serverUrl 包含caseId的url
+     * @Param sourceUrl 包含caseId的url
      * @Param dstUrl 上传目标服务器的url
      */
-    public Map<String, Object> uploadData(String serverUrl, String dstUrl, Status status = null) {
+    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Status status = null) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
-        if (serverUrl.contains(curlSep)) {
-            String[] serverUrls = serverUrl.split(urlSep);
+        if (sourceUrl.contains(curlSep)) {
+            String[] serverUrls = sourceUrl.split(urlSep);
             if (serverUrls == null || serverUrls.length == 0) {
                 result.put(ERROR, "Empty sourceUrl.");
             } else {
@@ -83,24 +83,24 @@ public class UploadDataServiceImpl implements UploadDataService {
                 }
             }
         } else {
-            addUrlToConfig(serverUrl, dstUrl);
-            uploadData(serverUrl, dstUrl, result, status);
+            addUrlToConfig(sourceUrl, dstUrl);
+            uploadData(sourceUrl, dstUrl, result, status);
         }
 
         return result;
     }
 
-    public Map<String, Object> uploadData(String serverUrl, String dstUrl, Map<String, Object> result, Status status = null) {
+    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Map<String, Object> result, Status status = null) {
 
         StringBuilder stringBuilder = getErrorMsg(result);
-        def subIndex = serverUrl.indexOf("?m=");
+        def subIndex = sourceUrl.indexOf("?m=");
         if (subIndex < 0) {
-            stringBuilder.append("名称不合法: " + serverUrl);
-            log.warn("名称不合法: " + serverUrl);
+            stringBuilder.append("名称不合法: " + sourceUrl);
+            log.warn("名称不合法: " + sourceUrl);
             //校验未通过,移除记录
-            removeConfig(serverUrl);
+            removeConfig(sourceUrl);
         } else {
-            def caseId = serverUrl.substring(subIndex + 3).trim();
+            def caseId = sourceUrl.substring(subIndex + 3).trim();
             ModelData modelData = modelDataRepository.findByCaseId(caseId);
             if (modelData != null) {
                 String tmpModelData = modelData.getModelData();
@@ -110,17 +110,17 @@ public class UploadDataServiceImpl implements UploadDataService {
             }
             //result.put("script", modelData.getModelData());
             if (modelData == null) {
-                stringBuilder.append("数据库中不存在此数据: " + serverUrl);
-                log.warn("数据库中不存在此数据: " + serverUrl);
+                stringBuilder.append("数据库中不存在此数据: " + sourceUrl);
+                log.warn("数据库中不存在此数据: " + sourceUrl);
                 //校验未通过,移除记录
-                removeConfig(serverUrl);
+                removeConfig(sourceUrl);
             } else {
                 //判断目标服务器是否存在
                 if (modelExits(dstUrl, caseId)) {
-                    stringBuilder.append("目标服务器已存在此数据: " + serverUrl);
-                    log.warn("目标服务器已存在此数据: " + serverUrl);
+                    stringBuilder.append("目标服务器已存在此数据: " + sourceUrl);
+                    log.warn("目标服务器已存在此数据: " + sourceUrl);
                     //校验未通过,移除记录
-                    removeConfig(serverUrl);
+                    removeConfig(sourceUrl);
                 } else {
                     String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
                     if (!filePath.endsWith("/")) {
@@ -129,7 +129,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                     filePath += caseId + ".zip";
                     File rootFile = new File(filePath);
                     if (caseMap.contains(caseId)) {
-                        stringBuilder.append("正在同步数据: " + serverUrl + ", 请勿重复操作.");
+                        stringBuilder.append("正在同步数据: " + sourceUrl + ", 请勿重复操作.");
                         return result;
                     }
                     if (rootFile.exists() && rootFile.isFile()) {
@@ -137,19 +137,19 @@ public class UploadDataServiceImpl implements UploadDataService {
                         Thread worker = Thread.start {
                             caseMap.put(caseId, caseId);
                             try {
-                                upload(dstUrl, apiKey, filePath, modelData, caseId, serverUrl, status);
+                                upload(dstUrl, apiKey, filePath, modelData, caseId, sourceUrl, status);
                             } finally {
                                 clearCaseMap(caseId);
                             }
                         }
                         result.put(STATUS, 1);
                         result.put("WORKER", worker);
-                        stringBuilder.append("正在同步数据: " + serverUrl);
+                        stringBuilder.append("正在同步数据: " + sourceUrl);
                     } else {
-                        stringBuilder.append("服务器上不存在此数据: " + serverUrl);
-                        log.warn("服务器上不存在此数据: " + serverUrl);
+                        stringBuilder.append("服务器上不存在此数据: " + sourceUrl);
+                        log.warn("服务器上不存在此数据: " + sourceUrl);
                         //校验未通过,移除记录
-                        removeConfig(serverUrl);
+                        removeConfig(sourceUrl);
                     }
                 }
             }
@@ -237,12 +237,12 @@ public class UploadDataServiceImpl implements UploadDataService {
         return Boolean.valueOf(text);
     }
 
-    private void upload(String serverUrl, String apiKey, String filePath, ModelData modelData, String caseId, String sourceUrl, Status status = null) {
+    private void upload(String dstUrl, String apiKey, String filePath, ModelData modelData, String caseId, String sourceUrl, Status status = null) {
         clearStatus(caseId);
         if (status == null) {
             status = getStatus(caseId);
         }
-        log.info("upload start..,serverUrl:{}",serverUrl);
+        log.info("upload start..,serverUrl:{}",dstUrl);
         status.addMessage("开始同步... : " + caseId);
         Map<String, String> params = toMapValueString(modelData);
         params.put("apiKey",apiKey);
@@ -258,7 +258,7 @@ public class UploadDataServiceImpl implements UploadDataService {
         log.info("params:{}",params);
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
-            HttpPost httppost = new HttpPost(serverUrl);
+            HttpPost httppost = new HttpPost(dstUrl);
 
             FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()

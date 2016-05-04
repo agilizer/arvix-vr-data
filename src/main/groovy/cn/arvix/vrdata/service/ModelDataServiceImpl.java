@@ -172,7 +172,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 					modelData.setDataVersion("v1");
 					//设置jsVersion为2.0.43
 					modelData.setJsVersion("2.0.43");
-					modelDataRepository.save(modelData);
+					modelDataRepository.saveAndFlush(modelData);
 					jsonResult.setSuccess(true);
 				} catch (Exception e) {
 					e.printStackTrace();
