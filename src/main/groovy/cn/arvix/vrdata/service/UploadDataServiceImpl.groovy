@@ -11,6 +11,7 @@ import com.alibaba.fastjson.JSONObject
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
 import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
@@ -49,7 +50,8 @@ public class UploadDataServiceImpl implements UploadDataService {
     private ConfigDomainRepository configDomainRepository;
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
-    public static final String urlSep = ",";
+    public static final String urlSep = "\\n";
+    public static final String curlSep = "\n";
     public static final String UPDATE_PREFIX = "UPDATE-SERVICE-";
     private static ConcurrentHashMap<String, String> caseMap = new ConcurrentHashMap<>();
     // caseId --> status
@@ -62,13 +64,14 @@ public class UploadDataServiceImpl implements UploadDataService {
     public Map<String, Object> uploadData(String serverUrl, String dstUrl, Status status = null) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
-        if (serverUrl.contains(urlSep)) {
+        if (serverUrl.contains(curlSep)) {
             String[] serverUrls = serverUrl.split(urlSep);
             if (serverUrls == null || serverUrls.length == 0) {
                 result.put(ERROR, "Empty sourceUrl.");
             } else {
                 //多个sourceUrl放入configDomain中,依次抓取
                 for (String surl : serverUrls) {
+                    surl = surl.trim();
                     if (surl != "") {
                         addUrlToConfig(surl, dstUrl);
                     }
@@ -95,49 +98,59 @@ public class UploadDataServiceImpl implements UploadDataService {
             stringBuilder.append("名称不合法: " + serverUrl);
             log.warn("名称不合法: " + serverUrl);
             //校验未通过,移除记录
-            removeConfig(dstUrl);
+            removeConfig(serverUrl);
         } else {
             def caseId = serverUrl.substring(subIndex + 3).trim();
             ModelData modelData = modelDataRepository.findByCaseId(caseId);
-            String tmpModelData = modelData.getModelData();
-            //替换成目标服务器域名
-            String dstServerDomain = dstUrl.replace("admin/updateModelData", "")
-            modelData.setModelData(tmpModelData.replaceAll(FetchDataServiceImpl.SERVER_URL,dstServerDomain));
+            if (modelData != null) {
+                String tmpModelData = modelData.getModelData();
+                //替换成目标服务器域名
+                String dstServerDomain = dstUrl.replace("admin/updateModelData", "")
+                modelData.setModelData(tmpModelData.replaceAll(FetchDataServiceImpl.SERVER_URL, dstServerDomain));
+            }
             //result.put("script", modelData.getModelData());
             if (modelData == null) {
                 stringBuilder.append("数据库中不存在此数据: " + serverUrl);
                 log.warn("数据库中不存在此数据: " + serverUrl);
                 //校验未通过,移除记录
-                removeConfig(dstUrl);
+                removeConfig(serverUrl);
             } else {
-                String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
-                if (!filePath.endsWith("/")) {
-                    filePath += "/";
-                }
-                filePath += caseId + ".zip";
-                File rootFile = new File(filePath);
-                if (caseMap.contains(caseId)) {
-                    stringBuilder.append("正在同步数据: " + serverUrl + ", 请勿重复操作.");
-                    return result;
-                }
-                if (rootFile.exists() && rootFile.isFile()) {
-                    String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
-                    Thread worker = Thread.start {
-                        caseMap.put(caseId, caseId);
-                        try {
-                            upload(dstUrl, apiKey, filePath, modelData, caseId, status);
-                        } finally {
-                            clearCaseMap(caseId);
-                        }
-                    }
-                    result.put(STATUS, 1);
-                    result.put("WORKER", worker);
-                    stringBuilder.append("正在同步数据: " + serverUrl);
-                } else {
-                    stringBuilder.append("服务器上不存在此数据: " + serverUrl);
-                    log.warn("服务器上不存在此数据: " + serverUrl);
+                //判断目标服务器是否存在
+                if (modelExits(dstUrl, caseId)) {
+                    stringBuilder.append("目标服务器已存在此数据: " + serverUrl);
+                    log.warn("目标服务器已存在此数据: " + serverUrl);
                     //校验未通过,移除记录
-                    removeConfig(dstUrl);
+                    removeConfig(serverUrl);
+                } else {
+                    String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
+                    if (!filePath.endsWith("/")) {
+                        filePath += "/";
+                    }
+                    filePath += caseId + ".zip";
+                    File rootFile = new File(filePath);
+                    if (caseMap.contains(caseId)) {
+                        stringBuilder.append("正在同步数据: " + serverUrl + ", 请勿重复操作.");
+                        return result;
+                    }
+                    if (rootFile.exists() && rootFile.isFile()) {
+                        String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
+                        Thread worker = Thread.start {
+                            caseMap.put(caseId, caseId);
+                            try {
+                                upload(dstUrl, apiKey, filePath, modelData, caseId, serverUrl, status);
+                            } finally {
+                                clearCaseMap(caseId);
+                            }
+                        }
+                        result.put(STATUS, 1);
+                        result.put("WORKER", worker);
+                        stringBuilder.append("正在同步数据: " + serverUrl);
+                    } else {
+                        stringBuilder.append("服务器上不存在此数据: " + serverUrl);
+                        log.warn("服务器上不存在此数据: " + serverUrl);
+                        //校验未通过,移除记录
+                        removeConfig(serverUrl);
+                    }
                 }
             }
         }
@@ -197,7 +210,7 @@ public class UploadDataServiceImpl implements UploadDataService {
         def configDomain = new ConfigDomain()
         configDomain.setEditable(true)
         configDomain.setDescription("fetch source url")
-        configDomain.setMapName(UPDATE_PREFIX + dstUrl)
+        configDomain.setMapName(UPDATE_PREFIX + sourceUrl)
         //记录自动同步信息
         configDomain.setMapValue(sourceUrl + "|" + dstUrl);
         configDomain.setValueType(ConfigDomain.ValueType.String);
@@ -209,12 +222,22 @@ public class UploadDataServiceImpl implements UploadDataService {
         }
     }
 
-    public void removeConfig(String dstUrl) {
+    public void removeConfig(String sourceUrl) {
         String hql = "delete from ConfigDomain c where c.mapName=:key ";
-        jpaShareService.updateForHql(hql, ["key" : UPDATE_PREFIX + dstUrl.trim()]);
+        jpaShareService.updateForHql(hql, ["key" : UPDATE_PREFIX + sourceUrl.trim()]);
     }
 
-    private void upload(String serverUrl, String apiKey, String filePath, ModelData modelData, String caseId, Status status = null) {
+    private boolean modelExits(String dstUrl, String caseId) {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        dstUrl = dstUrl.replace("updateModelData", "isExist/" + caseId);
+        HttpGet httpGet = new HttpGet(dstUrl);
+        CloseableHttpResponse response = httpclient.execute(httpGet);
+        HttpEntity resEntity = response.getEntity();
+        String text = IOUtils.toString(resEntity.getContent());
+        return Boolean.valueOf(text);
+    }
+
+    private void upload(String serverUrl, String apiKey, String filePath, ModelData modelData, String caseId, String sourceUrl, Status status = null) {
         clearStatus(caseId);
         if (status == null) {
             status = getStatus(caseId);
@@ -268,11 +291,11 @@ public class UploadDataServiceImpl implements UploadDataService {
                         if(jsonObject.getBoolean("success")){
                             status.addMessage(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！")
                             //同步完成,从configDomain中移除记录
-                            removeConfig(serverUrl);
+                            removeConfig(sourceUrl);
                         }else{
                             if(jsonObject.getString("errorCode")=="exist"){
                                 status.addMessage(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!")
-                                removeConfig(serverUrl);
+                                removeConfig(sourceUrl);
                             }
                             else{
                                 status.addMessage(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
