@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cn.arvix.vrdata.been.Status;
 import cn.arvix.vrdata.service.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,8 @@ public class AdminController {
 	FetchDataService fetchDataService;
 	@Autowired
 	UploadDataService uploadDataService;
+	@Autowired
+	SimpleStaService simpleStaService;
 
 	@RequestMapping("/listModelData/{max}/{offset}")
 	//TODO: 分页
@@ -236,6 +239,13 @@ public class AdminController {
 			result.put(ArvixDataConstants.ERROR_CODE,404);
 		}
 		return result;
+	}
+	
+	@Secured({Role.ROLE_ADMIN}) 
+	@RequestMapping(value = "/downsizeStaShow")
+	public String downsizeStaShow(Model model) {
+		model.addAttribute("size", simpleStaService.getDownloadSize());
+		return "admin/downsizeStaShow";
 	}
 	
 }
