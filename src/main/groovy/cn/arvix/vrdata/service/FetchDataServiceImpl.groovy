@@ -433,6 +433,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                 }
             }
             ///upload/playerImages/ZujWX1srahK/playerImages/
+			// TODO  存储播放图片到分布式文件系统
             sourceObject.put(filePathKey, SERVER_URL+"upload/playerImages/"+caseId+"/playerImages/"+fileName)
         }
     }

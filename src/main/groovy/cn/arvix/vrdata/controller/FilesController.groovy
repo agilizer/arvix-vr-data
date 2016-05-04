@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 
 import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.service.ConfigDomainService
+import cn.arvix.vrdata.service.SimpleStaService
 
 
 @Controller
@@ -20,6 +21,8 @@ class FilesController {
 	.getLogger(FilesController.class);
 	@Autowired
 	ConfigDomainService configDomainService;
+	@Autowired
+	SimpleStaService simpleStaService;
 	@RequestMapping("/**")
 	public String checkUsername(HttpServletRequest request,HttpServletResponse response) {
 		response.setHeader("Accept-Ranges", "bytes");
@@ -57,14 +60,13 @@ class FilesController {
 			File file =  new File(downLoadPath);
 			if(file.exists()){
 				long fileLength = file.length();//application/octet-stream
-				println("filename:"+contentPath+"    length:"+fileLength);
+				log.info("filename:"+contentPath+"    length:"+fileLength);
 				if(downLoadPath.endsWith(".jpg")){
 					response.setContentType("image/jpeg;");
 				}else{
 					response.setContentType("application/octet-stream");
 					
 				}
-				
 				response.setHeader("Content-Length", String.valueOf(fileLength));
 				bis = new BufferedInputStream(new FileInputStream(downLoadPath));
 				bos = new BufferedOutputStream(response.getOutputStream());
@@ -76,7 +78,8 @@ class FilesController {
 					countRead = countRead +bytesRead;
 				}
 				bos.flush();
-				println ("bytesRead--->"+countRead)
+				log.info ("bytesRead--->"+countRead)
+				simpleStaService.addDownloadSize(countRead)
 			}
 			
 		} catch (Exception e) {
