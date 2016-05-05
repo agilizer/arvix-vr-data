@@ -27,6 +27,7 @@
 				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
+			<h1 th:text="${#calendars.format(startTime,'yyyy-MM-dd HH:mm')}"></h1>
 			<h1 th:text="${size+' B'}"></h1>
 			<h1 th:text="${#numbers.formatDecimal(size/1000.0,0,2)+' KB'}"></h1>
 			<h1 th:text="${#numbers.formatDecimal(size/1000.0/1000,0,2)+' MB'}"></h1>
