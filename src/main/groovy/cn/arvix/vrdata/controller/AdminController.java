@@ -1,17 +1,20 @@
 package cn.arvix.vrdata.controller;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
-
-import cn.arvix.vrdata.been.Status;
-import cn.arvix.vrdata.service.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import cn.arvix.vrdata.been.Status;
 import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.ModelData;
 import cn.arvix.vrdata.domain.Role;
@@ -19,6 +22,14 @@ import cn.arvix.vrdata.domain.User;
 import cn.arvix.vrdata.repository.RoleRepository;
 import cn.arvix.vrdata.repository.UserRepository;
 import cn.arvix.vrdata.repository.UserRoleRepository;
+import cn.arvix.vrdata.service.FetchDataService;
+import cn.arvix.vrdata.service.FetchDataServiceImpl;
+import cn.arvix.vrdata.service.JdbcPage;
+import cn.arvix.vrdata.service.ModelDataService;
+import cn.arvix.vrdata.service.SimpleStaService;
+import cn.arvix.vrdata.service.UploadDataService;
+import cn.arvix.vrdata.service.UserRoleService;
+import cn.arvix.vrdata.service.UserService;
 import cn.arvix.vrdata.util.StaticMethod;
 
 @Controller
@@ -42,6 +53,8 @@ public class AdminController {
 	UploadDataService uploadDataService;
 	@Autowired
 	SimpleStaService simpleStaService;
+	
+	private Calendar startStaTime = Calendar.getInstance();
 
 	@RequestMapping("/listModelData/{max}/{offset}")
 	//TODO: 分页
@@ -245,6 +258,7 @@ public class AdminController {
 	@RequestMapping(value = "/downsizeStaShow")
 	public String downsizeStaShow(Model model) {
 		model.addAttribute("size", simpleStaService.getDownloadSize());
+		model.addAttribute("startTime", startStaTime);
 		return "admin/downsizeStaShow";
 	}
 	

@@ -4,11 +4,14 @@ import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.Ordered;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
@@ -72,8 +75,23 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
     	}else{
     		return null;
     	}
-     
-
+    }
+    @Value("${sync.taskExecutor.corePoolSize}")
+    private int corePoolSize;
+    @Value("${sync.taskExecutor.maxPoolSize}")
+    private int maxPoolSize;
+    @Value("${sync.taskExecutor.queueCapacity}")
+    private int queueCapacity;
+    @Value("${sync.taskExecutor.keepAliveSeconds}")
+    private int keepAliveSeconds;
+    @Bean
+    TaskExecutor syncTaskExecutor(){
+    	ThreadPoolTaskExecutor taskExecutor  = new ThreadPoolTaskExecutor();
+    	taskExecutor.setCorePoolSize(corePoolSize);
+    	taskExecutor.setMaxPoolSize(maxPoolSize);
+    	taskExecutor.setKeepAliveSeconds(keepAliveSeconds);
+    	taskExecutor.setQueueCapacity(queueCapacity);
+    	return taskExecutor;
     }
    
 }
