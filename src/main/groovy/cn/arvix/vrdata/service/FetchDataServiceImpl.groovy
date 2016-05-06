@@ -1,11 +1,16 @@
 package cn.arvix.vrdata.service
 
 import cn.arvix.vrdata.been.Status
+import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
 import cn.arvix.vrdata.consants.ArvixDataConstants
-import cn.arvix.vrdata.domain.ConfigDomain
 import cn.arvix.vrdata.domain.ModelData
+import cn.arvix.vrdata.domain.SyncTaskContent
+import cn.arvix.vrdata.domain.SyncTaskContent.TaskLevel
+import cn.arvix.vrdata.domain.SyncTaskContent.TaskType
+import cn.arvix.vrdata.domain.User
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
+import cn.arvix.vrdata.repository.SyncTaskContentRepository
 import cn.arvix.vrdata.util.AntZipUtil
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -19,6 +24,9 @@ import org.jsoup.select.Elements
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.task.TaskRejectedException
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
 import java.util.concurrent.ConcurrentHashMap
@@ -39,7 +47,16 @@ public class FetchDataServiceImpl implements FetchDataService {
     @Autowired
     private ConfigDomainRepository configDomainRepository;
     @Autowired
-    JpaShareService jpaShareService;
+    private JpaShareService jpaShareService;
+    @Autowired
+    private SyncTaskContentRepository syncTaskContentRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    @Qualifier("syncTaskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    private AutoSyncAndUpdateTask autoSyncAndUpdateTask;
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
     public static final String SERVER_URL = "http://vr.arvix.cn/";
@@ -55,41 +72,37 @@ public class FetchDataServiceImpl implements FetchDataService {
 
     //增加自动同步功能, 如果需要自动同步(dstUrl不为空), fetch后调用同步接口.
     @Override
-    public Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force) {
+    public Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force, TaskLevel taskLevel, SyncTaskContent.TaskType taskType) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
         if (sourceUrl.contains(curlSep)) {
             //多个地址
             String[] sourceUrls = sourceUrl.split(urlSep);
-            return fetch(sourceUrls, dstUrl, force);
+            return fetch(sourceUrls, dstUrl, force, taskLevel, taskType);
         } else {
-            //添加configDomain记录
-            addUrlToConfig(sourceUrl, dstUrl);
-            return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result);
+            return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, taskLevel, taskType);
         }
     }
 
-    @Override
-    public Map<String, Object> fetch(String[] sourceUrls, String dstUrl, boolean force) {
+    public Map<String, Object> fetch(String[] sourceUrls, String dstUrl, boolean force, TaskLevel taskLevel, SyncTaskContent.TaskType taskType) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
         if (sourceUrls == null || sourceUrls.size() == 0) {
             result.put(ERROR, "Empty sourceUrl.");
         } else {
-            //多个sourceUrl放入configDomain中,依次抓取
-            for (String sourceUrl : sourceUrls) {
-                sourceUrl = sourceUrl.trim();
-                if (sourceUrl != "") {
-                    addUrlToConfig(sourceUrl,dstUrl);
-                }
-            }
             for (String sourceUrl : sourceUrls) {
                 if (sourceUrl != "") {
-                    fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result);
+                    fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, taskLevel, taskType);
                 }
             }
         }
         return result;
+    }
+
+    Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force, SyncTaskContent syncTaskContent) {
+        Map<String, Object> result = new HashMap<>();
+        result.put(STATUS, -1);
+        return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, null, syncTaskContent.getTaskType(), syncTaskContent);
     }
 
     public Status getCaseStatus(String caseId) {
@@ -109,49 +122,11 @@ public class FetchDataServiceImpl implements FetchDataService {
         deferedMessage.remove(caseId);
     }
 
-    private void addUrlToConfig(String sourceUrl, String dstUrl = null) {
-        if (sourceUrl == null || sourceUrl == "") {
-            return;
-        }
-        sourceUrl = sourceUrl.trim();
-        if (dstUrl != null) {
-            dstUrl = dstUrl.trim();
-        }
-        def configDomain = new ConfigDomain()
-        configDomain.setEditable(true)
-        configDomain.setDescription("fetch source url")
-        configDomain.setMapName(FETCH_PREFIX + sourceUrl)
-        if (dstUrl == null) {
-            configDomain.setMapValue(sourceUrl);
-        } else {
-            //记录自动同步信息
-            configDomain.setMapValue(sourceUrl + "|" + dstUrl);
-        }
-        configDomain.setValueType(ConfigDomain.ValueType.String);
-        //config在服务器启动时加载完成
-        try {
-            configDomainRepository.saveAndFlush(configDomain)
-        } catch (Exception e) {
-            //Duplicate entry, ignore
-        }
-    }
-
-    public void removeConfig(String sourceUrl) {
-        String hql = "delete from ConfigDomain c where c.mapName=:key ";
-        jpaShareService.updateForHql(hql, ["key" : FETCH_PREFIX + sourceUrl.trim()]);
-    }
-
-    private void fetchData(String serverUrl, String dstUrl, String workDir, String[] fetchUrlArray,boolean force, Map<String, Object> result) {
-        fetchUrlArray.each {
-            fetchData(serverUrl, dstUrl,workDir, it, force,result)
-        }
-    }
-
-    private void removeUrlAndFlagCheck(String url){
+    private void removeUrlAndFlagCheck(String url) {
         FETCH_MAP.remove(url)
     }
 
-    private Map<String, Object> fetchData(String serverUrl, String dstUrl, String workDir, String sourceUrl, boolean force, Map<String, Object> result) {
+    private Map<String, Object> fetchData(String serverUrl, String dstUrl, String workDir, String sourceUrl, boolean force, Map<String, Object> result, TaskLevel taskLevel, SyncTaskContent.TaskType taskType, SyncTaskContent syncTaskContent = null) {
         StringBuilder errStringBuilder = (StringBuilder)result.get(ERROR);
         if (errStringBuilder == null) {
             errStringBuilder = new StringBuilder();
@@ -173,8 +148,6 @@ public class FetchDataServiceImpl implements FetchDataService {
                 if(modelDataExit){
                     errStringBuilder.append("服务器已经存在此数据，忽略："+sourceUrl);
                     removeUrlAndFlagCheck(sourceUrl)
-                    //校验未通过,移除记录
-                    removeConfig(sourceUrl);
                     return result;
                 }
                 ModelData modelData = new ModelData();
@@ -182,37 +155,86 @@ public class FetchDataServiceImpl implements FetchDataService {
                 modelData.setSourceUrl(sourceUrl);
                 def fileSaveDir = workDir +caseId+"/"
                 try {
-                    Thread worker = Thread.start {
-                        Status status = getStatus(caseId);
-                        status.addMessage("正在抓取: " + sourceUrl);
-                        try {
-                            genModelData(caseId,modelData,fileSaveDir);
-                        } catch(e) {
-                            log.error("fetch caseId {} genModelData error:",caseId,e);
-                            status.code = -1;
-                            status.addMessage("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
-                            removeUrlAndFlagCheck(sourceUrl)
-                            return;
-                        }
-                        genFiles(caseId,fileSaveDir,modelData,serverUrl);
-                        removeUrlAndFlagCheck(sourceUrl)
-                        //上传成功,修改数据库set
-                        modelData.fetchStatus = ModelData.FetchStatus.FINISH;
-                        modelDataRepository.saveAndFlush(modelData);
-                        //移除config中的记录
-                        removeConfig(sourceUrl);
-                        //如果dstUrl不为空,继续同步数据
-                        if (dstUrl && dstUrl != "") {
-                            Map<String, Object> uploadFeedBack = uploadDataService.uploadData(sourceUrl, dstUrl, status);
-                            int uploadStatus = (Integer)uploadFeedBack.get(STATUS);
-                            if (uploadStatus == -1) {
-                                log.warn(sourceUrl + " -> " + dstUrl + ": " + uploadFeedBack);
-                                status.addMessage(uploadFeedBack.get(ERROR).toString());
+                    if (syncTaskContent == null) {
+                        syncTaskContent = syncTaskContentRepository.findOneByCaseId(caseId);
+                        if (syncTaskContent == null) {
+                            syncTaskContent = new SyncTaskContent();
+                            User user = userService.currentUser();
+                            syncTaskContent.setCaseId(caseId);
+                            syncTaskContent.setAuthor(user);
+                            syncTaskContent.setSourceUrl(sourceUrl);
+                            syncTaskContent.setDstUrl(dstUrl);
+                            syncTaskContent.setTaskLevel(taskLevel);
+                            syncTaskContent.setDateCreated(Calendar.getInstance());
+                            if (dstUrl == null || dstUrl.trim().equals("") || taskType == TaskType.FETCH) {
+                                syncTaskContent.setTaskType(TaskType.FETCH);
+                            } else {
+                                syncTaskContent.setTaskType(TaskType.FETCH_UPDATE);
                             }
                         }
+                        syncTaskContent.setWorking(false);
+                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
+                        syncTaskContentRepository.saveAndFlush(syncTaskContent);
                     }
-                    result.put(STATUS, 1);
-                    result.put("WORKER", worker);
+                    Runnable worker = new Runnable() {
+                        public void run() {
+                            Status status = getStatus(caseId);
+                            status.addMessage("正在抓取: " + sourceUrl);
+                            try {
+                                genModelData(caseId, modelData, fileSaveDir);
+                            } catch (e) {
+                                log.error("fetch caseId {} genModelData error:", caseId, e);
+                                status.code = -1;
+                                status.addMessage("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
+                                removeUrlAndFlagCheck(sourceUrl)
+                                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                                syncTaskContentRepository.saveAndFlush(syncTaskContent);
+                                return;
+                            }
+                            try {
+                                genFiles(caseId, fileSaveDir, modelData, serverUrl, syncTaskContent);
+                                removeUrlAndFlagCheck(sourceUrl)
+                                //上传成功,修改数据库set
+                                modelData.fetchStatus = ModelData.FetchStatus.FINISH;
+                                modelDataRepository.saveAndFlush(modelData);
+                                //移除记录
+                                syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+                            } catch (Exception e) {
+                                status.addMessage("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
+                                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                                syncTaskContentRepository.saveAndFlush(syncTaskContent);
+                            }
+                            //如果dstUrl不为空,继续同步数据
+                            if (dstUrl && dstUrl != "" && syncTaskContent.getTaskType() == TaskType.FETCH_UPDATE) {
+                                Map<String, Object> uploadFeedBack = uploadDataService.uploadData(sourceUrl, dstUrl, taskLevel, status);
+                                int uploadStatus = (Integer) uploadFeedBack.get(STATUS);
+                                if (uploadStatus == -1) {
+                                    log.warn(sourceUrl + " -> " + dstUrl + ": " + uploadFeedBack);
+                                    status.addMessage(uploadFeedBack.get(ERROR).toString());
+                                }
+                            }
+
+                        }
+                    }
+                    try {
+                        if (syncTaskContent.taskLevel == TaskLevel.HIGH) {
+                            new Thread(worker).start();
+                        } else {
+                            taskExecutor.execute(worker);
+                        }
+                        result.put(STATUS, 1);
+                        errStringBuilder.append("正在抓取: " + sourceUrl);
+                        log.info("正在抓取: " + sourceUrl);
+                        syncTaskContent.setWorking(true);
+                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WORKING);
+                    } catch (TaskRejectedException e) {
+                        result.put(STATUS, 1);
+                        errStringBuilder.append("正在排队: " + sourceUrl);
+                        log.info("正在排队: " + sourceUrl);
+                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
+                        autoSyncAndUpdateTask.addToWait(worker);
+                    }
+                    syncTaskContentRepository.saveAndFlush(syncTaskContent);
                 }catch(e){
                     log.error("fetch caseId {} genFiles error:",caseId,e)
                     removeUrlAndFlagCheck(sourceUrl)
@@ -221,20 +243,17 @@ public class FetchDataServiceImpl implements FetchDataService {
                 errStringBuilder.append("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 log.warn("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 removeUrlAndFlagCheck(sourceUrl)
-                //校验未通过,移除记录
-                removeConfig(sourceUrl);
             }
         }else{
             errStringBuilder.append("源url不能为空");
             log.warn("源url不能为空");
             removeUrlAndFlagCheck(sourceUrl)
         }
-        errStringBuilder.append("正在抓取: " + sourceUrl);
         return result;
     }
 
 
-    public  void genFiles(String caseId,String fileSaveDir,ModelData modelData,String serverUrl){
+    public  void genFiles(String caseId,String fileSaveDir,ModelData modelData,String serverUrl, SyncTaskContent syncTaskContent){
         Status status = getStatus(caseId);
         def jsonObject =  genFileJson(caseId);
         def fileList = []
@@ -312,6 +331,8 @@ public class FetchDataServiceImpl implements FetchDataService {
                         status.code = -1;
                         status.addMessage("抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+"请开启VPN!");
                         log.error("fetch file   return--",e);
+                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                        syncTaskContentRepository.saveAndFlush(syncTaskContent);
                         return
                     }
                 }
@@ -399,7 +420,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                     def saveDir  = fileSaveDir+"playerImages/"
                     def fetchFileKeyList = ["signed_src","download_url","src","thumbnail_signed_src"]
                     def sumPlayImage = objectAr.size()*4
-                    status.addMessage("发现自动播放,共要抓取 "+sumPlayImage+" 个文件");
+                    status.addMessage("发现自动播放,共要抓取 "+sumPlayImage+" 个文件,caseId: " + caseId);
                     def activeReel = []
                     def showIndex = 1
                     objectAr.each  {jsonObject->
@@ -407,7 +428,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                         activeReel.add(["sid":jsonObject.get("sid")])
                         fetchFileKeyList.each{fileUrlKey->
                             fetchPlayerImage(saveDir,caseId,jsonObject,fileUrlKey)
-                            status.addMessage("自动播放文件${showIndex}/${sumPlayImage}完成");
+                            status.addMessage("自动播放文件${showIndex}/${sumPlayImage}完成,caseId: " + caseId);
                             showIndex++;
                         }
                     }

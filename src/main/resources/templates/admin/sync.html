@@ -24,159 +24,148 @@
 				<div class="col-lg-12">
 					<h1 class="page-header">数据同步</h1>
 				</div>
-				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
 
 				<form id="uploadForm" class="form-horizontal">
 					<div class="form-group">
-						<label for="uploadServerUrl" class="col-sm-2 control-label">源地址</label>
+						<label for="sourceUrl" class="col-sm-2 control-label">源地址</label>
 						<div class="col-sm-10">
-							<textarea class="form-control" id="uploadServerUrl" placeholder="多个地址换行分隔.地址参考格式:https://my.matterport.com/show/?m=YGPANRipHeL"></textarea>
+							<textarea class="form-control" id="sourceUrl" placeholder="多个地址换行分隔.地址参考格式:https://my.matterport.com/show/?m=YGPANRipHeL"></textarea>
 						</div>
 					</div>
 					<div class="form-group">
-						<label for="uploadDstUrl" class="col-sm-2 control-label">同步目标地址</label>
+						<label for="dstUrl" class="col-sm-2 control-label">同步目标地址</label>
 						<div class="col-sm-10">
-							<input type="input" class="form-control" value="http://vr.arvix.cn/api/v1/updateModelData" id="uploadDstUrl" placeholder="目标地址">
+							<input type="input" class="form-control" value="http://vr.arvix.cn/api/v1/updateModelData" id="dstUrl" placeholder="目标地址">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">紧急程度</label>
+						<div class="col-sm-10">
+							<label class="radio-inline">
+								<input type="radio" name="taskLevel" id="taskLevel1" value="HIGH"> High
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="taskLevel" checked="checked" id="taskLevel2" value="NORMAL"> Normal
+							</label>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">同步类型</label>
+						<div class="col-sm-10">
+							<label class="radio-inline">
+								<input type="radio" name="taskType" id="taskType1" value="FETCH"> FETCH
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="taskType" checked="checked" id="taskType2" value="FETCH_UPDATE"> FETCH_UPDATE
+							</label>
+							<label class="radio-inline">
+								<input type="radio" name="taskType" id="taskType3" value="UPDATE"> UPDATE
+							</label>
 						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-sm-offset-2 col-sm-10">
-							<button type="submit" id="startUpload" class="btn btn-default">提交</button>
+							<button type="button" id="startSync" class="btn btn-default">提交</button>
 						</div>
 					</div>
-					<textarea id="uploadStatusBox"  class="form-control" rows="5" disabled="disabled"></textarea>
 				</form>
-
 			</div>
 			<div class="row">
 				<div class="col-lg-12">
-					<h1 class="page-header">数据抓取</h1>
+					<h1 class="page-header">任务状态</h1>
 				</div>
-				<!-- /.col-lg-12 -->
 			</div>
 			<div class="row">
-
-				<form id="syncForm" class="form-horizontal">
-					<div class="form-group">
-						<label for="syncSourceUrl" class="col-sm-2 control-label">源地址</label>
-						<div class="col-sm-10">
-							<textarea class="form-control" id="syncSourceUrl" placeholder="多个地址换行分隔.地址参考格式:https://my.matterport.com/show/?m=YGPANRipHeL"></textarea>
-						</div>
-					</div>
-					<div class="form-group">
-						<label for="uploadDstUrl" class="col-sm-2 control-label">同步目标地址</label>
-						<div class="col-sm-10">
-							<input type="input" class="form-control" id="syncDstUrl" value="http://vr.arvix.cn/api/v1/updateModelData" placeholder="目标地址为空则不自动同步">
-						</div>
-					</div>
-					<div class="form-group">
-						<div class="col-sm-offset-2 col-sm-10">
-							<button type="submit" id="startSync" class="btn btn-default">提交</button>
-						</div>
-					</div>
-					<textarea id="syncStatusBox" class="form-control" rows="5" disabled="disabled"></textarea>
-				</form>
-		
+				<div class="col-md-6">
+					<textarea id="uploadStatusBox"  class="form-control" rows="5" disabled="disabled" th:text="${messages}"></textarea>
+				</div>
+				<div class="col-md-6">
+					<table class="table table-striped">
+						<thead>
+						<tr>
+							<th>#</th>
+							<th>caseId</th>
+							<th>taskLevel</th>
+							<th>taskType</th>
+							<th>taskStatus</th>
+							<th>操作</th>
+						</tr>
+						</thead>
+						<tbody>
+						<tr th:each="task:${tasks}">
+							<th th:text="${task.getId()}"></th>
+							<th th:text="${task.getCaseId()}"></th>
+							<th th:text="${task.getTaskLevel()}"></th>
+							<th th:text="${task.getTaskType()}"></th>
+							<th th:text="${task.getTaskStatus()}"></th>
+							<th th:if="${task.getTaskStatus()} == 'WORKING'">-</th>
+							<th th:if="${task.getTaskStatus()} != 'WORKING'"><a href="javascript:void(0)" th:attr="caseId=${task.getCaseId()}" th:attrappend="taskType=${task.getTaskType()}" onclick="deleteTask(this)">删除</a></th>
+						</tr>
+						</tbody>
+					</table>
+				</div>
 			</div>
 		</div>
 	</div>
 	<link rel="stylesheet" href="/resources/css/dataSync.css"/>
 	<script type="text/javascript" src="/resources/plugins/jquery.js"></script>
 	<script type="text/javascript">
-		var uploadCaseUrl = "";
-		var syncCaseUrl = "";
 
 		$(document).ready(function() {
-			//数据同步
-			$("#uploadForm").submit(function() {
-				return startUpload();
-			});
-
-			//数据抓取
-			$("#syncForm").submit(function() {
-				return startSync();
+			$("#startSync").click(function() {
+				startSync();
 			});
 		});
 
-		function startUpload() {
-			var serverUrl = $("#uploadServerUrl").val();
-			var dstUrl = $("#uploadDstUrl").val();
-			var uploadMsgBox = $("#uploadStatusBox");
-			if (serverUrl.length == 0 || dstUrl.length == 0) {
-				alert("地址字段不能为空");
-				return false;
-			}
+		function deleteTask(obj) {
+			var caseId = $(obj).attr("caseId");
+			var taskType = $(obj).attr("taskType");
+			console.log(caseId + ", " + taskType);
 			$.ajax({
-				url: "/admin/uploadData",
+				url: "/admin/deleteTask",
 				type: "POST",
-				data: {"serverUrl": serverUrl, "dstUrl": dstUrl},
+				data: {"caseId": caseId, "taskType": taskType},
 				dataType: "json",
 				success: function(data) {
-					alert(data.uploadResult.Msg);
-					if (data.uploadResult.Status == 1) {
-						uploadCaseUrl = serverUrl;
-					}
+					alert(data.deleteResult);
+					location.reload();
 				}
 			});
 			return false;
 		}
 
 		function startSync() {
-			var sourceUrl = $("#syncSourceUrl").val();
-			var dstUrl = $("#syncDstUrl").val();
-			var syncMsgBox = $("#syncStatusBox");
+			var sourceUrl = $("#sourceUrl").val();
+			var dstUrl = $("#dstUrl").val();
+			var taskLevel = $("input[name='taskLevel']:checked").val();
+			var taskType = $("input[name='taskType']:checked").val();
+			var url = "/admin";
+			if (taskType == "UPDATE") {
+				url += "/uploadData";
+			} else {
+				url += "/sync";
+			}
 			if (sourceUrl.length == 0) {
 				alert("地址字段不能为空");
 				return false;
 			}
 			$.ajax({
-				url: "/admin/sync",
+				url: url,
 				type: "POST",
-				data: {"sourceUrl": sourceUrl, "dstUrl": dstUrl},
+				data: {"sourceUrl": sourceUrl, "dstUrl": dstUrl, "taskLevel": taskLevel, "taskType": taskType},
 				dataType: "json",
 				success: function(data) {
-					alert(data.fetchResult.Msg);
-					if (data.fetchResult.Status == 1) {
-						syncCaseUrl = sourceUrl;
+					if (data.fetchResult) {
+						alert(data.fetchResult.Msg);
+					} else {
+						alert(data.uploadResult.Msg);
 					}
+					location.reload();
 				}
 			});
 			return false;
-		}
-
-		setTimeout("startCheckStatus()", 3000);
-
-		function startCheckStatus() {
-			var uploadMsgBox = $("#uploadStatusBox");
-			var syncMsgBox = $("#syncStatusBox");
-			console.log("interval running.");
-			if (uploadCaseUrl != null && uploadCaseUrl.length > 0) {
-				updateStatus(uploadMsgBox, "/admin/checkUploadStatus", uploadCaseUrl);
-			}
-			if (syncCaseUrl != null && syncCaseUrl.length > 0) {
-				updateStatus(syncMsgBox, "/admin/checkSyncStatus", syncCaseUrl);
-			}
-			setTimeout("startCheckStatus()", 3000);
-		}
-
-		function updateStatus(textBox, url, id) {
-			$.ajax({
-				url: url,
-				type: "POST",
-				data: {"sourceUrl": id, "serverUrl": id},
-				dataType: "json",
-				success: function(data) {
-					if (data.status != null) {
-						var message = "";
-						for (var msgIndex in data.status.message) {
-							message += data.status.message[msgIndex] + "\n";
-						}
-						textBox.val(message);
-					}
-				}
-			});
 		}
 	</script>
 

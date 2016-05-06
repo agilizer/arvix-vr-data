@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import cn.arvix.vrdata.been.Status;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
 import org.apache.http.util.Args;
@@ -52,6 +53,7 @@ public class FileProgressBody extends AbstractContentBody {
 			.getLogger(FileProgressBody.class);
     private final File file;
     private final String filename;
+    private Status status;
 
     /**
      * @since 4.1
@@ -93,6 +95,10 @@ public class FileProgressBody extends AbstractContentBody {
         this(file, ContentType.DEFAULT_BINARY, file != null ? file.getName() : null);
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     /**
      * @since 4.3
      */
@@ -126,6 +132,9 @@ public class FileProgressBody extends AbstractContentBody {
             while ((l = in.read(tmp)) != -1) {
                 out.write(tmp, 0, l);
                 uploaded = uploaded +l;
+                if (status != null) {
+                    status.addMessage("progress: " + uploaded + "/" + fileSize);
+                }
                 //UILog.getInstance().logProgress(fileSize, uploaded,filename);
             }
             out.flush();

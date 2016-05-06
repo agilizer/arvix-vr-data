@@ -23,29 +23,39 @@ public class SyncTaskContent  implements Serializable{
 	@Id
 	@GeneratedValue
 	@Column
-	private Long id; 
+	private Long id;
+	@Column
+	private String caseId;
 	@ManyToOne()
 	private User author;
 	@Column(columnDefinition = "longtext")
-	private String sourceUrls;
+	private String sourceUrl = "";
 	@Column
-	private String dstUrl;
+	private String dstUrl = "";
 	@Column
 	private Boolean working = false;
 	@Column
 	private TaskLevel taskLevel = TaskLevel.NORMAL;
 	@Column
 	private TaskStatus taskStatus = TaskStatus.WAIT;
+	@Column
+	private TaskType taskType;
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar dateCreated;
-	
+
 	public static enum TaskLevel{
-		HIGHT,
+		HIGH,
 		NORMAL		
 	}
 	public static enum TaskStatus{
 		WORKING,
-		WAIT		
+		WAIT,
+		FAILED
+	}
+	public static enum TaskType{
+		FETCH,
+		UPDATE,
+		FETCH_UPDATE
 	}
 	public Long getId() {
 		return id;
@@ -53,17 +63,23 @@ public class SyncTaskContent  implements Serializable{
 	public void setId(Long id) {
 		this.id = id;
 	}
+	public String getCaseId() {
+		return caseId;
+	}
+	public void setCaseId(String caseId) {
+		this.caseId = caseId;
+	}
 	public User getAuthor() {
 		return author;
 	}
 	public void setAuthor(User author) {
 		this.author = author;
 	}
-	public String getSourceUrls() {
-		return sourceUrls;
+	public String getSourceUrl() {
+		return sourceUrl;
 	}
-	public void setSourceUrls(String sourceUrls) {
-		this.sourceUrls = sourceUrls;
+	public void setSourceUrl(String sourceUrls) {
+		this.sourceUrl = sourceUrls;
 	}
 	public String getDstUrl() {
 		return dstUrl;
@@ -95,7 +111,16 @@ public class SyncTaskContent  implements Serializable{
 	public void setDateCreated(Calendar dateCreated) {
 		this.dateCreated = dateCreated;
 	}
-	
-	
+	public TaskType getTaskType() {
+		return taskType;
+	}
+	public void setTaskType(TaskType taskType) {
+		this.taskType = taskType;
+	}
 
+	public String toString() {
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append("SyncTask[" + caseId + ", " + taskType + ", " + taskLevel + ", userId: " + author.getId() + "]");
+		return stringBuilder.toString();
+	}
 }

@@ -1,11 +1,14 @@
 package cn.arvix.vrdata.service
 
 import cn.arvix.vrdata.been.Status
+import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
 import cn.arvix.vrdata.consants.ArvixDataConstants
-import cn.arvix.vrdata.domain.ConfigDomain
 import cn.arvix.vrdata.domain.ModelData
+import cn.arvix.vrdata.domain.SyncTaskContent
+import cn.arvix.vrdata.domain.User
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
+import cn.arvix.vrdata.repository.SyncTaskContentRepository
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
 import org.apache.commons.io.IOUtils
@@ -23,6 +26,9 @@ import org.apache.http.util.EntityUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.core.task.TaskRejectedException
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
 import java.beans.BeanInfo
@@ -48,6 +54,15 @@ public class UploadDataServiceImpl implements UploadDataService {
     JpaShareService jpaShareService;
     @Autowired
     private ConfigDomainRepository configDomainRepository;
+    @Autowired
+    private SyncTaskContentRepository syncTaskContentRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    @Qualifier("syncTaskExecutor")
+    private ThreadPoolTaskExecutor taskExecutor;
+    @Autowired
+    private AutoSyncAndUpdateTask autoSyncAndUpdateTask;
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
     public static final String urlSep = "\\n";
@@ -61,7 +76,7 @@ public class UploadDataServiceImpl implements UploadDataService {
      * @Param sourceUrl 包含caseId的url
      * @Param dstUrl 上传目标服务器的url
      */
-    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Status status = null) {
+    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, SyncTaskContent.TaskLevel taskLevel, Status status = null) {
         Map<String, Object> result = new HashMap<>();
         result.put(STATUS, -1);
         if (sourceUrl.contains(curlSep)) {
@@ -69,36 +84,33 @@ public class UploadDataServiceImpl implements UploadDataService {
             if (serverUrls == null || serverUrls.length == 0) {
                 result.put(ERROR, "Empty sourceUrl.");
             } else {
-                //多个sourceUrl放入configDomain中,依次抓取
-                for (String surl : serverUrls) {
-                    surl = surl.trim();
-                    if (surl != "") {
-                        addUrlToConfig(surl, dstUrl);
-                    }
-                }
                 for (String surl : serverUrls) {
                     if (surl != "") {
-                        uploadData(surl, dstUrl, result, status);
+                        uploadData(surl, dstUrl, result, taskLevel, status);
                     }
                 }
             }
         } else {
-            addUrlToConfig(sourceUrl, dstUrl);
-            uploadData(sourceUrl, dstUrl, result, status);
+            uploadData(sourceUrl, dstUrl, result, taskLevel, status);
         }
 
         return result;
     }
 
-    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Map<String, Object> result, Status status = null) {
+    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, SyncTaskContent syncTaskContent) {
+        Map<String, Object> result = new HashMap<>();
+        result.put(STATUS, -1);
+        uploadData(sourceUrl, dstUrl, result, null, null, syncTaskContent);
+        return result;
+    }
+
+    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Map<String, Object> result, SyncTaskContent.TaskLevel taskLevel, Status status = null, SyncTaskContent syncTaskContent = null) {
 
         StringBuilder stringBuilder = getErrorMsg(result);
         def subIndex = sourceUrl.indexOf("?m=");
         if (subIndex < 0) {
             stringBuilder.append("名称不合法: " + sourceUrl);
             log.warn("名称不合法: " + sourceUrl);
-            //校验未通过,移除记录
-            removeConfig(sourceUrl);
         } else {
             def caseId = sourceUrl.substring(subIndex + 3).trim();
             ModelData modelData = modelDataRepository.findByCaseId(caseId);
@@ -112,15 +124,11 @@ public class UploadDataServiceImpl implements UploadDataService {
             if (modelData == null) {
                 stringBuilder.append("数据库中不存在此数据: " + sourceUrl);
                 log.warn("数据库中不存在此数据: " + sourceUrl);
-                //校验未通过,移除记录
-                removeConfig(sourceUrl);
             } else {
                 //判断目标服务器是否存在
                 if (modelExits(dstUrl, caseId)) {
                     stringBuilder.append("目标服务器已存在此数据: " + sourceUrl);
                     log.warn("目标服务器已存在此数据: " + sourceUrl);
-                    //校验未通过,移除记录
-                    removeConfig(sourceUrl);
                 } else {
                     String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
                     if (!filePath.endsWith("/")) {
@@ -133,40 +141,62 @@ public class UploadDataServiceImpl implements UploadDataService {
                         return result;
                     }
                     if (rootFile.exists() && rootFile.isFile()) {
+                        //保存任务记录
+                        if (syncTaskContent == null) {
+                            syncTaskContent = syncTaskContentRepository.findOneByCaseId(caseId);
+                            if (syncTaskContent == null) {
+                                syncTaskContent = new SyncTaskContent();
+                                User user = userService.currentUser();
+                                syncTaskContent.setCaseId(caseId);
+                                syncTaskContent.setAuthor(user);
+                                syncTaskContent.setSourceUrl(sourceUrl);
+                                syncTaskContent.setDstUrl(dstUrl);
+                                syncTaskContent.setTaskLevel(taskLevel);
+                                syncTaskContent.setDateCreated(Calendar.getInstance());
+                                syncTaskContent.setTaskType(SyncTaskContent.TaskType.UPDATE);
+                            }
+                            syncTaskContent.setWorking(false);
+                            syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
+                            syncTaskContentRepository.saveAndFlush(syncTaskContent);
+                        }
                         String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
-                        Thread worker = Thread.start {
-                            caseMap.put(caseId, caseId);
-                            try {
-                                upload(dstUrl, apiKey, filePath, modelData, caseId, sourceUrl, status);
-                            } finally {
-                                clearCaseMap(caseId);
+                        Runnable worker = new Runnable() {
+                            public void run() {
+                                caseMap.put(caseId, caseId);
+                                try {
+                                    upload(dstUrl, apiKey, filePath, modelData, caseId, sourceUrl, taskLevel, status, syncTaskContent);
+                                } finally {
+                                    clearCaseMap(caseId);
+                                }
                             }
                         }
-                        result.put(STATUS, 1);
-                        result.put("WORKER", worker);
-                        stringBuilder.append("正在同步数据: " + sourceUrl);
+                        try {
+                            if (syncTaskContent.taskLevel == SyncTaskContent.TaskLevel.HIGH) {
+                                new Thread(worker).start();
+                            } else {
+                                taskExecutor.execute(worker);
+                            }
+                            result.put(STATUS, 1);
+                            stringBuilder.append("正在同步数据: " + sourceUrl);
+                            log.info("正在同步数据: " + sourceUrl);
+                            syncTaskContent.setWorking(true);
+                            syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WORKING);
+                        } catch (TaskRejectedException e) {
+                            result.put(STATUS, 1);
+                            stringBuilder.append("正在排队: " + sourceUrl);
+                            log.info("正在排队: " + sourceUrl);
+                            syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
+                            autoSyncAndUpdateTask.addToWait(worker);
+                        }
+                        syncTaskContentRepository.saveAndFlush(syncTaskContent);
                     } else {
                         stringBuilder.append("服务器上不存在此数据: " + sourceUrl);
                         log.warn("服务器上不存在此数据: " + sourceUrl);
-                        //校验未通过,移除记录
-                        removeConfig(sourceUrl);
                     }
                 }
             }
         }
         return result;
-    }
-
-    def uploadFileRecursive(File rootFile,def method) {
-        File[] files = rootFile.listFiles();
-        for (File file : files) {
-            if (file.isFile()) {
-                String filePath = file.getCanonicalPath();
-                method(filePath);
-            } else if (file.isDirectory()) {
-                uploadFileRecursive(file, method);
-            }
-        }
     }
 
     public Status getCaseStatus(String caseId) {
@@ -201,32 +231,6 @@ public class UploadDataServiceImpl implements UploadDataService {
         return stringBuilder;
     }
 
-    private void addUrlToConfig(String sourceUrl, String dstUrl) {
-        if (sourceUrl == null || dstUrl == null) {
-            return;
-        }
-        sourceUrl = sourceUrl.trim();
-        dstUrl = dstUrl.trim();
-        def configDomain = new ConfigDomain()
-        configDomain.setEditable(true)
-        configDomain.setDescription("fetch source url")
-        configDomain.setMapName(UPDATE_PREFIX + sourceUrl)
-        //记录自动同步信息
-        configDomain.setMapValue(sourceUrl + "|" + dstUrl);
-        configDomain.setValueType(ConfigDomain.ValueType.String);
-        //config在服务器启动时加载完成
-        try {
-            configDomainRepository.saveAndFlush(configDomain)
-        } catch (Exception e) {
-            //Duplicate entry, ignore
-        }
-    }
-
-    public void removeConfig(String sourceUrl) {
-        String hql = "delete from ConfigDomain c where c.mapName=:key ";
-        jpaShareService.updateForHql(hql, ["key" : UPDATE_PREFIX + sourceUrl.trim()]);
-    }
-
     private boolean modelExits(String dstUrl, String caseId) {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         dstUrl = dstUrl.replace("updateModelData", "isExist/" + caseId);
@@ -237,7 +241,7 @@ public class UploadDataServiceImpl implements UploadDataService {
         return Boolean.valueOf(text);
     }
 
-    private void upload(String dstUrl, String apiKey, String filePath, ModelData modelData, String caseId, String sourceUrl, Status status = null) {
+    private void upload(String dstUrl, String apiKey, String filePath, ModelData modelData, String caseId, String sourceUrl, SyncTaskContent.TaskLevel taskLevel, Status status = null, SyncTaskContent syncTaskContent = null) {
         clearStatus(caseId);
         if (status == null) {
             status = getStatus(caseId);
@@ -261,6 +265,7 @@ public class UploadDataServiceImpl implements UploadDataService {
             HttpPost httppost = new HttpPost(dstUrl);
 
             FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
+            zipFileData.setStatus(status);
             MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
                     .addPart("zipFileData", zipFileData)
             StringBody stringBody = null;
@@ -289,16 +294,17 @@ public class UploadDataServiceImpl implements UploadDataService {
                         log.info("Response content length: " + resEntity.getContentLength());
                         JSONObject jsonObject = JSON.parseObject(text);
                         if(jsonObject.getBoolean("success")){
-                            status.addMessage(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！")
-                            //同步完成,从configDomain中移除记录
-                            removeConfig(sourceUrl);
+                            status.addMessage(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！");
+                            syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
                         }else{
                             if(jsonObject.getString("errorCode")=="exist"){
-                                status.addMessage(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!")
-                                removeConfig(sourceUrl);
+                                status.addMessage(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!");
+                                syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
                             }
                             else{
                                 status.addMessage(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
+                                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                                syncTaskContentRepository.saveAndFlush(syncTaskContent);
                             }
                         }
                     }
@@ -311,16 +317,20 @@ public class UploadDataServiceImpl implements UploadDataService {
                     } else {
                         status.addMessage("同步异常！")
                     }
+                    syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                    syncTaskContentRepository.saveAndFlush(syncTaskContent);
                 }
                 EntityUtils.consume(resEntity);
 
             }catch(e){
                 log.error("upload failed",e);
                 if(e instanceof org.apache.http.conn.HttpHostConnectException){
-                    status.addMessage("数据上传失败,服务器地址不正确，连接失败！")
+                    status.addMessage("数据上传失败,服务器地址不正确，连接失败！caseId: " + caseId)
                 }else{
-                    status.addMessage("数据上传失败,请联系管理员:错误信息 " + e)
+                    status.addMessage("数据上传失败,请联系管理员:错误信息 " + e + ", caseId: " + caseId)
                 }
+                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+                syncTaskContentRepository.saveAndFlush(syncTaskContent);
             } finally {
                 if (response != null) {
                     response.close();

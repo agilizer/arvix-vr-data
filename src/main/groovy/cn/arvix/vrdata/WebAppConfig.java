@@ -1,5 +1,6 @@
 package cn.arvix.vrdata;
 
+import cn.arvix.vrdata.service.ShareService;
 import org.h2.tools.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,6 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.view.JstlView;
 import org.springframework.web.servlet.view.UrlBasedViewResolver;
-
-import cn.arvix.vrdata.service.ShareService;
 
 @Configuration
 @EnableWebMvc
@@ -84,8 +83,8 @@ public class WebAppConfig extends WebMvcConfigurerAdapter {
     private int queueCapacity;
     @Value("${sync.taskExecutor.keepAliveSeconds}")
     private int keepAliveSeconds;
-    @Bean
-    TaskExecutor syncTaskExecutor(){
+    @Bean(name = "syncTaskExecutor")
+    ThreadPoolTaskExecutor syncTaskExecutor(){
     	ThreadPoolTaskExecutor taskExecutor  = new ThreadPoolTaskExecutor();
     	taskExecutor.setCorePoolSize(corePoolSize);
     	taskExecutor.setMaxPoolSize(maxPoolSize);
