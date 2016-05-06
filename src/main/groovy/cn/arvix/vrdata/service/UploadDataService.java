@@ -10,7 +10,6 @@ import java.util.Map;
  */
 public interface UploadDataService {
 
-    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, SyncTaskContent.TaskLevel taskLevel, Status status);
-    public Map<String, Object> uploadData(String sourceUrl, String dstUrl, SyncTaskContent syncTaskContent);
+    public Map<String, Object> uploadData(SyncTaskContent syncTaskContent);
     public Status getCaseStatus(String caseId);
 }

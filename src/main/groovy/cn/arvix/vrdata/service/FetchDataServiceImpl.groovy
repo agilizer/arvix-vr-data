@@ -12,9 +12,11 @@ import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
 import cn.arvix.vrdata.repository.SyncTaskContentRepository
 import cn.arvix.vrdata.util.AntZipUtil
+
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
+
 import org.apache.commons.io.FileUtils
 import org.jsoup.Connection
 import org.jsoup.Jsoup
@@ -29,6 +31,7 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -50,6 +53,8 @@ public class FetchDataServiceImpl implements FetchDataService {
     private JpaShareService jpaShareService;
     @Autowired
     private SyncTaskContentRepository syncTaskContentRepository;
+	@Autowired
+	UploadDataService uploadDataService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -60,9 +65,7 @@ public class FetchDataServiceImpl implements FetchDataService {
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
     public static final String SERVER_URL = "http://vr.arvix.cn/";
-    public static final String urlSep = "\\n";
-    public static final String curlSep = "\n";
-    public static final String FETCH_PREFIX = "FETCH-SERVICE-";
+
     // caseId --> status
     private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<>();
 
@@ -70,40 +73,10 @@ public class FetchDataServiceImpl implements FetchDataService {
     def RETRY_TIMES = 3;
     Map FETCH_MAP = [:];
 
-    //增加自动同步功能, 如果需要自动同步(dstUrl不为空), fetch后调用同步接口.
-    @Override
-    public Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force, TaskLevel taskLevel, SyncTaskContent.TaskType taskType) {
-        Map<String, Object> result = new HashMap<>();
-        result.put(STATUS, -1);
-        if (sourceUrl.contains(curlSep)) {
-            //多个地址
-            String[] sourceUrls = sourceUrl.split(urlSep);
-            return fetch(sourceUrls, dstUrl, force, taskLevel, taskType);
-        } else {
-            return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, taskLevel, taskType);
-        }
-    }
-
-    public Map<String, Object> fetch(String[] sourceUrls, String dstUrl, boolean force, TaskLevel taskLevel, SyncTaskContent.TaskType taskType) {
-        Map<String, Object> result = new HashMap<>();
-        result.put(STATUS, -1);
-        if (sourceUrls == null || sourceUrls.size() == 0) {
-            result.put(ERROR, "Empty sourceUrl.");
-        } else {
-            for (String sourceUrl : sourceUrls) {
-                if (sourceUrl != "") {
-                    fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, taskLevel, taskType);
-                }
-            }
-        }
-        return result;
-    }
-
-    Map<String, Object> fetch(String sourceUrl, String dstUrl, boolean force, SyncTaskContent syncTaskContent) {
-        Map<String, Object> result = new HashMap<>();
-        result.put(STATUS, -1);
-        return fetchData(SERVER_URL, dstUrl, configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString(), sourceUrl, force, result, null, syncTaskContent.getTaskType(), syncTaskContent);
-    }
+	@Override
+	public Map<String, Object> fetch(SyncTaskContent syncTaskContent) {
+		
+	}
 
     public Status getCaseStatus(String caseId) {
         return deferedMessage.get(caseId.trim());
@@ -126,7 +99,14 @@ public class FetchDataServiceImpl implements FetchDataService {
         FETCH_MAP.remove(url)
     }
 
-    private Map<String, Object> fetchData(String serverUrl, String dstUrl, String workDir, String sourceUrl, boolean force, Map<String, Object> result, TaskLevel taskLevel, SyncTaskContent.TaskType taskType, SyncTaskContent syncTaskContent = null) {
+    public  Map<String, Object> fetchData(SyncTaskContent syncTaskContent) {
+		String sourceUrl = syncTaskContent.getSourceUrl();
+		String workDir = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH).toString()
+		String dstUrl = syncTaskContent.getDstUrl();
+		TaskType taskType = syncTaskContent.getTaskType();
+		TaskLevel taskLevel = syncTaskContent.getTaskLevel();
+		String serverUrl =  SERVER_URL;
+		Map<String, Object> result = new HashMap<>();
         StringBuilder errStringBuilder = (StringBuilder)result.get(ERROR);
         if (errStringBuilder == null) {
             errStringBuilder = new StringBuilder();
@@ -155,27 +135,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                 modelData.setSourceUrl(sourceUrl);
                 def fileSaveDir = workDir +caseId+"/"
                 try {
-                    if (syncTaskContent == null) {
-                        syncTaskContent = syncTaskContentRepository.findOneByCaseId(caseId);
-                        if (syncTaskContent == null) {
-                            syncTaskContent = new SyncTaskContent();
-                            User user = userService.currentUser();
-                            syncTaskContent.setCaseId(caseId);
-                            syncTaskContent.setAuthor(user);
-                            syncTaskContent.setSourceUrl(sourceUrl);
-                            syncTaskContent.setDstUrl(dstUrl);
-                            syncTaskContent.setTaskLevel(taskLevel);
-                            syncTaskContent.setDateCreated(Calendar.getInstance());
-                            if (dstUrl == null || dstUrl.trim().equals("") || taskType == TaskType.FETCH) {
-                                syncTaskContent.setTaskType(TaskType.FETCH);
-                            } else {
-                                syncTaskContent.setTaskType(TaskType.FETCH_UPDATE);
-                            }
-                        }
-                        syncTaskContent.setWorking(false);
-                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
-                        syncTaskContentRepository.saveAndFlush(syncTaskContent);
-                    }
+                    
                     Runnable worker = new Runnable() {
                         public void run() {
                             Status status = getStatus(caseId);
@@ -199,6 +159,9 @@ public class FetchDataServiceImpl implements FetchDataService {
                                 modelDataRepository.saveAndFlush(modelData);
                                 //移除记录
                                 syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+								if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
+									uploadDataService.uploadData(syncTaskContent);
+								}
                             } catch (Exception e) {
                                 status.addMessage("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
                                 syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
@@ -458,5 +421,4 @@ public class FetchDataServiceImpl implements FetchDataService {
             sourceObject.put(filePathKey, SERVER_URL+"upload/playerImages/"+caseId+"/playerImages/"+fileName)
         }
     }
-
 }

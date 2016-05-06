@@ -1,5 +1,21 @@
 package cn.arvix.vrdata.controller;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import cn.arvix.vrdata.been.Status;
 import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.ModelData;
@@ -10,15 +26,16 @@ import cn.arvix.vrdata.repository.RoleRepository;
 import cn.arvix.vrdata.repository.SyncTaskContentRepository;
 import cn.arvix.vrdata.repository.UserRepository;
 import cn.arvix.vrdata.repository.UserRoleRepository;
-import cn.arvix.vrdata.service.*;
+import cn.arvix.vrdata.service.FetchDataService;
+import cn.arvix.vrdata.service.FetchDataServiceImpl;
+import cn.arvix.vrdata.service.JdbcPage;
+import cn.arvix.vrdata.service.ModelDataService;
+import cn.arvix.vrdata.service.SimpleStaService;
+import cn.arvix.vrdata.service.SyncTaskContentService;
+import cn.arvix.vrdata.service.UploadDataService;
+import cn.arvix.vrdata.service.UserRoleService;
+import cn.arvix.vrdata.service.UserService;
 import cn.arvix.vrdata.util.StaticMethod;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.annotation.Secured;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.*;
 
 @Controller
 @RequestMapping("/admin")
@@ -43,6 +60,8 @@ public class AdminController {
 	SimpleStaService simpleStaService;
 	@Autowired
 	SyncTaskContentRepository syncTaskContentRepository;
+	@Autowired
+	SyncTaskContentService syncTaskContentService;
 	
 	private Calendar startStaTime = Calendar.getInstance();
 
@@ -121,24 +140,21 @@ public class AdminController {
 	}
 
 	@Secured({Role.ROLE_ADMIN}) 
-	@RequestMapping(value = "/sync", method = RequestMethod.POST)
+	@RequestMapping(value = "/syncCreate", method = RequestMethod.POST)
 	@ResponseBody
-	public Map<String, Object> sync(@RequestParam("sourceUrl") String sourceUrl, @RequestParam("taskLevel") SyncTaskContent.TaskLevel taskLevel,
+	public Map<String, Object> syncCreate(@RequestParam("sourceUrls") String sourceUrls, @RequestParam("taskLevel") SyncTaskContent.TaskLevel taskLevel,
 									@RequestParam("taskType") SyncTaskContent.TaskType taskType,
 									@RequestParam(value = "dstUrl", defaultValue = "") String dstUrl , @RequestParam(value = "force", defaultValue = "FALSE") boolean force) {
-		Map<String, Object> resultBody = new HashMap<String, Object>();
-		if (sourceUrl != "") {
-			sourceUrl = sourceUrl.trim();
+		if (sourceUrls != "") {
+			sourceUrls = sourceUrls.trim();
 		}
 		if (dstUrl != "") {
 			dstUrl = dstUrl.trim();
 		}
-		Map<String, Object> fetchResult = fetchDataService.fetch(sourceUrl, dstUrl, force, taskLevel, taskType);
-		resultBody.put("fetchResult", fetchResult);
-		if (fetchResult != null) {
-			fetchResult.remove("WORKER");
-		}
-		return resultBody;
+		syncTaskContentService.create(sourceUrls, dstUrl, taskLevel, taskType);
+		Map<String, Object> result = StaticMethod.getResult();
+		result.put(ArvixDataConstants.SUCCESS, true);
+		return result;
 	}
 
 	@Secured({Role.ROLE_ADMIN})
@@ -183,8 +199,8 @@ public class AdminController {
 	@ResponseBody
 	public Map<String, Object> syncStatus(@RequestParam("sourceUrl") String sourceUrl) {
 		Map<String, Object> resultBody = new HashMap<String, Object>();
-		if (sourceUrl.contains(FetchDataServiceImpl.urlSep)) {
-			String[] sourceUrls = sourceUrl.split(FetchDataServiceImpl.urlSep);
+		if (sourceUrl.contains(syncTaskContentService.urlSep)) {
+			String[] sourceUrls = sourceUrl.split(syncTaskContentService.urlSep);
 			Status multiStatus = new Status();
 			for (String url : sourceUrls) {
 				if (url != "") {
@@ -207,33 +223,15 @@ public class AdminController {
 		return resultBody;
 	}
 
-	@Secured({Role.ROLE_ADMIN})
-	@ResponseBody
-	@RequestMapping(value = "/uploadData")
-	public Map<String, Object> uploadModelData(@RequestParam("sourceUrl") String serverUrl, @RequestParam("dstUrl") String dstUrl,
-											   @RequestParam("taskLevel") SyncTaskContent.TaskLevel taskLevel) {
-		Map<String, Object> resultBody = new HashMap<String, Object>();
-		if (serverUrl != "") {
-			serverUrl = serverUrl.trim();
-		}
-		if (dstUrl != "") {
-			dstUrl = dstUrl.trim();
-		}
-		Map<String, Object> uploadResult =  uploadDataService.uploadData(serverUrl, dstUrl, taskLevel, null);
-		resultBody.put("uploadResult", uploadResult);
-		if (uploadResult != null) {
-			uploadResult.remove("WORKER");
-		}
-		return resultBody;
-	}
+	
 
 	@Secured({Role.ROLE_ADMIN})
 	@RequestMapping(value = "/checkUploadStatus", method = RequestMethod.POST)
 	@ResponseBody
 	public Map<String, Object> uploadStatus(@RequestParam("serverUrl") String serverUrl) {
 		Map<String, Object> resultBody = new HashMap<String, Object>();
-		if (serverUrl.contains(FetchDataServiceImpl.urlSep)) {
-			String sep = FetchDataServiceImpl.urlSep;
+		if (serverUrl.contains(syncTaskContentService.urlSep)) {
+			String sep = syncTaskContentService.urlSep;
 			String[] sourceUrlArr = serverUrl.split(sep);
 			Status multiStatus = new Status();
 

@@ -9,8 +9,10 @@ import cn.arvix.vrdata.domain.User
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
 import cn.arvix.vrdata.repository.SyncTaskContentRepository
+
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONObject
+
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
 import org.apache.http.client.methods.CloseableHttpResponse
@@ -37,6 +39,7 @@ import java.beans.Introspector
 import java.beans.PropertyDescriptor
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap
 
 /**
@@ -67,7 +70,6 @@ public class UploadDataServiceImpl implements UploadDataService {
     private static final String STATUS = "Status";
     public static final String urlSep = "\\n";
     public static final String curlSep = "\n";
-    public static final String UPDATE_PREFIX = "UPDATE-SERVICE-";
     private static ConcurrentHashMap<String, String> caseMap = new ConcurrentHashMap<>();
     // caseId --> status
     private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<String, Status>();
@@ -105,7 +107,6 @@ public class UploadDataServiceImpl implements UploadDataService {
     }
 
     public Map<String, Object> uploadData(String sourceUrl, String dstUrl, Map<String, Object> result, SyncTaskContent.TaskLevel taskLevel, Status status = null, SyncTaskContent syncTaskContent = null) {
-
         StringBuilder stringBuilder = getErrorMsg(result);
         def subIndex = sourceUrl.indexOf("?m=");
         if (subIndex < 0) {
@@ -140,25 +141,7 @@ public class UploadDataServiceImpl implements UploadDataService {
                         stringBuilder.append("正在同步数据: " + sourceUrl + ", 请勿重复操作.");
                         return result;
                     }
-                    if (rootFile.exists() && rootFile.isFile()) {
-                        //保存任务记录
-                        if (syncTaskContent == null) {
-                            syncTaskContent = syncTaskContentRepository.findOneByCaseId(caseId);
-                            if (syncTaskContent == null) {
-                                syncTaskContent = new SyncTaskContent();
-                                User user = userService.currentUser();
-                                syncTaskContent.setCaseId(caseId);
-                                syncTaskContent.setAuthor(user);
-                                syncTaskContent.setSourceUrl(sourceUrl);
-                                syncTaskContent.setDstUrl(dstUrl);
-                                syncTaskContent.setTaskLevel(taskLevel);
-                                syncTaskContent.setDateCreated(Calendar.getInstance());
-                                syncTaskContent.setTaskType(SyncTaskContent.TaskType.UPDATE);
-                            }
-                            syncTaskContent.setWorking(false);
-                            syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
-                            syncTaskContentRepository.saveAndFlush(syncTaskContent);
-                        }
+                    if (rootFile.exists() && rootFile.isFile()) {                      
                         String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
                         Runnable worker = new Runnable() {
                             public void run() {
@@ -364,4 +347,10 @@ public class UploadDataServiceImpl implements UploadDataService {
         }
         return returnMap;
     }
+
+	@Override
+	public Map<String, Object> uploadData(SyncTaskContent syncTaskContent) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

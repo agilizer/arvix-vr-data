@@ -55,13 +55,13 @@
 						<label class="col-sm-2 control-label">同步类型</label>
 						<div class="col-sm-10">
 							<label class="radio-inline">
-								<input type="radio" name="taskType" id="taskType1" value="FETCH"> FETCH
+								<input type="radio" name="taskType" id="taskType1" value="FETCH">抓取数据
 							</label>
 							<label class="radio-inline">
-								<input type="radio" name="taskType" checked="checked" id="taskType2" value="FETCH_UPDATE"> FETCH_UPDATE
+								<input type="radio" name="taskType" checked="checked" id="taskType2" value="FETCH_UPDATE">抓取和同步数据到目标服务器
 							</label>
 							<label class="radio-inline">
-								<input type="radio" name="taskType" id="taskType3" value="UPDATE"> UPDATE
+								<input type="radio" name="taskType" id="taskType3" value="UPDATE"> 同步数据到目标服务器
 							</label>
 						</div>
 					</div>
@@ -141,24 +141,18 @@
 			var dstUrl = $("#dstUrl").val();
 			var taskLevel = $("input[name='taskLevel']:checked").val();
 			var taskType = $("input[name='taskType']:checked").val();
-			var url = "/admin";
-			if (taskType == "UPDATE") {
-				url += "/uploadData";
-			} else {
-				url += "/sync";
-			}
 			if (sourceUrl.length == 0) {
 				alert("地址字段不能为空");
 				return false;
 			}
 			$.ajax({
-				url: url,
+				url: "/admin/syncCreate",
 				type: "POST",
-				data: {"sourceUrl": sourceUrl, "dstUrl": dstUrl, "taskLevel": taskLevel, "taskType": taskType},
+				data: {"sourceUrls": sourceUrl, "dstUrl": dstUrl, "taskLevel": taskLevel, "taskType": taskType},
 				dataType: "json",
 				success: function(data) {
 					if (data.fetchResult) {
-						alert(data.fetchResult.Msg);
+						alert("任务已经提交");
 					} else {
 						alert(data.uploadResult.Msg);
 					}
