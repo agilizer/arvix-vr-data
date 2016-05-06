@@ -93,7 +93,7 @@
 	<div id="gui-parent">
 		<div id="gui-loading" class="message-outer darkGlass"
 			style="display: none;">
-			<h2 class="model-title" th:text="${modelData.title}">The book
+			<h2 class="model-title model-title-xs"    th:text="${modelData.title}">The book
 				store of Demaotang</h2>
 
 			<div class="message-inner">
@@ -137,15 +137,15 @@
 							<div style="display: none;" class="co-brand">
 								Presented by <span class="title" id="cobrandTitle"></span>
 							</div>
-							<a style="display: none;"  id="more-hint">查看更多信息
+							<a style="display: none;"  id="more-hint">更多
 								<i class="icon icon-dpad-down"></i>
 							</a> <a id="less-hint" style="">收起 <i
 								class="icon icon-dpad-up"></i></a>
 
 							<div data-original-title="The book store of Demaotang" title=""
-								id="gui-name" th:attr="data-original-title=${modelData.title}"
-								class="gui-text titleText noCoBrand" rel="tooltip"
-								data-placement="bottom" data-html="true"
+								id="gui-name"  th:attr="data-original-title=${modelData.title}"
+								class="gui-text titleText noCoBrand  titleText-xs"  rel="tooltip"
+								data-placement="bottom"  data-html="true" 
 								th:text="${modelData.title}">The book store of Demaotang</div>
 						</div>
 					</div>
@@ -256,7 +256,6 @@
 		<div id="gui-message" class="message-outer darkGlass"
 			style="display: none;">
 			<h2 class="model-title">The book store of Demaotang</h2>
-
 			<div class="message-inner">
 				<div class="message-content">
 					<a class="hasHover" id="button-play"><i class="icon icon-play"></i></a>
@@ -350,7 +349,30 @@
 			  $("#weixinNote").show()
 		}
 	});
-
 </script>
+<style>
+#gui-name.noCoBrand{
+text-overflow: ellipsis; overflow: hidden; white-space: nowrap;
+width:50%;
+}
+#weixinNote{font-size:11px}
+@media screen and (max-width: 600px) { /*当屏幕尺寸小于600px时，应用下面的CSS样式*/
+	.model-title-xs{
+		margin-top:25%;
+		font-size:14px;
+	}
+	#gui-name{
+		font-size:12px;
+	}
+#less-hint, #more-hint {
+    font-size: 10px;
+    font-weight: 400;
+    position: absolute;
+    right: auto;
+    text-align: left;
+    top: 39px;
+}
+}
+</style>
 </body>
 </html>
