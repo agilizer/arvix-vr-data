@@ -1,16 +1,23 @@
 package cn.arvix.vrdata.service;
 
 import java.util.Calendar;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import cn.arvix.vrdata.domain.SyncTaskContent;
 import cn.arvix.vrdata.domain.SyncTaskContent.TaskLevel;
+import cn.arvix.vrdata.domain.SyncTaskContent.TaskStatus;
 import cn.arvix.vrdata.domain.SyncTaskContent.TaskType;
 import cn.arvix.vrdata.domain.User;
 import cn.arvix.vrdata.repository.SyncTaskContentRepository;
 
 @Service
 public class SyncTaskContentServiceImpl implements SyncTaskContentService {
+	private static final Logger log = LoggerFactory
+	.getLogger(SyncTaskContentServiceImpl.class);
 	@Autowired
 	private JpaShareService jpaShareService;
 	@Autowired
@@ -43,7 +50,7 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 		String caseId = sourceUrl.substring(subIndex + 3).trim();
 		SyncTaskContent syncTaskContent = syncTaskContentRepository
 				.findOneByCaseId(caseId);
-		if (syncTaskContent == null) {
+		if (syncTaskContent == null&& subIndex >0) {
 			syncTaskContent = new SyncTaskContent();
 			User user = userService.currentUser();
 			syncTaskContent.setCaseId(caseId);
@@ -62,6 +69,8 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 			syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
 			syncTaskContent = syncTaskContentRepository.saveAndFlush(syncTaskContent);
 			excute(syncTaskContent);
+		}else{
+			log.info("syncTaskContent  task exist or url is wrong,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
 		}
 	}
 
@@ -71,9 +80,14 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 			if(syncTaskContent.getTaskType()==TaskType.UPDATE){
 				uploadDataService.uploadData(syncTaskContent);
 			}else{
-				fetchDataService.fetch(syncTaskContent);
+				fetchDataService.fetchData(syncTaskContent);
 			}
 		}
+	}
+
+	@Override
+	public void failed(SyncTaskContent syncTaskContent, String failedMsg) {
+		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,failedMsg=?  where id=?", TaskStatus.FAILED,failedMsg,syncTaskContent.getId());
 	}
 
 }

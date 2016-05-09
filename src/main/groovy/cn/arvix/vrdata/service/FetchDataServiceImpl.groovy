@@ -1,21 +1,6 @@
 package cn.arvix.vrdata.service
 
-import cn.arvix.vrdata.been.Status
-import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
-import cn.arvix.vrdata.consants.ArvixDataConstants
-import cn.arvix.vrdata.domain.ModelData
-import cn.arvix.vrdata.domain.SyncTaskContent
-import cn.arvix.vrdata.domain.SyncTaskContent.TaskLevel
-import cn.arvix.vrdata.domain.SyncTaskContent.TaskType
-import cn.arvix.vrdata.domain.User
-import cn.arvix.vrdata.repository.ConfigDomainRepository
-import cn.arvix.vrdata.repository.ModelDataRepository
-import cn.arvix.vrdata.repository.SyncTaskContentRepository
-import cn.arvix.vrdata.util.AntZipUtil
-
-import com.alibaba.fastjson.JSON
-import com.alibaba.fastjson.JSONArray
-import com.alibaba.fastjson.JSONObject
+import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.commons.io.FileUtils
 import org.jsoup.Connection
@@ -31,8 +16,21 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap
+import cn.arvix.vrdata.been.Status
+import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
+import cn.arvix.vrdata.consants.ArvixDataConstants
+import cn.arvix.vrdata.domain.ModelData
+import cn.arvix.vrdata.domain.SyncTaskContent
+import cn.arvix.vrdata.domain.SyncTaskContent.TaskLevel
+import cn.arvix.vrdata.domain.SyncTaskContent.TaskType
+import cn.arvix.vrdata.repository.ConfigDomainRepository
+import cn.arvix.vrdata.repository.ModelDataRepository
+import cn.arvix.vrdata.repository.SyncTaskContentRepository
+import cn.arvix.vrdata.util.AntZipUtil
+
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONArray
+import com.alibaba.fastjson.JSONObject
 
 /**
  * Created by wanghaiyang on 16/4/26.
@@ -53,6 +51,8 @@ public class FetchDataServiceImpl implements FetchDataService {
     private JpaShareService jpaShareService;
     @Autowired
     private SyncTaskContentRepository syncTaskContentRepository;
+	 @Autowired
+    private SyncTaskContentService syncTaskContentService;
 	@Autowired
 	UploadDataService uploadDataService;
     @Autowired
@@ -72,11 +72,6 @@ public class FetchDataServiceImpl implements FetchDataService {
     def static Long EXPIRE_TIME = 240000
     def RETRY_TIMES = 3;
     Map FETCH_MAP = [:];
-
-	@Override
-	public Map<String, Object> fetch(SyncTaskContent syncTaskContent) {
-		
-	}
 
     public Status getCaseStatus(String caseId) {
         return deferedMessage.get(caseId.trim());
@@ -119,6 +114,10 @@ public class FetchDataServiceImpl implements FetchDataService {
             if(FETCH_MAP.containsKey(sourceUrl)){
                 errStringBuilder.append("正在抓取${sourceUrl}，请不要重复提交！");
                 removeUrlAndFlagCheck(sourceUrl)
+				syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
+				if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
+					uploadDataService.uploadData(syncTaskContent);
+				}
                 return result;
             }
             if(subIndex>0){
@@ -127,7 +126,8 @@ public class FetchDataServiceImpl implements FetchDataService {
                 ModelData modelDataExit = modelDataRepository.findByCaseId(caseId);
                 if(modelDataExit){
                     errStringBuilder.append("服务器已经存在此数据，忽略："+sourceUrl);
-                    removeUrlAndFlagCheck(sourceUrl)
+                    removeUrlAndFlagCheck(sourceUrl);
+					syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
                     return result;
                 }
                 ModelData modelData = new ModelData();
@@ -135,25 +135,24 @@ public class FetchDataServiceImpl implements FetchDataService {
                 modelData.setSourceUrl(sourceUrl);
                 def fileSaveDir = workDir +caseId+"/"
                 try {
-                    
+					FetchDataServiceImpl fetchDataService = this;
                     Runnable worker = new Runnable() {
                         public void run() {
-                            Status status = getStatus(caseId);
+                            Status status = fetchDataService.getStatus(caseId);
                             status.addMessage("正在抓取: " + sourceUrl);
                             try {
-                                genModelData(caseId, modelData, fileSaveDir);
+                                fetchDataService.genModelData(caseId, modelData, fileSaveDir);
                             } catch (e) {
                                 log.error("fetch caseId {} genModelData error:", caseId, e);
                                 status.code = -1;
                                 status.addMessage("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
-                                removeUrlAndFlagCheck(sourceUrl)
-                                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
-                                syncTaskContentRepository.saveAndFlush(syncTaskContent);
+                                fetchDataService.removeUrlAndFlagCheck(sourceUrl)
+                                syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
                                 return;
                             }
                             try {
-                                genFiles(caseId, fileSaveDir, modelData, serverUrl, syncTaskContent);
-                                removeUrlAndFlagCheck(sourceUrl)
+                                fetchDataService.genFiles(caseId, fileSaveDir, modelData, serverUrl, syncTaskContent);
+                                fetchDataService.removeUrlAndFlagCheck(sourceUrl)
                                 //上传成功,修改数据库set
                                 modelData.fetchStatus = ModelData.FetchStatus.FINISH;
                                 modelDataRepository.saveAndFlush(modelData);
@@ -164,7 +163,7 @@ public class FetchDataServiceImpl implements FetchDataService {
 								}
                             } catch (Exception e) {
                                 status.addMessage("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
-                                syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
+								syncTaskContentService.failed(syncTaskContent, e.getMessage());
                                 syncTaskContentRepository.saveAndFlush(syncTaskContent);
                             }
                             //如果dstUrl不为空,继续同步数据
@@ -176,7 +175,6 @@ public class FetchDataServiceImpl implements FetchDataService {
                                     status.addMessage(uploadFeedBack.get(ERROR).toString());
                                 }
                             }
-
                         }
                     }
                     try {
@@ -206,11 +204,13 @@ public class FetchDataServiceImpl implements FetchDataService {
                 errStringBuilder.append("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 log.warn("源url不正确，格式为：https://my.matterport.com/show/?m=MXfJvWQecHT");
                 removeUrlAndFlagCheck(sourceUrl)
+				syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
             }
         }else{
             errStringBuilder.append("源url不能为空");
             log.warn("源url不能为空");
             removeUrlAndFlagCheck(sourceUrl)
+			syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
         }
         return result;
     }
@@ -294,8 +294,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                         status.code = -1;
                         status.addMessage("抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+"请开启VPN!");
                         log.error("fetch file   return--",e);
-                        syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
-                        syncTaskContentRepository.saveAndFlush(syncTaskContent);
+                      	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
                         return
                     }
                 }
@@ -318,6 +317,7 @@ public class FetchDataServiceImpl implements FetchDataService {
             log.error("zip error",e);
             status.code = -2;
             status.addMessage("zip error: " + e.getMessage());
+			syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
         }
         status.code = 1;
         status.addMessage("完成");

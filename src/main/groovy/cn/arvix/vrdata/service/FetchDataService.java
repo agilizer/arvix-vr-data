@@ -7,6 +7,6 @@ import java.util.Map;
 
 public interface FetchDataService {
 	
-	Map<String,Object> fetch(SyncTaskContent syncTaskContent);
+	Map<String,Object> fetchData(SyncTaskContent syncTaskContent);
 	Status getCaseStatus(String caseId);
 }

@@ -30,6 +30,8 @@ public class SyncTaskContent  implements Serializable{
 	private User author;
 	@Column(columnDefinition = "longtext")
 	private String sourceUrl = "";
+	@Column(columnDefinition = "longtext")
+	private String failedMsg = "";
 	@Column
 	private String dstUrl = "";
 	@Column
@@ -118,6 +120,12 @@ public class SyncTaskContent  implements Serializable{
 		this.taskType = taskType;
 	}
 
+	public String getFailedMsg() {
+		return failedMsg;
+	}
+	public void setFailedMsg(String failedMsg) {
+		this.failedMsg = failedMsg;
+	}
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("SyncTask[" + caseId + ", " + taskType + ", " + taskLevel + ", userId: " + author.getId() + "]");
