@@ -131,11 +131,10 @@ public class AdminController {
 			if (syncTaskContent.getTaskStatus() == SyncTaskContent.TaskStatus.WORKING) {
 				resultBody.put("deleteResult", "无法删除正在执行的任务");
 			} else {
-				syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+				syncTaskContentRepository.delete(syncTaskContent);
 				resultBody.put("deleteResult", "删除成功");
 			}
 		}
-
 		return resultBody;
 	}
 

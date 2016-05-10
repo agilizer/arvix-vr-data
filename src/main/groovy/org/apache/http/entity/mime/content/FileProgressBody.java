@@ -53,7 +53,7 @@ public class FileProgressBody extends AbstractContentBody {
 			.getLogger(FileProgressBody.class);
     private final File file;
     private final String filename;
-    private Status status;
+    private FileProgressListenInter fileProgressListenInter;
 
     /**
      * @since 4.1
@@ -95,11 +95,16 @@ public class FileProgressBody extends AbstractContentBody {
         this(file, ContentType.DEFAULT_BINARY, file != null ? file.getName() : null);
     }
 
-    public void setStatus(Status status) {
-        this.status = status;
-    }
+    public FileProgressListenInter getFileProgressListenInter() {
+		return fileProgressListenInter;
+	}
 
-    /**
+	public void setFileProgressListenInter(
+			FileProgressListenInter fileProgressListenInter) {
+		this.fileProgressListenInter = fileProgressListenInter;
+	}
+
+	/**
      * @since 4.3
      */
     public FileProgressBody(final File file, final ContentType contentType, final String filename) {
@@ -132,8 +137,8 @@ public class FileProgressBody extends AbstractContentBody {
             while ((l = in.read(tmp)) != -1) {
                 out.write(tmp, 0, l);
                 uploaded = uploaded +l;
-                if (status != null) {
-                    status.addMessage("progress: " + uploaded + "/" + fileSize);
+                if (fileProgressListenInter != null) {
+                	fileProgressListenInter.progress(uploaded, fileSize);
                 }
                 //UILog.getInstance().logProgress(fileSize, uploaded,filename);
             }

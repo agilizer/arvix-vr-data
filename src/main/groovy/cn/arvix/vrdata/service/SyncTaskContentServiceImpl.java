@@ -59,18 +59,19 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 			syncTaskContent.setDstUrl(dstUrl);
 			syncTaskContent.setTaskLevel(taskLevel);
 			syncTaskContent.setDateCreated(Calendar.getInstance());
-			if (dstUrl == null || dstUrl.trim().equals("")
-					|| taskType == TaskType.FETCH) {
-				syncTaskContent.setTaskType(TaskType.FETCH);
-			} else {
-				syncTaskContent.setTaskType(TaskType.FETCH_UPDATE);
-			}
+			syncTaskContent.setTaskType(taskType);
 			syncTaskContent.setWorking(false);
 			syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WAIT);
 			syncTaskContent = syncTaskContentRepository.saveAndFlush(syncTaskContent);
 			excute(syncTaskContent);
 		}else{
-			log.info("syncTaskContent  task exist or url is wrong,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
+			if(syncTaskContent!=null&&syncTaskContent.getTaskStatus()==TaskStatus.FAILED){
+				jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",Calendar.getInstance(), TaskStatus.SUCCESS
+						,syncTaskContent.getId());
+				log.info("syncTaskContent  task exist and failed, restart task,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
+			}else{
+				log.info("syncTaskContent  task exist or url is wrong,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
+			}
 		}
 	}
 
@@ -87,7 +88,14 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 
 	@Override
 	public void failed(SyncTaskContent syncTaskContent, String failedMsg) {
-		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,failedMsg=?  where id=?", TaskStatus.FAILED,failedMsg,syncTaskContent.getId());
+		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,failedMsg=?,lastUpdated=?  where id=?", 
+				TaskStatus.FAILED,failedMsg,Calendar.getInstance(),syncTaskContent.getId());
+	}
+
+	@Override
+	public void finish(SyncTaskContent syncTaskContent) {
+		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",
+				Calendar.getInstance(), TaskStatus.SUCCESS,syncTaskContent.getId());
 	}
 
 }

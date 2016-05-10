@@ -10,5 +10,6 @@ public interface SyncTaskContentService {
 	public String curlSep = "\n";
 	public void  create(String sourceUrls,String dstUrl,TaskLevel taskLevel,TaskType taskType);
 	public void failed( SyncTaskContent syncTaskContent,String failedMsg);
+	public void finish(SyncTaskContent syncTaskContent);
 	public void excute(SyncTaskContent syncTaskContent);
 }

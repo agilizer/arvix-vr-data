@@ -125,9 +125,12 @@ public class FetchDataServiceImpl implements FetchDataService {
                 println serverUrl
                 ModelData modelDataExit = modelDataRepository.findByCaseId(caseId);
                 if(modelDataExit){
-                    errStringBuilder.append("服务器已经存在此数据，忽略："+sourceUrl);
+                    errStringBuilder.append("服务器已经存在此数据，忽略抓取："+sourceUrl);
                     removeUrlAndFlagCheck(sourceUrl);
 					syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
+					if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
+						uploadDataService.uploadData(syncTaskContent);
+					}
                     return result;
                 }
                 ModelData modelData = new ModelData();
@@ -136,6 +139,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                 def fileSaveDir = workDir +caseId+"/"
                 try {
 					FetchDataServiceImpl fetchDataService = this;
+					//线程执行任务代码 start
                     Runnable worker = new Runnable() {
                         public void run() {
                             Status status = fetchDataService.getStatus(caseId);
@@ -157,7 +161,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                                 modelData.fetchStatus = ModelData.FetchStatus.FINISH;
                                 modelDataRepository.saveAndFlush(modelData);
                                 //移除记录
-                                syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+								syncTaskContentService.finish(syncTaskContent);
 								if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
 									uploadDataService.uploadData(syncTaskContent);
 								}
@@ -166,17 +170,13 @@ public class FetchDataServiceImpl implements FetchDataService {
 								syncTaskContentService.failed(syncTaskContent, e.getMessage());
                                 syncTaskContentRepository.saveAndFlush(syncTaskContent);
                             }
-                            //如果dstUrl不为空,继续同步数据
-                            if (dstUrl && dstUrl != "" && syncTaskContent.getTaskType() == TaskType.FETCH_UPDATE) {
-                                Map<String, Object> uploadFeedBack = uploadDataService.uploadData(sourceUrl, dstUrl, taskLevel, status);
-                                int uploadStatus = (Integer) uploadFeedBack.get(STATUS);
-                                if (uploadStatus == -1) {
-                                    log.warn(sourceUrl + " -> " + dstUrl + ": " + uploadFeedBack);
-                                    status.addMessage(uploadFeedBack.get(ERROR).toString());
-                                }
+                            //如果任务需要同步,继续同步数据
+                            if (syncTaskContent.getTaskType() == TaskType.FETCH_UPDATE) {
+                                 uploadDataService.uploadData(syncTaskContent);
                             }
                         }
                     }
+					//线程执行任务代码 end
                     try {
                         if (syncTaskContent.taskLevel == TaskLevel.HIGH) {
                             new Thread(worker).start();

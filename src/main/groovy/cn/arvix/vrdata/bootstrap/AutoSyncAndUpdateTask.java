@@ -1,11 +1,9 @@
 package cn.arvix.vrdata.bootstrap;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import cn.arvix.vrdata.domain.SyncTaskContent;
 import cn.arvix.vrdata.repository.SyncTaskContentRepository;
 import cn.arvix.vrdata.service.JpaShareService;

@@ -146,18 +146,19 @@
 				alert("地址字段不能为空");
 				return false;
 			}
+			var data = {"sourceUrls": sourceUrl, "dstUrl": dstUrl, "taskLevel": taskLevel, "taskType": taskType}
+			console.log(data);
 			$.ajax({
 				url: "/admin/syncCreate",
 				type: "POST",
-				data: {"sourceUrls": sourceUrl, "dstUrl": dstUrl, "taskLevel": taskLevel, "taskType": taskType},
+				data: data,
 				dataType: "json",
 				success: function(data) {
-					if (data.fetchResult) {
+					if (data.success) {
 						alert("任务已经提交");
 					} else {
-						alert(data.uploadResult.Msg);
+						alert("服务器出错！");
 					}
-					location.reload();
 				}
 			});
 			return false;

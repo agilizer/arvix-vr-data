@@ -16,6 +16,8 @@ import org.apache.http.client.methods.HttpPost
 import org.apache.http.entity.ContentType
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.apache.http.entity.mime.content.FileProgressBody
+import org.apache.http.entity.mime.content.FileProgressListenDefault
+import org.apache.http.entity.mime.content.FileProgressListenInter
 import org.apache.http.entity.mime.content.StringBody
 import org.apache.http.impl.client.CloseableHttpClient
 import org.apache.http.impl.client.HttpClients
@@ -119,7 +121,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 								public void run() {
 									caseMap.put(caseId, caseId);
 									try {
-										uploadDataService.upload(filePath, modelData,null, syncTaskContent);
+										uploadDataService.upload(filePath, modelData, syncTaskContent);
 									} finally {
 										uploadDataService.clearCaseMap(caseId);
 									}
@@ -190,17 +192,15 @@ public class UploadDataServiceImpl implements UploadDataService {
 		return Boolean.valueOf(text);
 	}
 
-	private void upload( String filePath, ModelData modelData,
-			Status status = null, SyncTaskContent syncTaskContent) {
+	private void upload( String filePath, ModelData modelData, SyncTaskContent syncTaskContent) {
 		String dstUrl = syncTaskContent.getDstUrl();
 		String sourceUrl = syncTaskContent.getSourceUrl()
 		TaskLevel taskLevel = syncTaskContent.getTaskLevel()
 		String caseId = syncTaskContent.getCaseId();
 		String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
 		clearStatus(caseId);
-		if (status == null) {
-			status = getStatus(caseId);
-		}
+		Status status = getStatus(caseId);
+		
 		log.info("upload start..,serverUrl:{}",dstUrl);
 		status.addMessage("开始同步... : " + caseId);
 		Map<String, String> params = toMapValueString(modelData);
@@ -220,7 +220,8 @@ public class UploadDataServiceImpl implements UploadDataService {
 			HttpPost httppost = new HttpPost(dstUrl);
 
 			FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
-			zipFileData.setStatus(status);
+			FileProgressListenInter progressListen = new FileProgressListenDefault(status,syncTaskContent);
+			zipFileData.setFileProgressListenInter(progressListen);
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
 					.addPart("zipFileData", zipFileData)
 			StringBody stringBody = null;
@@ -250,16 +251,15 @@ public class UploadDataServiceImpl implements UploadDataService {
 						JSONObject jsonObject = JSON.parseObject(text);
 						if(jsonObject.getBoolean("success")){
 							status.addMessage(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！");
-							syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+							syncTaskContentService.finish(syncTaskContent);
 						}else{
 							if(jsonObject.getString("errorCode")=="exist"){
-								status.addMessage(modelData.getCaseId()+" 服务器已经存在相同的数据，请不要重复上传!");
-								syncTaskContentRepository.deleteTask(syncTaskContent.getCaseId(), syncTaskContent.getTaskType());
+								status.addMessage(modelData.getCaseId()+"服务器已经存在相同的数据，请不要重复上传!");
+								syncTaskContentService.failed(syncTaskContent, " 服务器已经存在相同的数据，请不要重复上传!");
 							}
 							else{
 								status.addMessage(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
-								syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
-								syncTaskContentRepository.saveAndFlush(syncTaskContent);
+								syncTaskContentService.failed(syncTaskContent,  " 数据上传失败，请联系管理员，返回结果为:\n"+text);
 							}
 						}
 					}
@@ -272,8 +272,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 					} else {
 						status.addMessage("同步异常！")
 					}
-					syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
-					syncTaskContentRepository.saveAndFlush(syncTaskContent);
+				 	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
 				}
 				EntityUtils.consume(resEntity);
 
@@ -284,8 +283,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 				}else{
 					status.addMessage("数据上传失败,请联系管理员:错误信息 " + e + ", caseId: " + caseId)
 				}
-				syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.FAILED);
-				syncTaskContentRepository.saveAndFlush(syncTaskContent);
+			 	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
 			} finally {
 				if (response != null) {
 					response.close();

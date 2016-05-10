@@ -44,7 +44,8 @@ public class SyncTaskContent  implements Serializable{
 	private TaskType taskType;
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar dateCreated;
-
+	@Temporal(TemporalType.TIMESTAMP)
+	private Calendar lastUpdated;
 	public static enum TaskLevel{
 		HIGH,
 		NORMAL		
@@ -52,7 +53,8 @@ public class SyncTaskContent  implements Serializable{
 	public static enum TaskStatus{
 		WORKING,
 		WAIT,
-		FAILED
+		FAILED,
+		SUCCESS
 	}
 	public static enum TaskType{
 		FETCH,
@@ -125,6 +127,13 @@ public class SyncTaskContent  implements Serializable{
 	}
 	public void setFailedMsg(String failedMsg) {
 		this.failedMsg = failedMsg;
+	}
+	
+	public Calendar getLastUpdated() {
+		return lastUpdated;
+	}
+	public void setLastUpdated(Calendar lastUpdated) {
+		this.lastUpdated = lastUpdated;
 	}
 	public String toString() {
 		StringBuilder stringBuilder = new StringBuilder();

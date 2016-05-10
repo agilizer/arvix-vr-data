@@ -32,9 +32,4 @@ public interface SyncTaskContentRepository extends JpaRepository<SyncTaskContent
     @Modifying
     @Query("delete from SyncTaskContent s where s.caseId=?1")
     public void deleteByCaseId(String caseId);
-
-    @Transactional
-    @Modifying
-    @Query("delete from SyncTaskContent s where s.caseId=?1 and s.taskType=?2")
-    public void deleteTask(String caseId, SyncTaskContent.TaskType taskType);
 }
