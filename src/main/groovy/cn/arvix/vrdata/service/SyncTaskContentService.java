@@ -12,4 +12,6 @@ public interface SyncTaskContentService {
 	public void failed( SyncTaskContent syncTaskContent,String failedMsg);
 	public void finish(SyncTaskContent syncTaskContent);
 	public void excute(SyncTaskContent syncTaskContent);
+	public void cleanSuccess();
+	public void cleanFailed();
 }

@@ -30,8 +30,6 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
-import cn.arvix.vrdata.been.Status
-import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
 import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
 import cn.arvix.vrdata.domain.SyncTaskContent
@@ -39,6 +37,7 @@ import cn.arvix.vrdata.domain.SyncTaskContent.TaskLevel
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
 import cn.arvix.vrdata.repository.SyncTaskContentRepository
+import cn.arvix.vrdata.util.AntZipUtil
 import cn.arvix.vrdata.util.StaticMethod
 
 import com.alibaba.fastjson.JSON
@@ -69,14 +68,12 @@ public class UploadDataServiceImpl implements UploadDataService {
 	@Autowired
 	private SyncTaskContentService syncTaskContentService;
 	@Autowired
-	private AutoSyncAndUpdateTask autoSyncAndUpdateTask;
+	MessageBroadcasterService messageBroadcasterService
 	private static final String ERROR = "Msg";
 	private static final String STATUS = "Status";
 	public static final String urlSep = "\\n";
 	public static final String curlSep = "\n";
 	private static ConcurrentHashMap<String, String> caseMap = new ConcurrentHashMap<>();
-	// caseId --> status
-	private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<String, Status>();
 
 	public Map<String, Object> uploadData(SyncTaskContent syncTaskContent) {
 		String sourceUrl = syncTaskContent.getSourceUrl()
@@ -104,70 +101,44 @@ public class UploadDataServiceImpl implements UploadDataService {
 				syncTaskContentService.failed(syncTaskContent, stringBuilder.toString());
 				log.warn("目标服务器已存在此数据: " + sourceUrl);
 			} else {
-				String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
-				if (!filePath.endsWith("/")) {
-					filePath += "/";
-				}
-				filePath += caseId + ".zip";
-				File rootFile = new File(filePath);
 				if (caseMap.contains(caseId)) {
 					stringBuilder.append("正在同步数据: " + sourceUrl + ", 请勿重复操作.");
 					syncTaskContentService.failed(syncTaskContent, stringBuilder.toString());
 					return result;
 				}
 				UploadDataServiceImpl uploadDataService = this;
-				if (rootFile.exists() && rootFile.isFile()) {
-					Runnable worker = new Runnable() {
-								public void run() {
-									caseMap.put(caseId, caseId);
-									try {
-										uploadDataService.upload(filePath, modelData, syncTaskContent);
-									} finally {
-										uploadDataService.clearCaseMap(caseId);
-									}
+				Runnable worker = new Runnable() {
+							public void run() {
+								caseMap.put(caseId, caseId);
+								try {
+									uploadDataService.upload( modelData, syncTaskContent);
+								} catch(Exception e){
+									log.error("upload failed",e)
+									syncTaskContentService.failed(syncTaskContent, e.getMessage());
+								}finally {
+									uploadDataService.clearCaseMap(caseId);
 								}
-					};
-					try {
-						if (syncTaskContent.taskLevel == SyncTaskContent.TaskLevel.HIGH) {
-							new Thread(worker).start();
-						} else {
-							taskExecutor.execute(worker);
-						}
-						result.put(STATUS, 1);
-						stringBuilder.append("正在同步数据: " + sourceUrl);
-						log.info("正在同步数据: " + sourceUrl);
-						syncTaskContent.setWorking(true);
-						syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WORKING);
-					} catch (TaskRejectedException e) {
-						syncTaskContentService.failed(syncTaskContent, "任务队列已满!!!!!!!");
+							}
+				};
+				try {
+					if (syncTaskContent.taskLevel == SyncTaskContent.TaskLevel.HIGH) {
+						new Thread(worker).start();
+					} else {
+						taskExecutor.execute(worker);
 					}
-				} else {
-					stringBuilder.append("服务器上不存在此数据: " + sourceUrl);
-					log.warn("服务器上不存在此数据: " + sourceUrl);
+					result.put(STATUS, 1);
+					stringBuilder.append("正在同步数据: " + sourceUrl);
+					log.info("正在同步数据: " + sourceUrl);
+					syncTaskContent.setWorking(true);
+					syncTaskContent.setTaskStatus(SyncTaskContent.TaskStatus.WORKING);
+				} catch (TaskRejectedException e) {
+					syncTaskContentService.failed(syncTaskContent, "任务队列已满!!!!!!!");
 				}
 			}
 		}
 		return result;
 	}
 
-	public Status getCaseStatus(String caseId) {
-		return deferedMessage.get(caseId.trim());
-	}
-
-	private Status getStatus(String caseId, Status status = null) {
-		if (status == null) {
-			status = deferedMessage.get(caseId);
-			if (status == null) {
-				status = new Status();
-				deferedMessage.put(caseId, status);
-			}
-		}
-		return status;
-	}
-
-	private void clearStatus(String caseId) {
-		deferedMessage.remove(caseId);
-	}
 
 	private void clearCaseMap(String caseId) {
 		caseMap.remove(caseId);
@@ -192,17 +163,15 @@ public class UploadDataServiceImpl implements UploadDataService {
 		return Boolean.valueOf(text);
 	}
 
-	private void upload( String filePath, ModelData modelData, SyncTaskContent syncTaskContent) {
+	private void upload( ModelData modelData, SyncTaskContent syncTaskContent) {
 		String dstUrl = syncTaskContent.getDstUrl();
 		String sourceUrl = syncTaskContent.getSourceUrl()
 		TaskLevel taskLevel = syncTaskContent.getTaskLevel()
 		String caseId = syncTaskContent.getCaseId();
 		String apiKey = configDomainService.getConfig(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY);
-		clearStatus(caseId);
-		Status status = getStatus(caseId);
 		
 		log.info("upload start..,serverUrl:{}",dstUrl);
-		status.addMessage("开始同步... : " + caseId);
+		messageBroadcasterService.send("开始同步... : " + caseId);
 		Map<String, String> params = toMapValueString(modelData);
 		params.put("apiKey",apiKey);
 		params.put("modelDataClient", params.get("modelData"));
@@ -218,9 +187,27 @@ public class UploadDataServiceImpl implements UploadDataService {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
 			HttpPost httppost = new HttpPost(dstUrl);
-
+			String filePath = configDomainService.getConfig(ArvixDataConstants.FILE_STORE_PATH);
+			if (!filePath.endsWith("/")) {
+				filePath += "/";
+			}
+			String zipFilePath = filePath+caseId + ".zip"
+			File zipFile = new File(zipFilePath);
+			if(!zipFile.exists()){
+				String fileSaveDir = filePath.substring(0,filePath.length()-1)
+				log.info("fileSaveDir-->"+fileSaveDir);
+				log.info("zipFilePath-->"+zipFilePath);
+				try{
+				   messageBroadcasterService.send(caseId+"正在压缩文件....");
+					AntZipUtil.writeByApacheZipOutputStream(fileSaveDir,zipFilePath,caseId)
+				}catch(e){
+					log.error("zip error",e);
+					messageBroadcasterService.send(caseId+"zip error: " + e.getMessage());
+					syncTaskContentService.failed(syncTaskContent, "zip error: " + e.getMessage());
+				}
+			}
 			FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
-			FileProgressListenInter progressListen = new FileProgressListenDefault(status,syncTaskContent);
+			FileProgressListenInter progressListen = new FileProgressListenDefault(messageBroadcasterService,syncTaskContent);
 			zipFileData.setFileProgressListenInter(progressListen);
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
 					.addPart("zipFileData", zipFileData)
@@ -238,53 +225,53 @@ public class UploadDataServiceImpl implements UploadDataService {
 				httppost.setEntity(reqEntity);
 				log.info("executing request " + httppost.getRequestLine());
 				response = httpclient.execute(httppost);
-				status.addMessage("成功发送同步请求！" + response.getStatusLine().toString())
+				messageBroadcasterService.send(caseId+"成功发送同步请求！" + response.getStatusLine().toString())
 				log.info(response.getStatusLine().toString());
 				int code = response.getStatusLine().getStatusCode()
 				HttpEntity resEntity = response.getEntity();
 				String text = IOUtils.toString(resEntity.getContent());
 				log.info(text);
-
 				if(code == 200){
 					if (resEntity != null) {
 						log.info("Response content length: " + resEntity.getContentLength());
 						JSONObject jsonObject = JSON.parseObject(text);
 						if(jsonObject.getBoolean("success")){
-							status.addMessage(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！");
+							messageBroadcasterService.send(modelData.getCaseId()+" 数据上传成功，请访问服务器地址查看结果！");
 							syncTaskContentService.finish(syncTaskContent);
 						}else{
 							if(jsonObject.getString("errorCode")=="exist"){
-								status.addMessage(modelData.getCaseId()+"服务器已经存在相同的数据，请不要重复上传!");
+								messageBroadcasterService.send(caseId+"服务器已经存在相同的数据，请不要重复上传!");
 								syncTaskContentService.failed(syncTaskContent, " 服务器已经存在相同的数据，请不要重复上传!");
 							}
 							else{
-								status.addMessage(modelData.getCaseId() + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
+								messageBroadcasterService.send(caseId + " 数据上传失败，请联系管理员，返回结果为:\n"+text)
 								syncTaskContentService.failed(syncTaskContent,  " 数据上传失败，请联系管理员，返回结果为:\n"+text);
 							}
 						}
 					}
 				} else {
 					if (code == 403) {
-						status.addMessage("apiKey不正确！")
+						messageBroadcasterService.send(caseId +"apiKey不正确！")
 					}
 					if (code == 404) {
-						status.addMessage("服务器地址不正确！")
+						messageBroadcasterService.send(caseId +"服务器地址不正确！")
 					} else {
-						status.addMessage("同步异常！")
+						messageBroadcasterService.send(caseId +"同步异常！")
 					}
-				 	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
+				 	syncTaskContentService.failed(syncTaskContent, "同步失败  403 or 404 or 同步异常");
 				}
 				EntityUtils.consume(resEntity);
 
 			}catch(e){
 				log.error("upload failed",e);
 				if(e instanceof org.apache.http.conn.HttpHostConnectException){
-					status.addMessage("数据上传失败,服务器地址不正确，连接失败！caseId: " + caseId)
+					messageBroadcasterService.send("数据上传失败,服务器地址不正确，连接失败！caseId: " + caseId)
 				}else{
-					status.addMessage("数据上传失败,请联系管理员:错误信息 " + e + ", caseId: " + caseId)
+					messageBroadcasterService.send("数据上传失败,请联系管理员:错误信息 " + e + ", caseId: " + caseId)
 				}
-			 	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
+			 	syncTaskContentService.failed(syncTaskContent, "数据上传失败"+caseId);
 			} finally {
+				zipFile.deleteOnExit();
 				if (response != null) {
 					response.close();
 				}
@@ -317,4 +304,5 @@ public class UploadDataServiceImpl implements UploadDataService {
 		}
 		return returnMap;
 	}
+
 }

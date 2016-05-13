@@ -89,7 +89,7 @@ public class ThymeleafAutoConfiguration {
 			resolver.setPrefix(this.properties.getPrefix());
 			resolver.setSuffix(this.properties.getSuffix());
 			resolver.setTemplateMode("LEGACYHTML5");
-			resolver.setCharacterEncoding(this.properties.getEncoding());
+			resolver.setCharacterEncoding(this.properties.getEncoding().toString());
 			resolver.setCacheable(this.properties.isCache());
 			return resolver;
 		}
@@ -164,8 +164,8 @@ public class ThymeleafAutoConfiguration {
 		public ThymeleafViewResolver thymeleafViewResolver() {
 			ThymeleafViewResolver resolver = new ThymeleafViewResolver();
 			resolver.setTemplateEngine(this.templateEngine);
-			resolver.setCharacterEncoding(this.properties.getEncoding());
-			resolver.setContentType(appendCharset(this.properties.getContentType(),
+			resolver.setCharacterEncoding(this.properties.getEncoding().toString());
+			resolver.setContentType(appendCharset(this.properties.getContentType().toString(),
 					resolver.getCharacterEncoding()));
 			resolver.setExcludedViewNames(this.properties.getExcludedViewNames());
 			resolver.setViewNames(this.properties.getViewNames());

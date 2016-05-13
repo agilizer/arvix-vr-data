@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js" xmlns:th="http://www.w3.org/1999/xhtml">
+<!--<![endif]-->
+<head th:replace="layout/admin :: head (title='模型数据管理--管理员后台')">
+<!-- BEGIN PLUGINS CSS -->
+<!-- END PLUGINS CSS -->
+</head>
+<body>
+<style>
+#uploadStatusBox div{
+            border-color: grey;
+            height: 300px;
+            max-height:500px;
+            overflow: auto;
+              border: 1px solid;
+            -moz-border-radius: 4px;
+            border-radius: 4px;
+            width: 100%;
+            padding: 0px;
+            margin: 5px;
+        }
+</style>
+	<link
+		href="/resources/plugins/fineuploader-dist/dist/fine-uploader.min.css"
+		rel="stylesheet" />
+	<div id="wrapper">
+		<div class="nav-bar-container" th:replace="layout/admin :: nav">
+		</div>
+		<!--.nav-bar-container-->
+		<div id="page-wrapper">
+			<div class="row">
+				<div class="col-lg-12">
+					<h3 class="page-header">数据同步</h3>
+				</div>
+			</div>
+			<div class="row">
+				<form id="uploadForm" class="form-horizontal">
+					<div class="col-md-6">
+						<div class="form-group">
+							<label for="sourceUrl" class="col-sm-2 control-label">源地址</label>
+							<div class="col-sm-10">
+								<textarea class="form-control" id="sourceUrl"
+									placeholder="多个地址换行分隔.地址参考格式:https://my.matterport.com/show/?m=YGPANRipHeL"></textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="dstUrl" class="col-sm-2 control-label">同步目标地址</label>
+							<div class="col-sm-10">
+								<input type="input" class="form-control"
+									value="http://vr.arvix.cn/api/v1/updateModelData" id="dstUrl"
+									placeholder="目标地址">
+							</div>
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="form-group">
+							<label class="col-sm-2 control-label">紧急程度</label>
+							<div class="col-sm-10">
+								<label class="radio-inline"> <input type="radio"
+									name="taskLevel" id="taskLevel1" value="HIGH"> High
+								</label> <label class="radio-inline"> <input type="radio"
+									name="taskLevel" checked="checked" id="taskLevel2"
+									value="NORMAL"> Normal
+								</label>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="col-sm-2 control-label">同步类型</label>
+							<div class="col-sm-10">
+								<section th:if="${application?.configMap?.supportDataFetch}">
+									<label class="radio-inline"> <input type="radio"
+										name="taskType" id="taskType1" value="FETCH">抓取数据
+									</label> <label class="radio-inline"> <input type="radio"
+										name="taskType" checked="checked" id="taskType2"
+										value="FETCH_UPDATE">抓取和同步数据到目标服务器
+									</label>
+										<label class="radio-inline"> <input type="radio"
+									name="taskType" id="taskType3" value="UPDATE">
+									同步数据到目标服务器
+								</label>
+								</section>
+								<section th:if="${application?.configMap?.supportDataFetch==false}">
+										<label class="radio-inline"> <input type="radio" checked="checked"
+									name="taskType" id="taskType3" value="UPDATE">
+									同步数据到目标服务器
+								</label>
+								</section>
+							</div>
+						</div>
+						<div class="form-group">
+						<div class="col-sm-offset-2 col-sm-10">
+							<button type="button" id="startSync" class="btn btn-default">提交</button>
+						</div>
+					</div>
+					</div>
+				</form>
+			</div>
+			<div class="row">
+				<div class="col-lg-12">
+					<h3 class="page-header">任务状态</h3>
+				</div>
+				<div class="col-md-12 box"   id="uploadStatusBox"  >
+					<div></div>
+				</div>
+				</div>
+				<br/>
+				<div class="col-md-12">
+				<div class="col-md-12">
+					<div class="col-md-6">
+						<a href="javascript:;" onclick="cleanTask()">清空所有成功 </a>
+					</div>
+					<div class="col-md-6">
+						<a href="javascript:;" onclick="cleanTask('failed')">清空所有失败 </a>
+					</div>
+				</div>
+					<table class="table table-striped">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>caseId</th>
+								<th>taskLevel</th>
+								<th>taskType</th>
+								<th>taskStatus</th>
+								<th>errorMsg</th>
+								<th>操作</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="task:${tasks}">
+								<th th:text="${task.getId()}"></th>
+								<th th:text="${task.getCaseId()}"></th>
+								<th th:text="${task.getTaskLevel()}"></th>
+								<th th:text="${task.getTaskType()}"></th>
+								<th th:text="${task.getTaskStatus()}"></th>
+								<th th:text="${task?.failedMsg}"></th>
+								<th th:if="${task.getTaskStatus()} == 'WORKING'">-</th>
+								<th th:if="${task.getTaskStatus()} != 'WORKING'"><a
+									href="javascript:void(0)" th:attr="caseId=${task.getCaseId()}"
+									th:attrappend="taskType=${task.getTaskType()}"
+									onclick="deleteTask(this)">删除</a></th>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div th:include="layout/admin :: jsEnd"></div>
+	 <script src="/resources/plugins/sockjs-1.1.0.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$("#startSync").click(function() {
+				startSync();
+			});
+		});
+
+		function deleteTask(obj) {
+			var caseId = $(obj).attr("caseId");
+			var taskType = $(obj).attr("taskType");
+			console.log(caseId + ", " + taskType);
+			$.ajax({
+				url : "/admin/syncTasskContent/deleteTask",
+				type : "POST",
+				data : {
+					"caseId" : caseId,
+					"taskType" : taskType
+				},
+				dataType : "json",
+				success : function(data) {
+					alert(data.deleteResult);
+					location.reload();
+				}
+			});
+			return false;
+		}
+
+		function cleanTask(type) {
+			var url = "/admin/syncTasskContent/cleanSuccess";
+			if (type == 'failed') {
+				url = "/admin/syncTasskContent/cleanFailed";
+			}
+			$.ajax({
+				url : url,
+				type : "POST",
+				success : function(data) {
+					location.reload();
+				}
+			});
+			return false;
+		}
+
+		function startSync() {
+			var sourceUrl = $("#sourceUrl").val();
+			var dstUrl = $("#dstUrl").val();
+			var taskLevel = $("input[name='taskLevel']:checked").val();
+			var taskType = $("input[name='taskType']:checked").val();
+			if (sourceUrl.length == 0) {
+				alert("地址字段不能为空");
+				return false;
+			}
+			var data = {
+				"sourceUrls" : sourceUrl,
+				"dstUrl" : dstUrl,
+				"taskLevel" : taskLevel,
+				"taskType" : taskType
+			}
+			console.log(data);
+			$.ajax({
+				url : "/admin/syncTasskContent/syncCreate",
+				type : "POST",
+				data : data,
+				dataType : "json",
+				success : function(data) {
+					if (data.success) {
+						alert("任务已经提交");
+					} else {
+						alert("服务器出错！");
+					}
+				}
+			});
+			return false;
+		}
+		
+		//log show
+ 	var sockjs_url = '/websocket/endpoint';
+    var sockjs = new SockJS(sockjs_url);
+    var div  = $("#uploadStatusBox div")
+    var print = function(p) {
+        div.append($("<span>").text(p));
+        div.append($("<br>"));
+        div.scrollTop(div.scrollTop()+10000);
+    };
+    sockjs.onopen    = function()  {print('日志开起成功---》'+sockjs.protocol);};
+    sockjs.onmessage = function(e) {print(e.data);};
+    sockjs.onclose   = function()  {print('[*] close');};		
+	</script>
+</body>
+</html>

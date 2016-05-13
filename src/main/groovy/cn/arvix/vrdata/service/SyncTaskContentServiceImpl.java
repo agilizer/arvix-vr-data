@@ -28,7 +28,8 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 	FetchDataService fetchDataService;
 	@Autowired
 	UploadDataService uploadDataService;
-
+	@Autowired
+	MessageBroadcasterService messageBroadcasterService;
 	@Override
 	public void create(String sourceUrls, String dstUrl,
 			TaskLevel taskLevel, TaskType taskType) {
@@ -66,10 +67,12 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 			excute(syncTaskContent);
 		}else{
 			if(syncTaskContent!=null&&syncTaskContent.getTaskStatus()==TaskStatus.FAILED){
-				jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",Calendar.getInstance(), TaskStatus.SUCCESS
+				jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",TaskStatus.SUCCESS,Calendar.getInstance()
 						,syncTaskContent.getId());
 				log.info("syncTaskContent  task exist and failed, restart task,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
+				messageBroadcasterService.send("任务已经存在");
 			}else{
+				messageBroadcasterService.send("任务存在或者url不正确");
 				log.info("syncTaskContent  task exist or url is wrong,sourceUrl  :{},dst url :{}",sourceUrl,dstUrl);
 			}
 		}
@@ -90,12 +93,23 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 	public void failed(SyncTaskContent syncTaskContent, String failedMsg) {
 		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,failedMsg=?,lastUpdated=?  where id=?", 
 				TaskStatus.FAILED,failedMsg,Calendar.getInstance(),syncTaskContent.getId());
+		messageBroadcasterService.send(failedMsg);
 	}
 
 	@Override
 	public void finish(SyncTaskContent syncTaskContent) {
-		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",
-				Calendar.getInstance(), TaskStatus.SUCCESS,syncTaskContent.getId());
+		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",TaskStatus.SUCCESS,
+				Calendar.getInstance(), syncTaskContent.getId());
+	}
+
+	@Override
+	public void cleanSuccess() {
+		jpaShareService.executeForHql("delete from  SyncTaskContent where taskStatus=?", TaskStatus.SUCCESS);
+	}
+
+	@Override
+	public void cleanFailed() {
+		jpaShareService.executeForHql("delete from  SyncTaskContent where taskStatus=?", TaskStatus.FAILED);
 	}
 
 }

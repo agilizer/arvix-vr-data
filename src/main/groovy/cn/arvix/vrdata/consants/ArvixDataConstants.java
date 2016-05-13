@@ -43,6 +43,8 @@ public interface ArvixDataConstants {
 	
 	String SITE_URL = "siteUrl";
 	
+	String SUPPORT_DATA_FETCH = "supportDataFetch";
+	
 	String TEAM_DESCRIPTION = "teamDescription";
 	
 	String ERROR_CODE_EXIST = "exist";

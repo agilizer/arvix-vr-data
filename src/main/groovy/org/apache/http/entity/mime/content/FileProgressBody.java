@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import cn.arvix.vrdata.been.Status;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MIME;
 import org.apache.http.util.Args;

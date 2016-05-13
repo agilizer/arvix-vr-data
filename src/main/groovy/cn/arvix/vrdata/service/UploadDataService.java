@@ -1,9 +1,8 @@
 package cn.arvix.vrdata.service;
 
-import cn.arvix.vrdata.been.Status;
-import cn.arvix.vrdata.domain.SyncTaskContent;
-
 import java.util.Map;
+
+import cn.arvix.vrdata.domain.SyncTaskContent;
 
 /**
  * Created by wanghaiyang on 16/4/26.
@@ -11,5 +10,4 @@ import java.util.Map;
 public interface UploadDataService {
 
     public Map<String, Object> uploadData(SyncTaskContent syncTaskContent);
-    public Status getCaseStatus(String caseId);
 }

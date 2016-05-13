@@ -31,7 +31,6 @@ public class HomeController {
 	ConfigDomainService configDomainService;
 	@RequestMapping("/home")
 	public String home() {
-		
 		return "home";
 	}
 
