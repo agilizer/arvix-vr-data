@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import cn.arvix.vrdata.domain.SyncTaskContent;
 import cn.arvix.vrdata.repository.SyncTaskContentRepository;
 import cn.arvix.vrdata.service.JpaShareService;
@@ -22,11 +23,9 @@ public class AutoSyncAndUpdateTask {
     private SyncTaskContentRepository syncTaskContentRepository;
 
     public void init() {
-        List<SyncTaskContent> syncTaskContentList = syncTaskContentRepository.getWaitingTask();
+        List<SyncTaskContent> syncTaskContentList = syncTaskContentRepository.getRestartTask();
         for (SyncTaskContent syncTaskContent : syncTaskContentList) {
-            if (syncTaskContent.getTaskStatus() == SyncTaskContent.TaskStatus.WAIT) {
-            	syncTaskContentService.excute(syncTaskContent);
-            }
+        	syncTaskContentService.excute(syncTaskContent);
         }
     }
 

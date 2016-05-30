@@ -16,7 +16,6 @@ import org.springframework.core.task.TaskRejectedException
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.stereotype.Service
 
-import cn.arvix.vrdata.been.Status
 import cn.arvix.vrdata.bootstrap.AutoSyncAndUpdateTask
 import cn.arvix.vrdata.consants.ArvixDataConstants
 import cn.arvix.vrdata.domain.ModelData
@@ -57,6 +56,8 @@ public class FetchDataServiceImpl implements FetchDataService {
 	UploadDataService uploadDataService;
     @Autowired
     private UserService userService;
+	@Autowired
+	MessageBroadcasterService messageBroadcasterService
     @Autowired
     @Qualifier("syncTaskExecutor")
     private ThreadPoolTaskExecutor taskExecutor;
@@ -65,30 +66,9 @@ public class FetchDataServiceImpl implements FetchDataService {
     private static final String ERROR = "Msg";
     private static final String STATUS = "Status";
     public static final String SERVER_URL = "http://vr.arvix.cn/";
-
-    // caseId --> status
-    private static ConcurrentHashMap<String, Status> deferedMessage = new ConcurrentHashMap<>();
-
     def static Long EXPIRE_TIME = 240000
     def RETRY_TIMES = 3;
     Map FETCH_MAP = [:];
-
-    public Status getCaseStatus(String caseId) {
-        return deferedMessage.get(caseId.trim());
-    }
-
-    private Status getStatus(String caseId) {
-        Status status = deferedMessage.get(caseId.trim());
-        if (status == null) {
-            status = new Status();
-            deferedMessage.put(caseId, status);
-        }
-        return status;
-    }
-
-    private void clearStatus(String caseId) {
-        deferedMessage.remove(caseId);
-    }
 
     private void removeUrlAndFlagCheck(String url) {
         FETCH_MAP.remove(url)
@@ -110,7 +90,6 @@ public class FetchDataServiceImpl implements FetchDataService {
         if(sourceUrl){
             def subIndex = sourceUrl.indexOf("?m=");
             def caseId = sourceUrl.substring(subIndex+3).trim()
-            clearStatus(caseId);
             if(FETCH_MAP.containsKey(sourceUrl)){
                 errStringBuilder.append("正在抓取${sourceUrl}，请不要重复提交！");
                 removeUrlAndFlagCheck(sourceUrl)
@@ -142,16 +121,14 @@ public class FetchDataServiceImpl implements FetchDataService {
 					//线程执行任务代码 start
                     Runnable worker = new Runnable() {
                         public void run() {
-                            Status status = fetchDataService.getStatus(caseId);
-                            status.addMessage("正在抓取: " + sourceUrl);
+                            messageBroadcasterService.send("正在抓取: " + sourceUrl);
                             try {
                                 fetchDataService.genModelData(caseId, modelData, fileSaveDir);
                             } catch (e) {
                                 log.error("fetch caseId {} genModelData error:", caseId, e);
-                                status.code = -1;
-                                status.addMessage("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
+                                messageBroadcasterService.send("正在抓取${sourceUrl}数据出错，请检查网络后重试！");
                                 fetchDataService.removeUrlAndFlagCheck(sourceUrl)
-                                syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
+                                syncTaskContentService.failed(syncTaskContent, "请检查网络后重试");
                                 return;
                             }
                             try {
@@ -166,7 +143,7 @@ public class FetchDataServiceImpl implements FetchDataService {
 									uploadDataService.uploadData(syncTaskContent);
 								}
                             } catch (Exception e) {
-                                status.addMessage("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
+                                messageBroadcasterService.send("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
 								syncTaskContentService.failed(syncTaskContent, e.getMessage());
                                 syncTaskContentRepository.saveAndFlush(syncTaskContent);
                             }
@@ -217,7 +194,6 @@ public class FetchDataServiceImpl implements FetchDataService {
 
 
     public  void genFiles(String caseId,String fileSaveDir,ModelData modelData,String serverUrl, SyncTaskContent syncTaskContent){
-        Status status = getStatus(caseId);
         def jsonObject =  genFileJson(caseId);
         def fileList = []
         def baseUrl = ""
@@ -273,8 +249,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                     if(log.infoEnabled){
                         log.info("fetch file "+fetchFileCount+"  finish")
                     }
-                    status.code = 0;
-                    status.addMessage("抓取第 "+fetchFileCount+"/"+fileSumCount+" 文件完成，caseId:${caseId}");
+                    messageBroadcasterService.send("抓取第 "+fetchFileCount+"/"+fileSumCount+" 文件完成，caseId:${caseId}");
                     fetchFileCount ++ ;
                     modelData.setFileFetchedCount(fetchFileCount)
                     modelData.setCurrentFetchFileKey(fetchFilePath)
@@ -291,10 +266,9 @@ public class FetchDataServiceImpl implements FetchDataService {
                     }else{
                         fetchFileCount ++
                         modelData.setFetchErrorMsg("抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+e.getMessage());
-                        status.code = -1;
-                        status.addMessage("抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+"请开启VPN!");
+                        messageBroadcasterService.send("抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+"请开启VPN!");
                         log.error("fetch file   return--",e);
-                      	syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
+                      	syncTaskContentService.failed(syncTaskContent, "抓取${fetchFilePath}时出错 retryTimes ${retryTimes}，"+"请开启VPN!");
                         return
                     }
                 }
@@ -307,20 +281,7 @@ public class FetchDataServiceImpl implements FetchDataService {
         long useTime = (long)((System.currentTimeMillis()-start)/1000)
         modelData.setUserTimeSec(useTime);
         modelData.setFileTotalSize(fileTotalSize)
-        String zipFilePath = fileSaveDir.substring(0,fileSaveDir.length()-1)+".zip"
-        log.info("fileSaveDir-->"+fileSaveDir);
-        log.info("zipFilePath-->"+zipFilePath);
-        try{
-            status.addMessage("正在压缩文件....");
-            AntZipUtil.writeByApacheZipOutputStream(fileSaveDir,zipFilePath,caseId)
-        }catch(e){
-            log.error("zip error",e);
-            status.code = -2;
-            status.addMessage("zip error: " + e.getMessage());
-			syncTaskContentService.failed(syncTaskContent, status.getMessage().get(status.getMessage().size()-1));
-        }
-        status.code = 1;
-        status.addMessage("完成");
+        messageBroadcasterService.send(caseId+"完成");
     }
 
     def static fetchFile(String fileSaveDir,String baseUrl,fetchFilePath){
@@ -358,9 +319,7 @@ public class FetchDataServiceImpl implements FetchDataService {
         return  JSON.parseObject(body).get("base.url");
     }
 
-
     public genModelData(String caseId,ModelData modelData,String fileSaveDir){
-        Status status = getStatus(caseId);
         def url = "https://my.matterport.com/show/?m=${caseId}"
         Document doc = Jsoup.parse(new URL(url), 30000);
         // 取得所有的script tag
@@ -383,7 +342,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                     def saveDir  = fileSaveDir+"playerImages/"
                     def fetchFileKeyList = ["signed_src","download_url","src","thumbnail_signed_src"]
                     def sumPlayImage = objectAr.size()*4
-                    status.addMessage("发现自动播放,共要抓取 "+sumPlayImage+" 个文件,caseId: " + caseId);
+                     messageBroadcasterService.send("发现自动播放,共要抓取 "+sumPlayImage+" 个文件,caseId: " + caseId);
                     def activeReel = []
                     def showIndex = 1
                     objectAr.each  {jsonObject->
@@ -391,7 +350,7 @@ public class FetchDataServiceImpl implements FetchDataService {
                         activeReel.add(["sid":jsonObject.get("sid")])
                         fetchFileKeyList.each{fileUrlKey->
                             fetchPlayerImage(saveDir,caseId,jsonObject,fileUrlKey)
-                            status.addMessage("自动播放文件${showIndex}/${sumPlayImage}完成,caseId: " + caseId);
+                            messageBroadcasterService.send("自动播放文件${showIndex}/${sumPlayImage}完成,caseId: " + caseId);
                             showIndex++;
                         }
                     }

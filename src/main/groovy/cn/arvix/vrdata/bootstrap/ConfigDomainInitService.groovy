@@ -52,6 +52,11 @@ class ConfigDomainInitService {
 					,true,"网站访问路径",ValueType.String)
 		}
 		
+		if(!configDomainRepository.findByMapName(ArvixDataConstants.SUPPORT_DATA_FETCH)){
+			saveCon(ArvixDataConstants.SUPPORT_DATA_FETCH,"false"
+					,true,"网站访问路径",ValueType.Boolean)
+		}
+		
 		if(!configDomainRepository.findByMapName(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY)){
 			saveCon(ArvixDataConstants.API_UPLOAD_MODELDATA_KEY,"c2654aa9-f432-49a7-9dd6-524518beeea1"
 					,true,"上传数据时访问key",ValueType.String)

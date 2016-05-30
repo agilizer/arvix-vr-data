@@ -19,8 +19,12 @@ public interface SyncTaskContentRepository extends JpaRepository<SyncTaskContent
     @Query("select s from SyncTaskContent s join s.author u where u.id=?1")
     public List<SyncTaskContent> getTaskByUserId(Long userId);
 
-    @Query("select s from SyncTaskContent s where s.taskStatus=1")
-    public List<SyncTaskContent> getWaitingTask();
+    /**
+     * 查询出 working和failed的任务
+     * @return
+     */
+    @Query("select s from SyncTaskContent s where s.taskStatus=1 or s.taskStatus=0")
+    public List<SyncTaskContent> getRestartTask();
 
     @Query("select s from SyncTaskContent s where s.caseId=?1")
     public SyncTaskContent findOneByCaseId(String caseId);

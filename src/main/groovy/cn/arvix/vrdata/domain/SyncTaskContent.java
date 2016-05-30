@@ -54,7 +54,11 @@ public class SyncTaskContent  implements Serializable{
 		WORKING,
 		WAIT,
 		FAILED,
-		SUCCESS
+		SUCCESS,
+		/**
+		 * 程序出错
+		 */
+		ERROR
 	}
 	public static enum TaskType{
 		FETCH,
