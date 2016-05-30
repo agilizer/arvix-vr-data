@@ -95,7 +95,7 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 	@Override
 	public void finish(SyncTaskContent syncTaskContent) {
 		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",
-				Calendar.getInstance(), TaskStatus.SUCCESS,syncTaskContent.getId());
+				 TaskStatus.SUCCESS,Calendar.getInstance(),syncTaskContent.getId());
 	}
 
 }

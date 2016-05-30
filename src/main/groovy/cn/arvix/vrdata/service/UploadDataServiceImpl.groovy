@@ -218,7 +218,6 @@ public class UploadDataServiceImpl implements UploadDataService {
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		try {
 			HttpPost httppost = new HttpPost(dstUrl);
-
 			FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
 			FileProgressListenInter progressListen = new FileProgressListenDefault(status,syncTaskContent);
 			zipFileData.setFileProgressListenInter(progressListen);
