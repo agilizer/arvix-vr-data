@@ -34,7 +34,7 @@
 				<form class="form-inline">
 					<div class="form-group" style="float: right;">
 						<div class="input-group">
-							<select class="form-control" id="searchType" style="width:60px;">
+							<select class="form-control" id="searchType" style="width:100px;">
 								<option value="title">标题</option>
 								<option value="caseId">caseId</option>
 								<option value="desc">描述</option>
@@ -68,6 +68,7 @@
 						<td>是否显示logo</td>
 						<td>是否上线</td>
 						<td>标题</td>
+						<td>使用matterport链接</td>
 						<td>标签</td>
 						<td>右侧链接</td>
 						<td>logo下展示</td>
@@ -75,7 +76,7 @@
 						<td>操作</td>
 					</tr>
 					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,
-					m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml ,m.logoDownHtml-->
+					m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml ,m.logoDownHtml,m.useMatterportLink-->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
 						<td th:text="${modelData[1]}"></td>
 						<td><img th:id="${'img'+modelData[2]}"
@@ -92,6 +93,12 @@
 							data-pk="1" data-name='title'
 							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
 							th:attr="data-pk=${modelData[2]}"></a></td>
+							
+					<td><a class="editable" href="#" th:text="${modelData[13]}"
+							data-pk="1" data-name='useMatterportLink'
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+							
 
 						<td><a class="editable" href="#" th:text="${modelData[13]}"
 							   data-pk="1" data-name='tagStr'

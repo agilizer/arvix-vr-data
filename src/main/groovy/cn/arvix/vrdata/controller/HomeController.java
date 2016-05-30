@@ -48,17 +48,21 @@ public class HomeController {
 		ModelData modelData = modelDataService.findByCaseId(caseId);
 		String viewName = "404";
 		StaticMethod.cros(response);
+		
 		if(modelData!=null){
 			log.info("modelData.getOnline()-->"+modelData.getOnline()+" title:"+modelData.getTitle());
-			
-			if(null!=modelData.getOnline()&&modelData.getOnline()){
-				model.addAttribute("modelData",modelData );
-				model.addAttribute("caseId",caseId );
-				model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
-				model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
-				viewName = "show";
+			if(null==modelData.getUseMatterportLink()||true==modelData.getUseMatterportLink()){
+				viewName = "redirect:"+modelData.getSourceUrl();
 			}else{
-				viewName = "404";
+				if(null!=modelData.getOnline()&&modelData.getOnline()){
+					model.addAttribute("modelData",modelData );
+					model.addAttribute("caseId",caseId );
+					model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
+					model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
+					viewName = "show";
+				}else{
+					viewName = "404";
+				}
 			}
 		}
 		return viewName;

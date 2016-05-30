@@ -85,7 +85,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
 		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml"
-				+ " ,m.logoDownHtml,m.tagStr From "
+				+ " ,m.logoDownHtml,m.tagStr,m.useMatterportLink From "
 				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData where fetchStatus=:fetchStatus " ;
 		JdbcPage jdbcPage = jpaShareService.queryForHql(hql, countHql, max,
@@ -98,7 +98,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 		Map<String,Object>  map = new HashMap<String,Object>();
 		map.put("fetchStatus",FetchStatus.FINISH);
 		String hql = "select m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,f.storePath,m.logoShow,m.online,m.rightHtml"
-				+ " ,m.logoDownHtml,m.tagStr From "
+				+ " ,m.logoDownHtml,m.tagStr,m.useMatterportLink From "
 				+ " ModelData m left join m.fileInfo f where m.fetchStatus=:fetchStatus " ;
 		String countHql = "select count(*) from ModelData m where m.fetchStatus=:fetchStatus " ;
 		if (title != null && !(title = title.trim()).equals("")) {
@@ -125,7 +125,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 	@Override
 	public Map<String, Object> update(String fieldName, Long id, String value) {
 		Map<String, Object> result = StaticMethod.getResult();
-		if("logoShow".equals(fieldName)||"online".equals(fieldName)){
+		if("logoShow".equals(fieldName)||"online".equals(fieldName)||"useMatterportLink".equals(fieldName)){
 			jpaShareService.executeForHql("update ModelData set "+fieldName+"=? where id=?", Boolean.valueOf(value),id);
 		}else{
 			jpaShareService.executeForHql("update ModelData set "+fieldName+"=? where id=?", value,id);

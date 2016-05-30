@@ -80,7 +80,11 @@ public class ModelData  implements Serializable{
 	 */
 	@Temporal(TemporalType.TIMESTAMP)
 	private Calendar dateCreated;
+	@Column
 	private Boolean online = true;
+	
+	@Column
+	private Boolean useMatterportLink = true;
 	@Column(columnDefinition = "longtext")
 	private String rightHtml ; 
 	
@@ -309,6 +313,14 @@ public class ModelData  implements Serializable{
 
 	public void setLogoDownHtml(String logoDownHtml) {
 		this.logoDownHtml = logoDownHtml;
+	}
+
+	public Boolean getUseMatterportLink() {
+		return useMatterportLink;
+	}
+
+	public void setUseMatterportLink(Boolean useMatterportLink) {
+		this.useMatterportLink = useMatterportLink;
 	}
 	
 	
