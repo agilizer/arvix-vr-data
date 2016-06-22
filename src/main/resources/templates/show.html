@@ -65,6 +65,8 @@
 
 </head>
 <body class="player-active">
+<img src="http://www.arvix.cn/wp-content/uploads/2016/06/472823801.jpg" style="Opacity:0;width:0" 
+ th:src="${'/upload/'+modelData.fileInfo?.storePath}"/>
     <p class="prompt"   id="weixinNote"  style="display:none">点击···使用浏览器打开</p>
 	<div id="siteUrl" style="display: none;"
 		th:text="${siteUrl+'api/player/models/'+modelData.caseId+'/'}"></div>
