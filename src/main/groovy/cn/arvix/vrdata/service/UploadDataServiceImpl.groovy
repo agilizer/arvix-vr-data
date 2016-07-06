@@ -86,7 +86,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 		if (modelData != null) {
 			String tmpModelData = modelData.getModelData();
 			//替换成目标服务器域名
-			String dstServerDomain = dstUrl.replace("admin/updateModelData", "")
+			String dstServerDomain = dstUrl.replace("api/v1/updateModelData", "")
 			modelData.setModelData(tmpModelData.replaceAll(FetchDataServiceImpl.SERVER_URL, dstServerDomain));
 		}
 		//result.put("script", modelData.getModelData());
@@ -194,7 +194,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 			String zipFilePath = filePath+caseId + ".zip"
 			File zipFile = new File(zipFilePath);
 			if(!zipFile.exists()){
-				String fileSaveDir = filePath.substring(0,filePath.length()-1)
+				String fileSaveDir = filePath+caseId
 				log.info("fileSaveDir-->"+fileSaveDir);
 				log.info("zipFilePath-->"+zipFilePath);
 				try{
@@ -206,7 +206,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 					syncTaskContentService.failed(syncTaskContent, "zip error: " + e.getMessage());
 				}
 			}
-			FileProgressBody zipFileData = new FileProgressBody(new File(filePath));
+			FileProgressBody zipFileData = new FileProgressBody(new File(zipFilePath));
 			FileProgressListenInter progressListen = new FileProgressListenDefault(messageBroadcasterService,syncTaskContent);
 			zipFileData.setFileProgressListenInter(progressListen);
 			MultipartEntityBuilder multipartEntityBuilder = MultipartEntityBuilder.create()
