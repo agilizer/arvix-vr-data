@@ -66,6 +66,7 @@
 </head>
 <body class="player-active">
 
+
 <img src="http://www.arvix.cn/wp-content/uploads/2016/06/472823801.jpg" style="Opacity:0;width:0"
  th:src="${'/upload/'+modelData.fileInfo?.storePath}"/>
 
@@ -122,7 +123,8 @@
 					</div>
 				</div>
 				<div th:if="${modelData.logoShow}" class="bottom-logo">
-					<img alt="Arvix 荣誉出品" src="/resources/images/poweredByLogo.png" />
+				<img   alt="powered By Matterport"   src="https://my.matterport.com/show/images/poweredByLogo.png" />
+<!-- 					<img alt="Arvix 荣誉出品" src="/resources/images/poweredByLogo.png" /> -->
 					<div th:utext="${modelData?.logoDownHtml}">
 					<h2>3D虚拟互联网展示</h2>
 					<h3>服务联系人：狄经理  电话：13701243593</h3>
