@@ -70,7 +70,7 @@ public class FetchDataServiceImpl implements FetchDataService {
     def RETRY_TIMES = 3;
     Map FETCH_MAP = [:];
 
-    private void removeUrlAndFlagCheck(String url) {
+    public void removeUrlAndFlagCheck(String url) {
         FETCH_MAP.remove(url)
     }
 
@@ -106,9 +106,10 @@ public class FetchDataServiceImpl implements FetchDataService {
                 if(modelDataExit){
                     errStringBuilder.append("服务器已经存在此数据，忽略抓取："+sourceUrl);
                     removeUrlAndFlagCheck(sourceUrl);
-					syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
 					if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
 						uploadDataService.uploadData(syncTaskContent);
+					}else{
+						syncTaskContentService.failed(syncTaskContent, errStringBuilder.toString());
 					}
                     return result;
                 }
@@ -134,23 +135,21 @@ public class FetchDataServiceImpl implements FetchDataService {
                             try {
                                 fetchDataService.genFiles(caseId, fileSaveDir, modelData, serverUrl, syncTaskContent);
                                 fetchDataService.removeUrlAndFlagCheck(sourceUrl)
-                                //上传成功,修改数据库set
+                                //修改数据库set
                                 modelData.fetchStatus = ModelData.FetchStatus.FINISH;
                                 modelDataRepository.saveAndFlush(modelData);
                                 //移除记录
 								syncTaskContentService.finish(syncTaskContent);
+								//如果任务需要同步,继续同步数据
 								if(syncTaskContent.getTaskType()==TaskType.FETCH_UPDATE){
 									uploadDataService.uploadData(syncTaskContent);
 								}
                             } catch (Exception e) {
+								log.error("fetch caseId {} genModelData error:", caseId, e);
                                 messageBroadcasterService.send("正在抓取${sourceUrl}数据出: " + e.getMessage() + ", " + e.getCause());
 								syncTaskContentService.failed(syncTaskContent, e.getMessage());
                                 syncTaskContentRepository.saveAndFlush(syncTaskContent);
-                            }
-                            //如果任务需要同步,继续同步数据
-                            if (syncTaskContent.getTaskType() == TaskType.FETCH_UPDATE) {
-                                 uploadDataService.uploadData(syncTaskContent);
-                            }
+                            }                         
                         }
                     }
 					//线程执行任务代码 end
@@ -309,7 +308,8 @@ public class FetchDataServiceImpl implements FetchDataService {
 
     public static JSONObject genFileJson(String caseId){
         def url="https://my.matterport.com/api/player/models/${caseId}/files?filter=*dam%2C*dam.lzma%2C*_obj.zip%2Cpan%2F*.jpg%2C*texture_jpg_high%2F*.jpg%2C*texture_jpg_low%2F*.jpg%2C*.csv%2C*.modeldata&type=2&format=json"
-        String body = Jsoup.connect(url).ignoreContentType(true).timeout(200000).execute().body();
+        log.info("url:{}",url)
+		String body = Jsoup.connect(url).ignoreContentType(true).timeout(200000).execute().body();
         return  JSON.parseObject(body);
     }
 
@@ -355,8 +355,8 @@ public class FetchDataServiceImpl implements FetchDataService {
                         }
                     }
                     modelData.setActiveReel(JSON.toJSONString(["reel":activeReel]))
-                    modelData.setModelData("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
                 }
+				modelData.setModelData("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
             }
         }
         modelData.setDescription(doc.getElementById("meta-description").text());

@@ -10,4 +10,6 @@ import cn.arvix.vrdata.domain.SyncTaskContent;
 public interface UploadDataService {
 
     public Map<String, Object> uploadData(SyncTaskContent syncTaskContent);
+    
+    public  void clearCaseMap(String caseId) ;
 }

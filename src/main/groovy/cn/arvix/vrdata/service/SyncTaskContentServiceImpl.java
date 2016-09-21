@@ -93,6 +93,8 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 	public void failed(SyncTaskContent syncTaskContent, String failedMsg) {
 		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,failedMsg=?,lastUpdated=?  where id=?", 
 				TaskStatus.FAILED,failedMsg,Calendar.getInstance(),syncTaskContent.getId());
+		fetchDataService.removeUrlAndFlagCheck(syncTaskContent.getSourceUrl());
+		uploadDataService.clearCaseMap(syncTaskContent.getCaseId());
 		messageBroadcasterService.send(failedMsg);
 	}
 
@@ -100,6 +102,8 @@ public class SyncTaskContentServiceImpl implements SyncTaskContentService {
 	public void finish(SyncTaskContent syncTaskContent) {
 		jpaShareService.executeForHql("update SyncTaskContent set taskStatus=?,lastUpdated=?   where id=?",
 				 TaskStatus.SUCCESS,Calendar.getInstance(),syncTaskContent.getId());
+		fetchDataService.removeUrlAndFlagCheck(syncTaskContent.getSourceUrl());
+		uploadDataService.clearCaseMap(syncTaskContent.getCaseId());
 	}
 
 	@Override

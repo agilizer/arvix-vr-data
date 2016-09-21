@@ -140,7 +140,7 @@ public class UploadDataServiceImpl implements UploadDataService {
 	}
 
 
-	private void clearCaseMap(String caseId) {
+	public  void clearCaseMap(String caseId) {
 		caseMap.remove(caseId);
 	}
 

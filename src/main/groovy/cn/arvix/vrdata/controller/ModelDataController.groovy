@@ -38,11 +38,6 @@ public class ModelDataController {
 	ConfigDomainService configDomainService;
 	@Autowired
 	ModelDataListService modelDataListService;
-	@ResponseBody
-	@RequestMapping("/api/v1/fetchData")
-	public Map<String,Object> fetchData(String sourceUrl,boolean force) {
-		return fetchDataService.fetch(sourceUrl, force);
-	}
 	
 	
 	@ResponseBody

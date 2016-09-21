@@ -53,6 +53,7 @@ public class FileProgressBody extends AbstractContentBody {
     private final File file;
     private final String filename;
     private FileProgressListenInter fileProgressListenInter;
+    private static long ONE_M = 1024*1024;
 
     /**
      * @since 4.1
@@ -130,14 +131,17 @@ public class FileProgressBody extends AbstractContentBody {
         final InputStream in = new FileInputStream(this.file);
         long fileSize = this.file.length();
         try {
-            final byte[] tmp = new byte[4096];
+            final byte[] tmp = new byte[8192];
             int l;
             long uploaded = 0;
+            long diffUpload = 0;
             while ((l = in.read(tmp)) != -1) {
                 out.write(tmp, 0, l);
-                uploaded = uploaded +l;
-                if (fileProgressListenInter != null) {
+                uploaded = uploaded + l;
+                diffUpload = diffUpload + l ;
+                if (fileProgressListenInter != null && diffUpload > ONE_M) {
                 	fileProgressListenInter.progress(uploaded, fileSize);
+                	diffUpload = 0;
                 }
                 //UILog.getInstance().logProgress(fileSize, uploaded,filename);
             }
