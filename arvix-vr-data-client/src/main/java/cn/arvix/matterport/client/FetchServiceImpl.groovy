@@ -199,6 +199,7 @@ public class FetchServiceImpl implements FetchService{
 		
 		if(!file.exists()){
 			def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
+			log.info("fetchUrl:{}",fetchUrl);
 			resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000)
 					.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
 			tempBytes= resultFile.bodyAsBytes()
@@ -224,6 +225,7 @@ public class FetchServiceImpl implements FetchService{
 	public  genModelData(String caseId,ModelDataClient modelData,String fileSaveDir){
 		def url = "https://my.matterport.com/show/?m=${caseId}"
 		Document doc = Jsoup.parse(new URL(url), 30000);
+		println doc
 		// 取得所有的script tag
 		Elements eles = doc.getElementsByTag("script");
 		for (Element ele : eles) {
