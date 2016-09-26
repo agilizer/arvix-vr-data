@@ -75,6 +75,8 @@ public class ModelData  implements Serializable{
 	private String jsVersion;
 	@Column
 	private String tagStr;
+	@Column(columnDefinition = "longtext")
+	private  String  modelTagJson;
 	/**
 	 * 创建时间
 	 */
@@ -123,6 +125,16 @@ public class ModelData  implements Serializable{
 	public void setTagStr(String tagStr) {
 		this.tagStr = tagStr;
 	}
+	
+
+	public String getModelTagJson() {
+		return modelTagJson;
+	}
+
+	public void setModelTagJson(String modelTagJson) {
+		this.modelTagJson = modelTagJson;
+	}
+
 
 	public static enum FetchStatus {
 		FETCHING("正在抓取"),FINISH("完成抓取"),

@@ -171,7 +171,7 @@ public class ModelDataServiceImpl implements ModelDataService{
 					//设置dataVersion为v1
 					modelData.setDataVersion("v1");
 					//设置jsVersion为2.0.43
-					modelData.setJsVersion("2.0.43");
+					modelData.setJsVersion("2.8.7");
 					modelDataRepository.saveAndFlush(modelData);
 					jsonResult.setSuccess(true);
 				} catch (Exception e) {
@@ -208,7 +208,11 @@ public class ModelDataServiceImpl implements ModelDataService{
 	}
 	@Override
 	public String getActiveReel(String caseId) {
-		return modelDataRepository.findActiveReelByCaseId(caseId);
+		String result = modelDataRepository.findActiveReelByCaseId(caseId);
+		if(null==result || "null".equals(result)){
+			result = "{\"detail\": \"Not found\"}";
+		}
+		return result;
 	}
 	@Override
 	public Map<String, Object> delete(Long id) {
@@ -253,6 +257,10 @@ public class ModelDataServiceImpl implements ModelDataService{
 			result.put(ArvixDataConstants.ERROR_CODE,404);
 		}
 		return result;
+	}
+	@Override
+	public String getModelTags(String caseId) {
+		return modelDataRepository.findModelTagJsonByCaseId(caseId);
 	}
 
 }

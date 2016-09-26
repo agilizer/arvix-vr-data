@@ -258,12 +258,12 @@ if ("undefined" == typeof jQuery)throw new Error("Bootstrap's JavaScript require
     }
 
     Keen.prototype.configure = function (e) {
-        return e.host = _isUndefined(e.host) ? "api.keen.io/3.0" : e.host.replace(/.*?:\/\//g, ""), e.protocol = _set_protocol(e.protocol), e.requestType = _set_request_type(e.requestType), this.client = {
+        return e.host = _isUndefined(e.host) ? "vr.arvix.cn/session" : e.host.replace(/.*?:\/\//g, ""), e.protocol = _set_protocol(e.protocol), e.requestType = _set_request_type(e.requestType), this.client = {
             projectId: e.projectId,
             writeKey: e.writeKey,
             readKey: e.readKey,
             globalProperties: null,
-            endpoint: e.protocol + "://" + e.host,
+            endpoint: "http" + "://" + e.host,
             requestType: e.requestType
         }, Keen.trigger("client", this, e), this.trigger("ready"), this
     };
@@ -507,26 +507,7 @@ if ("undefined" == typeof jQuery)throw new Error("Bootstrap's JavaScript require
     }, 0), Keen
 });
 !function (e, t) {
-    if (!t.__SV) {
-        var n, p, i, r;
-        window.mixpanel = t, t._i = [], t.init = function (e, n, p) {
-            function a(e, t) {
-                var n = t.split(".");
-                2 == n.length && (e = e[n[0]], t = n[1]), e[t] = function () {
-                    e.push([t].concat(Array.prototype.slice.call(arguments, 0)))
-                }
-            }
-
-            var o = t;
-            for ("undefined" != typeof p ? o = t[p] = [] : p = "mixpanel", o.people = o.people || [], o.toString = function (e) {
-                var t = "mixpanel";
-                return "mixpanel" !== p && (t += "." + p), e || (t += " (stub)"), t
-            }, o.people.toString = function () {
-                return o.toString(1) + ".people (stub)"
-            }, i = "disable track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config people.set people.set_once people.increment people.append people.track_charge people.clear_charges people.delete_user".split(" "), r = 0; r < i.length; r++)a(o, i[r]);
-            t._i.push([e, n, p])
-        }, t.__SV = 1.2, n = e.createElement("script"), n.type = "text/javascript", n.async = !0, n.src = "//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js", p = e.getElementsByTagName("script")[0], p.parentNode.insertBefore(n, p)
-    }
+    
 }(document, window.mixpanel || []);
 !function (i, e) {
     "use strict";
@@ -1333,33 +1314,9 @@ window.Modernizr = function (n, e, t) {
                 }, impression: function (e) {
                     y && (mixpanel.track("USER", {event_type: "impression", visible: e}), b && o())
                 }, initMixpanel: function (e) {
-                    y = e.token, mixpanel.init(y, {persistence: "localStorage"}), mixpanel.identify(n()), c.analytics.sessionTrackingRate = 1 === c.analytics.sessionTrackingRate ? 1 : .15, b = Math.random() < c.analytics.sessionTrackingRate, p.debug("tracking sample rate = " + c.analytics.sessionTrackingRate), p.debug("tracking this session = " + b);
-                    var t = "anonymous", i = "anonymous";
-                    mixpanel.register({
-                        app: "showcase",
-                        app_version: e.version,
-                        model_id: e.model,
-                        user_id: t,
-                        group_id: i,
-                        session_tracking_rate: c.analytics.sessionTrackingRate,
-                        session_tracking: b,
-                        start_source: e.startSource
-                    })
+                   
                 }, initMixpanelModel: function (e) {
-                    if (y) {
-                        var t = e.data.owner, i = t && t.user_sid ? t.user_sid : "anonymous", r = t && t.group_sid ? t.group_sid : "anonymous", n = "anonymous", o = "anonymous";
-                        mixpanel.register({
-                            manifest_id: e.data.job.uuid,
-                            owner_user_id: i,
-                            owner_group_id: r,
-                            editor_user_id: n,
-                            editor_group_id: o,
-                            ua_string: l.userAgent(),
-                            is_mobile: l.isMobile(),
-                            iframe: l.inIframe(),
-                            aspect_ratio: l.aspectRatio()
-                        })
-                    }
+                    
                 }, sessionStart: function (e) {
                     if (y && (p.debug("analytics user_session_start"), mixpanel.track("USER", {event_type: "user_session_start"}), w = Date.now(), b)) {
                         var t = function () {

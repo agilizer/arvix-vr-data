@@ -1,10 +1,9 @@
 package cn.arvix.vrdata.service
 
-import java.util.concurrent.ConcurrentHashMap
-
 import org.apache.commons.io.FileUtils
 import org.jsoup.Connection
 import org.jsoup.Jsoup
+import org.jsoup.Connection.Response
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.select.Elements
@@ -25,7 +24,6 @@ import cn.arvix.vrdata.domain.SyncTaskContent.TaskType
 import cn.arvix.vrdata.repository.ConfigDomainRepository
 import cn.arvix.vrdata.repository.ModelDataRepository
 import cn.arvix.vrdata.repository.SyncTaskContentRepository
-import cn.arvix.vrdata.util.AntZipUtil
 
 import com.alibaba.fastjson.JSON
 import com.alibaba.fastjson.JSONArray
@@ -285,25 +283,47 @@ public class FetchDataServiceImpl implements FetchDataService {
 
     def static fetchFile(String fileSaveDir,String baseUrl,fetchFilePath){
         /**
-         * time out处理，amazon cdn超时后会报403错误
-         **/
-        Connection.Response resultFile
-        File file
-        byte[] tempBytes
-        def result = 0
-
-        // output here
-        file = new File(fileSaveDir+fetchFilePath)
-
-        if(!file.exists()){
-            def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
-            resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000)
-                    .userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
-            tempBytes= resultFile.bodyAsBytes()
-            FileUtils.writeByteArrayToFile(file, tempBytes)
-            result = tempBytes.length
-        }
-        return result
+		 * time out处理，amazon cdn超时后会报403错误
+		 **/
+		Response  resultFile
+		File file
+		byte[] tempBytes
+		def result = 0
+		
+		// output here
+		file = new File(fileSaveDir+fetchFilePath)
+		
+		if(!file.exists()){
+			def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
+			log.info("fetchUrl:{}",fetchUrl);
+			if(fetchUrl.indexOf("/2k/")>0){
+				log.info("fetchUrl:2k...............");
+				return 0
+			}
+			if(fetchUrl.indexOf("semantic/roomdata.csv")>0){
+				log.info("fetchUrl:semantic/roomdata.csv...............");
+				return 0
+			}
+			
+			if(fetchUrl.indexOf("tesselate.dam.lzma")>0){
+				log.info("fetchUrl:tesselate.dam.lzma...............");
+				return 0
+			}
+			if(fetchUrl.indexOf("tesselate.v2.dam.lzma")>0){
+				log.info("fetchUrl:tesselate.v2.dam.lzma...............");
+				return 0
+			}
+			try{
+				resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000).maxBodySize(1024*1024*10*2)
+						.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
+				tempBytes= resultFile.bodyAsBytes()
+				FileUtils.writeByteArrayToFile(file, tempBytes)
+				result = tempBytes.length
+			}catch(e){
+				log.error("error",e)
+			}
+		}
+		return result
     }
 
     public static JSONObject genFileJson(String caseId){

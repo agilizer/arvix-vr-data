@@ -1,5 +1,8 @@
 package cn.arvix.vrdata.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import cn.arvix.vrdata.consants.ArvixDataConstants;
 import cn.arvix.vrdata.domain.ModelData;
@@ -33,7 +37,15 @@ public class HomeController {
 	public String home() {
 		return "home";
 	}
-
+	@ResponseBody
+	@RequestMapping("/session/**")
+	public Map<String,Object> session(Model model) {
+		Map<String,Object> result = new HashMap<String,Object>();
+		result.put("create", true);
+		return result;
+	}
+	
+	
 	@RequestMapping("/")
 	public String index(Model model) {
 		// Collection<?> temp =
@@ -59,7 +71,7 @@ public class HomeController {
 					model.addAttribute("caseId",caseId );
 					model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
 					model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
-					viewName = "show";
+					viewName = "show-"+modelData.getJsVersion();
 				}else{
 					viewName = "404";
 				}

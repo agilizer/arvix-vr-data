@@ -1,4 +1,4 @@
-package cn.arvix.matterport.client;
+package cn.arvix.vr.client;
 
 import java.io.Serializable;
 
@@ -31,6 +31,7 @@ public class ModelDataClient  implements Serializable{
 	private  String  fetchErrorMsg;
 	private Long userTimeSec;
 	private String activeReel;
+	private String modelTagJson;
 	
 	public static enum FetchStatus {
 		FETCHING("正在抓取"),FINISH("完成抓取"),
@@ -121,6 +122,13 @@ public class ModelDataClient  implements Serializable{
 	}
 	public void setActiveReel(String activeReel) {
 		this.activeReel = activeReel;
+	}
+	
+	public String getModelTagJson() {
+		return modelTagJson;
+	}
+	public void setModelTagJson(String modelTagJson) {
+		this.modelTagJson = modelTagJson;
 	}
 	
 	

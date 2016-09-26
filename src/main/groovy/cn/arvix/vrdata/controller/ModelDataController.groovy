@@ -24,6 +24,9 @@ import cn.arvix.vrdata.service.ModelDataService
 import cn.arvix.vrdata.util.JSONResult
 import cn.arvix.vrdata.util.StaticMethod
 
+import com.alibaba.fastjson.JSON
+import com.alibaba.fastjson.JSONObject
+
 
 @Controller
 @RequestMapping("")
@@ -63,6 +66,17 @@ public class ModelDataController {
 			}
 			return null;
 		}
+		//设置文件下载template
+		String newScript = modelDataClient.replace("window.MP_PREFETCHED_MODELDATA = ", "");
+		if(newScript.endsWith(";")){
+			newScript = newScript.substring(0,newScript.length()-1);
+		}
+		println "\n\n\n:"+newScript 
+		//newScript =newScript.substring(0,newScript.length()-1);
+		JSONObject object = JSON.parseObject(newScript);
+		String serverUrl = configDomainService.getConfigString(ArvixDataConstants.SITE_URL)
+		object.files.templates[0]= serverUrl +"files287/d?path={{filename}}&caseId="+modelData.getCaseId();
+		modelDataClient = "window.MP_PREFETCHED_MODELDATA = " + JSON.toJSONString(object);
 		modelData.setModelData(modelDataClient);
 		return modelDataService.uploadModelData(modelData, zipFileData);
 	}

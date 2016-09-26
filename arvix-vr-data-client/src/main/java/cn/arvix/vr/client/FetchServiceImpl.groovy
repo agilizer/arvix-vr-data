@@ -1,6 +1,13 @@
-package cn.arvix.matterport.client
+package cn.arvix.vr.client
 
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.util.EntityUtils
 import org.jsoup.Jsoup
 import org.jsoup.Connection.Response
 import org.jsoup.nodes.Document
@@ -148,7 +155,8 @@ public class FetchServiceImpl implements FetchService{
 					fetchSuccessTag = true;
 				}catch(e){
 					log.error("fetch file",e);
-					if((e instanceof java.net.UnknownHostException|| e instanceof  java.net.SocketTimeoutException || e instanceof java.net.SocketException) && retryTimes < RETRY_TIMES){
+					if((e instanceof java.net.UnknownHostException|| e instanceof  java.net.SocketTimeoutException || 
+						e instanceof java.net.SocketException) && retryTimes < RETRY_TIMES){
 						Thread.sleep(3000);
 						if(retryTimes==0){
 							i--
@@ -200,11 +208,32 @@ public class FetchServiceImpl implements FetchService{
 		if(!file.exists()){
 			def fetchUrl  = baseUrl.replace("{{filename}}", fetchFilePath)
 			log.info("fetchUrl:{}",fetchUrl);
-			resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000)
-					.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
-			tempBytes= resultFile.bodyAsBytes()
-			FileUtils.writeByteArrayToFile(file, tempBytes)
-			result = tempBytes.length
+			if(fetchUrl.indexOf("/2k/")>0){
+				log.info("fetchUrl:2k...............");
+				return 0
+			}
+			if(fetchUrl.indexOf("semantic/roomdata.csv")>0){
+				log.info("fetchUrl:semantic/roomdata.csv...............");
+				return 0
+			}
+			
+			if(fetchUrl.indexOf("tesselate.dam.lzma")>0){
+				log.info("fetchUrl:tesselate.dam.lzma...............");
+				return 0
+			}
+			if(fetchUrl.indexOf("tesselate.v2.dam.lzma")>0){
+				log.info("fetchUrl:tesselate.v2.dam.lzma...............");
+				return 0
+			}
+			try{
+				resultFile = Jsoup.connect(fetchUrl).ignoreContentType(true).timeout(300000).maxBodySize(1024*1024*10*2)
+						.userAgent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:43.0) Gecko/20100101 Firefox/43.0").execute();
+				tempBytes= resultFile.bodyAsBytes()
+				FileUtils.writeByteArrayToFile(file, tempBytes)
+				result = tempBytes.length
+			}catch(e){
+				log.error("error",e)
+			}
 		}
 		return result
 	}
@@ -258,9 +287,11 @@ public class FetchServiceImpl implements FetchService{
 							showIndex++;
 						}
 					}
-					modelData.setActiveReel(JSON.toJSONString(["reel":activeReel]))
+					modelData.setActiveReel(genActiveReel(caseId))
 					modelData.setModelDataClient("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
 				}
+				modelData.setModelTagJson(genTags(caseId))
+				break;
 			}
 		}
 		modelData.setDescription(doc.getElementById("meta-description").text());
@@ -280,6 +311,47 @@ public class FetchServiceImpl implements FetchService{
 			}
 			///upload/playerImages/ZujWX1srahK/playerImages/
 			sourceObject.put(filePathKey,ClientStaticVar.SERVER_URL+"upload/playerImages/"+caseId+"/playerImages/"+fileName)
+		}
+	}
+	private String genActiveReel(String caseId){
+		return genJsonField(caseId,"https://my.matterport.com/api/v1/jsonstore/model/highlights/${caseId}/active_reel")
+	}
+	
+	private String genTags(String caseId){
+		return genJsonField(caseId,"https://my.matterport.com/api/v1/jsonstore/model/mattertags/${caseId}")
+	}
+	
+	private String genJsonField(String caseId,String url){
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		String result = '{"detail": "Not found"}';
+		try {
+			HttpGet get = new HttpGet(url);
+			get.addHeader("Referer","https://my.matterport.com/show/?m=${caseId}");
+			get.addHeader("Accept-Encoding","gzip, deflate, sdch, br");
+			get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36");
+			get.addHeader("Accept","application/json");
+			get.addHeader("Connection","keep-alive");
+			
+			CloseableHttpResponse response = null;
+			try { 
+				response = httpclient.execute(get);
+				int code = response.getStatusLine().getStatusCode()
+				HttpEntity resEntity = response.getEntity();
+				if(code == 200){
+					if (resEntity != null) {
+						result =  IOUtils.toString(resEntity.getContent());
+					}
+				}
+				EntityUtils.consume(resEntity);
+				
+			}catch(e){
+				e.printStackTrace()
+			} finally {
+				response.close();
+			}
+		} finally {
+			httpclient.close();
+			return result;
 		}
 	}
 	

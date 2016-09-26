@@ -39,7 +39,7 @@ import org.apache.http.util.Args;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import cn.arvix.matterport.client.UILog;
+import cn.arvix.vr.client.UILog;
 
 
 /**

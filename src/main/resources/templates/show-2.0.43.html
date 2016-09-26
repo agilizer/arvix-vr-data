@@ -12,60 +12,17 @@
 <title th:unless="${modelData.logoShow}" th:text="${modelData.title}">The
 	book store of Demaotang -</title>
 
-<meta property="og:title" content="The book store of Demaotang"
-	th:content="${modelData.title}" />
-<meta property="og:description" content="3D Showcase" />
-<meta property="og:type" content="video" />
-<meta property="og:url"
-	content="https://my.matterport.com/show/?m=MXfJvWQecHT"
-	th:content="${'https://my.matterport.com/show/?m='+modelData.caseId}" />
-<meta property="og:site_name" content="Matterport" />
-<meta property="og:image"
-	content="https://my.matterport.com/api/v1/player/models/MXfJvWQecHT/thumb"
-	th:content="${'https://my.matterport.com/api/v1/player/models/'+modelData.caseId+'/thumb'}" />
-<meta property="og:image:width" content="" />
-<meta property="og:image:height" content="" />
-
-
-<meta name="twitter:card" content="photo" />
-<meta name="twitter:site" content="@matterport" />
-<meta name="twitter:title" content="The book store of Demaotang" />
-<meta name="twitter:image"
-	content="https://my.matterport.com/api/v1/player/models/MXfJvWQecHT/thumb"
-	th:content="${'https://my.matterport.com/api/v1/player/models/'+modelData.caseId+'/thumb'}" />
-<meta name="twitter:image:width" content="" />
-<meta name="twitter:image:height" content="" />
-<meta name="twitter:url"
-	content="https://my.matterport.com/show/?m=MXfJvWQecHT"
-	th:content="${'https://my.matterport.com/show/?m='+modelData.caseId}" />
-
-
-
-<link rel="alternate" type="application/json+oembed"
-	th:title="${modelData.title}"
-	th:href="${'https://my.matterport.com/api/v1/scanmodel/oembed?url=https://my.matterport.com/show/?m='+modelData.caseId}"
-	href="https://my.matterport.com/api/v1/scanmodel/oembed?url=https://my.matterport.com/show/?m=MXfJvWQecHT"
-	title="The book store of Demaotang" />
-
 <script th:utext="${modelData.modelData}">
 	
 </script>
 
-
-
 <link rel="icon" type="image/png" sizes="32x32"
 	href="/resources/images/favicon-32x32.ico" class="keep" />
-<link rel="apple-touch-icon-precomposed" sizes="114x114"
-	href="https://my.matterport.com/show/images/icons/apple-touch-icon-114.png"
-	class="keep" />
-<link rel="apple-touch-icon-precomposed" sizes="144x144"
-	href="https://my.matterport.com/show/images/icons/apple-touch-icon-144.png"
-	class="keep" />
-<link rel="stylesheet" href="/resources/matterport-2.0.43/jsAndCss/main.css" />
+
+<link rel="stylesheet" href="/resources/vr-2.0.43/jsAndCss/main.css" />
 
 </head>
 <body class="player-active">
-
 
 <img src="http://www.arvix.cn/wp-content/uploads/2016/06/472823801.jpg" style="Opacity:0;width:0"
  th:src="${'/upload/'+modelData.fileInfo?.storePath}"/>
@@ -123,11 +80,9 @@
 					</div>
 				</div>
 				<div th:if="${modelData.logoShow}" class="bottom-logo">
-				<img   alt="powered By Matterport"   src="https://my.matterport.com/show/images/poweredByLogo.png" />
+				<img   alt="powered By Matterport"   src="/resources/images/poweredByLogo-m.png" />
 <!-- 					<img alt="Arvix 荣誉出品" src="/resources/images/poweredByLogo.png" /> -->
-					<div th:utext="${modelData?.logoDownHtml}">
-					<h2>3D虚拟互联网展示</h2>
-					<h3>服务联系人：狄经理  电话：13701243593</h3>
+					<div th:utext="${modelData?.logoDownHtml}">			
 					</div>
 				</div>
 			</div>
@@ -207,10 +162,9 @@
 			</div>
 			<div class="pinBottom right hideTarget">
 				<div class="rightViewContainer">
-					<div style="display: none;" class="gui-floor hasHover">
-						<div class="gui-floor-title">全部</div>
+					<div class="gui-floor hasHover">
+						<div class="gui-floor-title">All</div>
 						<i class="icon icon-dpad-up"></i>
-
 						<div class="container"></div>
 					</div>
 					<div id="gui-fullscreen" class="ui-icon double"
@@ -271,7 +225,7 @@
 			</div>
 			<div class="bottom-logo">
 				<img class="onlyLogo" alt="Matterport Logo"
-					src="/resources/matterport-2.0.43/jsAndCss/matterportLogoColor.png" /> <span>3D
+					src="/resources/vr-2.0.43/jsAndCss/matterportLogoColor.png" /> <span>3D
 					Showcase</span>
 			</div>
 		</div>
@@ -331,16 +285,16 @@
     </div>
     <![endif]-->
 	</div>
-	<script src="/resources/matterport-2.0.43/jsAndCss/three71.js"
+	<script src="/resources/vr-2.0.43/jsAndCss/three71.js"
 		class="build keep"></script>
-	<script src="/resources/matterport-2.0.43/jsAndCss//three71-shim.js"
+	<script src="/resources/vr-2.0.43/jsAndCss//three71-shim.js"
 		class="build keep"></script>
-	<script src="/resources/matterport-2.0.43/jsAndCss/jquery-2.1.1.min.js"
+	<script src="/resources/vr-2.0.43/jsAndCss/jquery-2.1.1.min.js"
 		class="build keep"></script>
 	<script
-		src="/resources/matterport-2.0.43/jsAndCss/jquery.fracs-0.15.0.min.js"
+		src="/resources/vr-2.0.43/jsAndCss/jquery.fracs-0.15.0.min.js"
 		class="build keep"></script>
-	<script src="/resources/matterport-2.0.43/jsAndCss/main.js"></script>
+	<script src="/resources/vr-2.0.43/jsAndCss/main.js"></script>
 	<script>
 	function is_weixin(){
 		var ua = navigator.userAgent.toLowerCase();

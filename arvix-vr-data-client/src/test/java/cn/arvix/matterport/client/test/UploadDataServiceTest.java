@@ -6,9 +6,9 @@ import java.io.IOException;
 import org.apache.commons.io.FileUtils;
 import org.junit.Test;
 
-import cn.arvix.matterport.client.ModelDataClient;
-import cn.arvix.matterport.client.UploadDataService;
-import cn.arvix.matterport.client.UploadDataServiceImpl;
+import cn.arvix.vr.client.ModelDataClient;
+import cn.arvix.vr.client.UploadDataService;
+import cn.arvix.vr.client.UploadDataServiceImpl;
 
 public class UploadDataServiceTest {
 

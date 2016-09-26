@@ -1,4 +1,4 @@
-package cn.arvix.matterport.client;
+package cn.arvix.vr.client;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
