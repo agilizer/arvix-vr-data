@@ -1,6 +1,13 @@
 package cn.arvix.vrdata.service
 
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.IOUtils
+import org.apache.http.HttpEntity
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
+import org.apache.http.util.EntityUtils
 import org.jsoup.Connection
 import org.jsoup.Jsoup
 import org.jsoup.Connection.Response
@@ -374,8 +381,9 @@ public class FetchDataServiceImpl implements FetchDataService {
                             showIndex++;
                         }
                     }
-                    modelData.setActiveReel(JSON.toJSONString(["reel":activeReel]))
+                    modelData.setActiveReel(genActiveReel(caseId))
                 }
+				modelData.setModelTagJson(genTags(caseId))
 				modelData.setModelData("window.MP_PREFETCHED_MODELDATA = "+JSON.toJSONString(object));
             }
         }
@@ -400,4 +408,47 @@ public class FetchDataServiceImpl implements FetchDataService {
             sourceObject.put(filePathKey, SERVER_URL+"upload/playerImages/"+caseId+"/playerImages/"+fileName)
         }
     }
+	
+	
+	private String genActiveReel(String caseId){
+		return genJsonField(caseId,"https://my.matterport.com/api/v1/jsonstore/model/highlights/${caseId}/active_reel")
+	}
+	
+	private String genTags(String caseId){
+		return genJsonField(caseId,"https://my.matterport.com/api/v1/jsonstore/model/mattertags/${caseId}")
+	}
+	
+	private String genJsonField(String caseId,String url){
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		String result = '{"detail": "Not found"}';
+		try {
+			HttpGet get = new HttpGet(url);
+			get.addHeader("Referer","https://my.matterport.com/show/?m=${caseId}");
+			get.addHeader("Accept-Encoding","gzip, deflate, sdch, br");
+			get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36");
+			get.addHeader("Accept","application/json");
+			get.addHeader("Connection","keep-alive");
+			
+			CloseableHttpResponse response = null;
+			try {
+				response = httpclient.execute(get);
+				int code = response.getStatusLine().getStatusCode()
+				HttpEntity resEntity = response.getEntity();
+				if(code == 200){
+					if (resEntity != null) {
+						result =  IOUtils.toString(resEntity.getContent());
+					}
+				}
+				EntityUtils.consume(resEntity);
+				
+			}catch(e){
+				e.printStackTrace()
+			} finally {
+				response.close();
+			}
+		} finally {
+			httpclient.close();
+			return result;
+		}
+	}
 }

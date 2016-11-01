@@ -2365,7 +2365,7 @@ window.Modernizr = function (n, e, t) {
                 if ($("head title").text(l.pageTitle), $("#gui-message, #gui-loading, #nprogress, #gui-thumb, #bottom-logo").hide(), $("#gui-loading").fadeOut(250), h.track("USER", {
                         event_type: "showcase_error",
                         error_key: e
-                    }), "webgl-unsupported" === e)s.isMobile() ? o() : n("浏览器不支持."); else if ("webgl-ios" === e)r("iOS 版本不被支持.", "升级到ios 8以上版本查看模型.", "", "Tap <strong>Settings > General > Software Update</strong>.");
+                    }), "webgl-unsupported" === e)s.isMobile() ? o() : n("浏览器不支持."); else if ("webgl-ios" === e)r("browser not support.", ".", "please try another browser", "Tap <strong>Settings > General > Software Update</strong>.");
                     else if ("webgl-safari" === e)r("浏览3D模型需要开启WebGL.", "", "", "Click <strong>Preferences > Advanced > Show Develop menu</strong>. Then click <strong>Develop > 开启 WebGL</strong>."); else if ("webgl-generic" === e)o(); else if ("missing-urls" === e)r("对不起，模型数据出现错误.", "",
                     		"这是一个旧的模型，服务器正在创建新的模型."); else if ("loading-failed" === e)r("对不起.模型数据出错", "", "", '<a class="link" target="_blank" href=' + d + ">如果有问题，请联系我们</a>."); else {
                     if ("loading-failed-maintenance" !== e)return void c.error("Unhandled error: " + e);

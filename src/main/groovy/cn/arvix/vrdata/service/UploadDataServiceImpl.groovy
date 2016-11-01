@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.commons.io.IOUtils
 import org.apache.http.HttpEntity
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
