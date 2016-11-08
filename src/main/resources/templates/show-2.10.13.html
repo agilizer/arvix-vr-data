@@ -1,0 +1,430 @@
+<!doctype html>
+<html>
+<head>
+<base
+	href="https://static.matterport.com/showcase/2.10.13-0-ga964b80/index.html">
+<meta charset="utf-8">
+<meta name="viewport"
+	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title th:if="${modelData.logoShow}"
+	th:text="${modelData.title+'|唯幻科技'}">title</title>
+<title  th:unless="${modelData.logoShow}" th:text="${modelData.title}">title</title>
+<script th:utext="${modelData.modelData}">
+</script>
+<link rel="icon" type="image/png" sizes="32x32"
+	href="/resources/images/favicon-32x32.ico" class="keep" />
+<script class="build keep">
+	// Safari and Android does not support performance.timing.navigationStart :(
+	if (window.performance) {
+		window.navigationStart = window.performance.timing.navigationStart;
+	} else {
+		window.navigationStart = Date.now() + 300;
+	}
+</script>
+<link rel="stylesheet" href="/resources/static/vr-2.10.13/main.css">
+</head>
+<body>
+	<div id="gui-thumb" style="display: none;"></div>
+	<div id="player" style="display: none;"></div>
+	<div id="gui-parent">
+		<div id="gui-loading" class="message-outer darkGlass"
+			style="display: none;">
+			<h2 class="model-title"></h2>
+			<div class="message-inner">
+				<div id="circleLoader">
+					<div id="loader-cont" data-status="Loading">
+						<svg id="svg" width="100" height="100" viewport="0 0 100 100"
+							version="1.1" xmlns="http://www.w3.org/2000/svg">
+							<circle id="barBg" r="47" cx="50" cy="50" fill="transparent"
+								stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+							<circle id="bar" r="47" cx="50" cy="50"
+								transform="rotate(-90 50 50)" fill="transparent"
+								stroke-dasharray="295.30" stroke-dashoffset="295.30"
+								style="stroke-dashoffset : 295.30"></circle></svg>
+					</div>
+				</div>
+				<div id="loaderCoBrand">
+					<div class="vert-align">
+						<p>PRESENTED BY</p>
+						<h2 id="loaderCoBrandName"></h2>
+					</div>
+				</div>
+				<div class="bottom-logo">
+					<div class="img"></div>
+				</div>
+				<div class="specialPower">
+					<span class="powered-by">powered by</span>&#xA0;
+					<div class="img"></div>
+				</div>
+			</div>
+		</div>
+		<div id="gui" style="display: none;">
+			<div class="pinTop left">
+				<div id="model-title">
+					<div class="title-row">
+						<div id="title-toggle" class="darkGlass">
+							<a><i class="icon icon-dpad-left"></i></a>
+						</div>
+						<div class="title-container darkGlass meta-toggle">
+							<div class="co-brand">
+								Presented by <span class="title" id="cobrandTitle"></span>
+							</div>
+							<a id="more-hint">More <i class="icon icon-dpad-down"></i></a> <a
+								id="less-hint" style="display: none">Less <i
+								class="icon icon-dpad-up"></i></a>
+							<div id="gui-name" class="gui-text titleText" rel="tooltip"
+								data-placement="bottom" data-html="true"></div>
+						</div>
+					</div>
+				</div>
+				<div class="meta-info-spacing-fix">
+					<div id="meta-info" class="darkGlass">
+						<div id="meta-description"></div>
+						<div class="contact-info">
+							<i class="icon icon-user pull-left"></i>&#xA0;
+							<div id="contact-data"></div>
+						</div>
+						<div class="address">
+							<i class="icon icon-pin"></i> <span id="addressTxt"></span>
+						</div>
+						<div id="mattertag-toggles" class="menu-toggles">
+							<span>Mattertag&#x2122; Content</span>
+							<div id="mattertag-inputs" class="menu-radios">
+								<div id="show-tag" class="menu-radio-show">
+									<input id="radio-tag-show" type="radio" name="mattertags"
+										value="show"> <label for="radio-tag-show">Show</label>
+								</div>
+								<div id="hide-tag" class="menu-radio-hide">
+									<input id="radio-tag-hide" type="radio" name="mattertags"
+										value="hide"> <label for="radio-tag-hide">Hide</label>
+								</div>
+							</div>
+						</div>
+						<div id="labels-toggles" class="menu-toggles">
+							<span>Labels</span>
+							<div id="labels-inputs" class="menu-radios">
+								<div id="show-label" class="menu-radio-show">
+									<input id="radio-labels-show" type="radio" name="labels"
+										value="show"> <label for="radio-labels-show">Show</label>
+								</div>
+								<div id="hide-label" class="menu-radio-hide">
+									<input id="radio-labels-hide" type="radio" name="labels"
+										value="hide"> <label for="radio-labels-hide">Hide</label>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="pinBottom-container">
+				<div class="pinBottom center">
+					<div id="view-controllers">
+						<div id="gui-modes-dollhouse" class="darkGlass">
+							<span class="mode">Dollhouse</span>
+						</div>
+						<div id="gui-modes-floorplan" class="darkGlass">
+							<span class="mode">Floor plan</span>
+						</div>
+					</div>
+				</div>
+				<div class="pinBottom zoomPanel">
+					<div id="gui-zoomin"
+						class="buttonZoom buttonZoomIn buttonZoomEnabled"
+						data-placement="top">
+						<div class="buttonZoomContent">
+							<a><i rel="tooltip" title="Zoom in" class="icon icon-plus"></i></a>
+						</div>
+					</div>
+					<div id="gui-zoomout"
+						class="buttonZoom buttonZoomOut buttonZoomEnabled"
+						data-placement="top">
+						<div class="buttonZoomContent">
+							<a><i rel="tooltip" title="Zoom out" class="icon icon-minus"></i></a>
+						</div>
+					</div>
+				</div>
+				<div class="pinBottom left">
+					<div class="viewContainer">
+						<div id="pullTab" class="ui-icon darkGlass">
+							<a><i rel="tooltip" title="Open Highlights"
+								class="icon icon-dpad-up"></i></a>
+						</div>
+						<div id="previous" class="previous desktop-only ui-icon">
+							<a><i rel="tooltip" title="Previous"
+								class="icon icon-dpad-left"></i></a>
+						</div>
+						<div id="play" class="ui-icon">
+							<a><i rel="tooltip" title="Play" class="icon icon-play"></i></a>
+						</div>
+						<div id="pause" class="ui-icon" style="display: none;">
+							<a><i rel="tooltip" title="Pause" class="icon icon-pause"></i></a>
+						</div>
+						<div id="next" class="next desktop-only ui-icon wide">
+							<a><i rel="tooltip" title="Next" class="icon icon-dpad-right"></i></a>
+						</div>
+						<div id="gui-modes-inside" class="ui-icon">
+							<a><i rel="tooltip" title="Explore&#xA0;3D&#xA0;space"
+								class="icon icon-inside"></i></a>
+						</div>
+						<div id="gui-modes-outside" class="ui-icon">
+							<a><i rel="tooltip" title="View&#xA0;dollhouse"
+								class="icon icon-dollhouse"></i></a>
+						</div>
+					</div>
+				</div>
+				<div class="pinBottom right hideTarget">
+					<div class="rightViewContainer">
+						<div class="gui-floor">
+							<div class="gui-floor-title"></div>
+							<span class="gui-floor-number"></span> <i
+								class="icon icon-dpad-up"></i>
+							<div class="container"></div>
+						</div>
+						<div id="vr" class="ui-icon wide hidden">
+							<a><i rel="tooltip" title="View in VR"
+								class="icon icon-goggles"></i></a>
+						</div>
+						<div id="gui-fullscreen" class="ui-icon wide" data-placement="top">
+							<a><i rel="tooltip" title="View Fullscreen"
+								class="icon icon-fullscreen"></i></a>
+						</div>
+						<div id="gui-fullscreen-exit" class="ui-icon wide"
+							data-placement="top" style="display: none;">
+							<a><i rel="tooltip" title="Exit Fullscreen"
+								class="icon icon-fullscreen-exit"></i></a>
+						</div>
+						<div class="pull-right terms terms2">
+							<a>Terms</a>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="drawer-container">
+				<div id="drawer" class="fullWidth">
+					<div class="frame-container darkGlass">
+						<div id="scrollFrame" class="frame">
+							<ul id="thumb-container" class="slidee"></ul>
+						</div>
+						<div class="scrollbar" id="scroller">
+							<div class="handle"></div>
+						</div>
+					</div>
+				</div>
+				<div id="playHead">
+					<div id="status">
+						<span class="curIdx">1</span> of <span class="totalSteps"></span>
+					</div>
+					<div id="progressBar"></div>
+				</div>
+			</div>
+			<div class="footer">
+				<div class="footer-help">
+					<a class="hasHover">Help</a>
+				</div>
+				<div>|</div>
+				<div class="footer-terms">
+					<a class="hasHover">Matterport terms</a>
+				</div>
+				<img src="images/Matterport-glyph.svg">
+			</div>
+		</div>
+		<div id="gui-spinner" style="display: none;">
+			<div id="gui-spinner-icon"></div>
+		</div>
+		<div id="gui-message" class="message-outer darkGlass"
+			style="display: none;">
+			<h2 class="model-title"></h2>
+			<div class="message-inner">
+				<div class="message-content">
+					<a id="button-play"><i class="icon icon-play"></i></a>
+					<div>Explore 3D Space</div>
+				</div>
+			</div>
+			<div class="bottom-logo">
+				<div class="img onlyLogo"></div>
+			</div>
+		</div>
+		<div id="share-modal" style="display: none;">
+			<div class="title">
+				Share Link <i class="icon icon-link"></i>
+			</div>
+			<div id="share-close">
+				<i class="icon icon-close"></i>
+			</div>
+			<input type="text" id="shareUrl" disabled>
+		</div>
+		<div id="terms-modal" style="display: none;">
+			<div id="terms-text"></div>
+			<button type="button" class="btn btn-default">Close</button>
+		</div>
+		<div class="gui-error message-outer" style="display: none;">
+			<div class="message-inner">
+				<div class="message-content">
+					<div class="error-problem-text"></div>
+					<div class="error-solution-text"></div>
+					<div class="error-explanation"></div>
+					<div class="error-actions"></div>
+				</div>
+			</div>
+		</div>
+		<div class="nav-help-dialog" style="display: none;">
+			<div class="nav-help-elements">
+				<div class="title">How to Navigate</div>
+				<div class="close">
+					<a><i class="icon icon-close"></i></a>
+				</div>
+				<div class="nav-help-content">
+					<div class="nav-icon"></div>
+					<div class="nav-text"></div>
+				</div>
+				<div class="page-count"></div>
+				<div class="next-button">NEXT</div>
+				<div class="prev-button">PREVIOUS</div>
+			</div>
+		</div>
+		<div class="vr-popup" style="display: none">
+			<div class="title">View Space in Virtual Reality</div>
+			<div class="outer">
+				<div class="inner">
+					<h3 class="vr-popup-title">
+						<span class="show-supported p1"><p class="center">Tap
+								to view the Space in VR with</p></span> <span class="show-unsupported p1">Sorry,
+							but your device doesn&apos;t meet the minimum requirements to
+							view a space in VR.</span> <span class="show-ios p1">Matterport
+							VR Coming&#xA0;Soon for iOS<br>
+						<br>
+						</span> <span class="show-ios p2 p3">What you&apos;ll need</span>
+					</h3>
+					<h4 class="vr-sub-title">
+						<span class="show-ios p1">Matterport VR app is available
+							for Android phones<br>
+						</span>
+					</h4>
+					<div class="vr-images">
+						<div class="img-container cardboard first">
+							<img class="vr-sm-image first">
+							<div class="vr-img-caption first">
+								<span class="show-supported show-desktop p1"><b>Google
+										Cardboard</b></span> <span
+									class="show-supported show-unsupported show-desktop p2">What
+									you&apos;ll need with Google&#xA0;Cardboard</span> <span
+									class="show-supported show-unsupported show-desktop p3">What
+									you&apos;ll need with Samsung&#xA0;Gear&#xA0;VR</span> <span
+									class="show-ios p2"><b>Google Cardboard</b><br>
+								<br></span> <span class="show-ios p3"><b>Samsung Gear
+										VR</b><br>
+								<br></span>
+							</div>
+						</div>
+						<div class="img-container gearvr second">
+							<img class="vr-sm-image second">
+							<div class="vr-img-caption second">
+								<span class="show-supported show-desktop p1"><b>Samsung
+										Gear&#xA0;VR</b></span> <span
+									class="show-supported show-ios show-desktop p2"><p>
+										<b>Compatible Android Devices</b>
+									</p>
+									<p>Displays from 4.5&quot;-5.5&quot; running Android OS
+										4.4.4 and higher</p></span> <span class="show-unsupported p1 p2"><p>
+										<b>Compatible Android Devices</b>
+									</p>
+									<p>Displays from 4.5&quot;-5.5&quot; running Android OS
+										4.4.4 and higher</p></span> <span
+									class="show-supported show-unsupported show-ios show-desktop p3"><p>
+										<b>Compatible Samsung Devices</b>
+									</p>
+									<p>Galaxy S5 and Above</p></span>
+							</div>
+						</div>
+						<div class="img-container third">
+							<img class="vr-sm-image third">
+							<div class="vr-img-caption third">
+								<span
+									class="show-supported show-unsupported show-ios show-desktop p2"><p>
+										<b>Matterport VR app for Google Cardboard</b>
+									</p>
+									<p>
+										<a class="cardboardLink">Download here</a>
+									</p></span> <span
+									class="show-supported show-unsupported show-ios show-desktop p3"><p>
+										<b>Matterport VR app for Gear&#xA0;VR</b>
+									</p>
+									<p>
+										<a class="gearLink">Download here</a>
+									</p></span>
+							</div>
+						</div>
+					</div>
+					<div class="vr-popup-body">
+						<span class="show-supported p1"><p>
+								<i>Requires a VR headset and Matterport VR app for Android
+									to be installed</i>
+							</p>
+							<br>
+						<p>
+								<i>If app is not installed, you will be redirected to the
+									app store.</i>
+							</p></span> <span class="show-desktop p1"><p></p>
+							<h3>Open the Link on Your Android Mobile&#xA0;Phone</h3>
+							<p>
+								<br>
+							</p>
+							<p class="logo-button">
+								<span class="modelLink"></span>
+							</p>
+							<br>
+						<br>
+						<p></p>
+							<h3>Available Android VR Headset Options</h3>
+							<p></p></span>
+					</div>
+				</div>
+				<div class="vr-buttons">
+					<div class="next-button"></div>
+					<div class="prev-button">PREVIOUS</div>
+					<div class="vr-arrows prev-container">
+						<img class="prev-arrow" src="images/arrow.png">
+					</div>
+					<div class="vr-arrows next-container">
+						<img class="next-arrow" src="images/arrow.png">
+					</div>
+				</div>
+				<div class="vr-page"></div>
+				<div class="close">
+					<a><i class="icon icon-close"></i></a>
+				</div>
+			</div>
+		</div>
+		<div id="quick-blackout" class="quick"></div>
+		<div id="quick-overlay" class="quick">
+			<div class="outer">
+				<div class="info desktop">Click and drag to explore this 3D
+					space.</div>
+				<div class="info mobile">Tap and drag to explore this 3D
+					space.</div>
+			</div>
+		</div>
+		<div id="quick-logo">
+			<img src="images/powered-by-matterport.svg">
+		</div>
+		<!--[if lte IE 9]>
+ <div class="gui-error message-outer darkGlass">
+ <div class='message-inner'>
+ <div class='message-content' style='font-family: Helvetica Neue, sans-serif;'>
+ <div class="error-problem-text">Browser not supported.</div>
+ <div class="error-solution-text">Install a new browser to explore in 3D.</div>
+ <div class="error-actions">For Matterport 3D Showcase support,
+ <a class="link" target="_blank" href="https://matterportsupport.zendesk.com/hc/en-us/articles/208220058-Showcase-System-Requirements">see our troubleshooting guide</a>
+ </div>
+ </div>
+ </div>
+ </div>
+ <![endif]-->
+	</div>
+	<div id="tag-billboards"></div>
+	<script src="/resources/vr-2.10.13/js/lib/jquery-2.1.1.min.js" class="build keep"></script>
+	<script src="/resources/vr-2.10.13/js/app-preheater.js"></script>
+	<script src="/resources/vr-2.10.13/js/main.js"></script>
+</body>
+</html>

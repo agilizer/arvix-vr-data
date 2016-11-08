@@ -10820,7 +10820,7 @@ window.Modernizr = function (n, e, t) {
             brand: r.valueFromHash("brand", !0),
             debug: !1,
             version: "2.8.7-0-gece9a22",
-            pageTitle: "Matterport 3D Showcase",
+            pageTitle: "",
             authorizationHeader: u.getAuthorizationHeader(),
             autoplay: r.valueFromHash("play", !1) || !r.inIframe(),
             autohelp: r.valueFromHash("help", null),
