@@ -73,10 +73,12 @@
 						<td>右侧链接</td>
 						<td>logo下展示</td>
 						<td>描述</td>
+						<td>源地址</td>
 						<td>操作</td>
 					</tr>
-					<!--m.title,m.caseId,m.id,m.description,m.sourceUrl 4,m.fileTotalSize,m.fileSumCount,
-					m.modelData,8f.storePath,m.logoShow,m.online,11m.rightHtml ,m.logoDownHtml,m.useMatterportLink-->
+				<!--	"select 0m.title,m.caseId,m.id,m.description,m.sourceUrl,m.fileTotalSize,m.fileSumCount,m.modelData,
+				8f.storePath,m.logoShow,m.online,m.rightHtml"
+				+ " ,12m.logoDownHtml,13m.tagStr,m.useMatterportLink,m.sourceUrl From "-->
 					<tr th:each="modelData,moelDataStat:${jdbcPage.pageItems}">
 						<td th:text="${modelData[1]}"></td>
 						<td><img th:id="${'img'+modelData[2]}"
@@ -94,10 +96,17 @@
 							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
 							th:attr="data-pk=${modelData[2]}"></a></td>
 							
-					<td><a class="editable" href="#" th:text="${modelData[13]}"
+						<td><a class="editable" href="#" th:if="${modelData[14]}"
 							data-pk="1" data-name='useMatterportLink'
 							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
-							th:attr="data-pk=${modelData[2]}"></a></td>
+							th:attr="data-pk=${modelData[2]}">true</a>
+							
+							<a class="editable" href="#" th:unless="${modelData[14]}"
+							data-pk="1" data-name='useMatterportLink'
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}">false</a>
+							
+							</td>
 							
 
 						<td><a class="editable" href="#" th:text="${modelData[13]}"
@@ -118,6 +127,11 @@
 							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
 							th:attr="data-pk=${modelData[2]}"></a></td>
 
+						<td><a class="editable" href="#" th:text="${modelData[15]}"
+							data-pk="1" data-name='sourceUrl'  
+							data-url="/admin/updateModelDataByField" data-title="请输入新的值"
+							th:attr="data-pk=${modelData[2]}"></a></td>
+							
 						<td><a href="javascript:;" onclick="modelUploadPhoto(this)"
 							th:attr="data-id=${modelData[2]}">缩略图上传</a> <a
 							href="/show/?m=452aMkAmjrQ" th:href="${'/show/?m='+modelData[1]}">查看</a>

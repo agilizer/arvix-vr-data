@@ -6203,7 +6203,10 @@ window.Modernizr = function (n, e, t) {
             function r(t) {
                 this.urls = t;
                 var e = i("bWVzc2FnZSBiaW5hcnlfbWVzaCB7CglyZXBlYXRlZCBjaHVua19zaW1wbGUgY2h1bmsgPSAxOwoJcmVwZWF0ZWQgY2h1bmtfcXVhbnRpemVkIHF1YW50aXplZF9jaHVuayA9IDI7Cn0KCi8vIERlZmluaXRpb24gb2YgdmVydGljZXM6IDNEIGNvb3JkaW5hdGVzLCBhbmQgMkQgdGV4dHVyZSBjb29yZGluYXRlcy4KbWVzc2FnZSB2ZXJ0aWNlc19zaW1wbGUgewoJcmVwZWF0ZWQgZmxvYXQgeHl6ID0gMSBbcGFja2VkPXRydWVdOyAgLy8geF8wLHlfMCx6XzAsIHhfMSx5XzEsel8xLCAuLi4KCXJlcGVhdGVkIGZsb2F0IHV2ID0gMiBbcGFja2VkPXRydWVdOyAgLy8gdV8wLHZfMCwgdV8xLHZfMSwgLi4uCn0KCi8vIEluZGV4ZXMgb2YgdmVydGljZXMgb2YgZmFjZXMKbWVzc2FnZSBmYWNlc19zaW1wbGUgewoJcmVwZWF0ZWQgdWludDMyIGZhY2VzID0gMSBbcGFja2VkPXRydWVdOyAvLyBpMDAsaTAxLGkwMiwgaTEwLGkxMSxpMTIsIC4uLgp9CgovLyBBIHNpbXBseSBlbmNvZGVkIGNodW5rLgovLyBUT0RPOiBhZGQgY2h1bmsgcHJvcGVyaXRlcyAoc3VjaCBhcyAicmVmbGVjdGl2ZSIpCm1lc3NhZ2UgY2h1bmtfc2ltcGxlIHsKCW9wdGlvbmFsIHZlcnRpY2VzX3NpbXBsZSB2ZXJ0aWNlcyA9IDE7CglvcHRpb25hbCBmYWNlc19zaW1wbGUgZmFjZXMgPSAyOwoJb3B0aW9uYWwgc3RyaW5nIGNodW5rX25hbWUgPSAzOwoJb3B0aW9uYWwgc3RyaW5nIG1hdGVyaWFsX25hbWUgPSA0Owp9CgovLyBRdWFudGl6ZWQgdmVyc2lvbnMgZm9sbG93OgptZXNzYWdlIHZlcnRpY2VzX3F1YW50aXplZCB7CglvcHRpb25hbCBmbG9hdCBxdWFudGl6YXRpb24gPSAxOwoJcmVwZWF0ZWQgZmxvYXQgdHJhbnNsYXRpb24gPSAyOwoJcmVwZWF0ZWQgc2ludDMyIHggPSAzIFtwYWNrZWQ9dHJ1ZV07CglyZXBlYXRlZCBzaW50MzIgeSA9IDQgW3BhY2tlZD10cnVlXTsKCXJlcGVhdGVkIHNpbnQzMiB6ID0gNSBbcGFja2VkPXRydWVdOwp9CgptZXNzYWdlIHV2X3F1YW50aXplZCB7CglvcHRpb25hbCBzdHJpbmcgbmFtZSA9IDE7CglvcHRpb25hbCBmbG9hdCBxdWFudGl6YXRpb24gPSAyOwoJcmVwZWF0ZWQgc2ludDMyIHUgPSAzIFtwYWNrZWQ9dHJ1ZV07CglyZXBlYXRlZCBzaW50MzIgdiA9IDQgW3BhY2tlZD10cnVlXTsKfQoKLy8gSW5kZXhlcyBvZiB2ZXJ0aWNlcyBvZiBmYWNlcwptZXNzYWdlIGZhY2VzX2NvbXByZXNzZWQgewoJcmVwZWF0ZWQgc2ludDMyIGZhY2VzID0gMSBbcGFja2VkPXRydWVdOyAvLyBpMDAsaTAxLGkwMiwgaTEwLGkxMSxpMTIsIC4uLgp9CgptZXNzYWdlIGNodW5rX3F1YW50aXplZCB7CglvcHRpb25hbCBzdHJpbmcgY2h1bmtfbmFtZSA9IDE7CglvcHRpb25hbCBzdHJpbmcgbWF0ZXJpYWxfbmFtZSA9IDI7CglvcHRpb25hbCB2ZXJ0aWNlc19xdWFudGl6ZWQgdmVydGljZXMgPSAzOwoJcmVwZWF0ZWQgdXZfcXVhbnRpemVkIHV2cyA9IDQ7CglvcHRpb25hbCBmYWNlc19zaW1wbGUgZmFjZXMgPSA1Owp9Cg==", "base64");
+				console.log("eeeeeeeeeeeeeeee");
+				console.log(e);
                 this.builder = a.loadProto(e), this.decoder = this.builder.build("binary_mesh")
+				console.log(this.decoder)
             }
 
             var o = t("three"), a = t("protobufjs"), s = t("../util/logger"), l = (t("../util/common"), t("../util/ajax")), h = t("../objects/Chunk"), c = new s(n);
@@ -6216,6 +6219,7 @@ window.Modernizr = function (n, e, t) {
                     var o = this.readProtobuf(t);
                     if (!o)return r();
                     try {
+						
                         c.time("convert to webgl"), this.convertProtobufToSceneObject(o, e, i, n, r), c.timeEnd("convert to webgl")
                     } catch (t) {
                         return c.error("failed parsing .dam"), c.error(t.message), r()
@@ -6223,7 +6227,10 @@ window.Modernizr = function (n, e, t) {
                 }, readProtobuf: function (t) {
                     var e;
                     try {
+						console.log("readdam:"+t)
+						console.log(t)
                         c.time("parse proto"), e = this.decoder.decode(t), c.timeEnd("parse proto")
+						console.log(e)
                     } catch (t) {
                         return c.error("failed parsing proto for .dam"), c.error(t.message), null
                     }
@@ -6238,6 +6245,7 @@ window.Modernizr = function (n, e, t) {
                             meshUrl: e
                         })
                     }
+					console.log(t)
 
                     if (0 === t.chunk.length)return c.warn("No chunks in damfile..."), i([]);
                     var s = new o.Matrix4;
@@ -6292,9 +6300,11 @@ window.Modernizr = function (n, e, t) {
                     })), a = t.chunks[0].meshUrl.indexOf("_50k") !== -1 ? "_50k" : "", h = "_50k" === a ? "high" : "low";
                     o.isMobile() && "high" == h && (o.detectSamsungS6() ? (l.warn("Galaxy S6 cannot handle large textures, turning down quality."), h = "low") : i > s.maxMobileTextures && (l.warn("Model probably too large for mobile, turning down quality."), h = "low"));
                     var c = t.data.job.uuid + a + "_texture_jpg_" + h + "/", u = $.Deferred(), d = 0;
+					
                     return t.chunks.forEach(function (i) {
                         if (!i.material.map && i.textureName) {
                             var n = t.urls.get(c + i.textureName);
+							console.log(c + i.textureName)
                             i.setTextureMap(r.load(n, e.bind(this, r.isLoaded(n))))
                         }
                     }), u.promise()
@@ -6346,8 +6356,11 @@ window.Modernizr = function (n, e, t) {
                     }).map(function (t) {
                         return t.position = s.convertVisionVector(t.position), t.quaternion = s.convertVisionQuaternion(t.quaternion), t.puck = s.convertVisionVector(t.puck), t
                     });
+					console.log(i)
                     return i.forEach(function (t) {
                         t.neighbours = t.neighbours.map(function (t) {
+							
+							console.log(i[t].uuid)
                             return i[t].uuid
                         })
                     }), i
@@ -7506,7 +7519,7 @@ window.Modernizr = function (n, e, t) {
             }, n.prototype.addChunk = function (t, e) {
                 this.floors.getOrMakeFloor(t).addChunk(e), this.chunks.push(e)
             }, n.prototype.setMode = function (t) {
-                if (!this.supportedModes[t])throw new P("Mode not supported for this model: " + t);
+               if (!this.supportedModes[t])throw new P("Mode not supported for this model: " + t);
                 this.mode = t, this.chunks.forEach(function (e) {
                     e.setMode(t)
                 })
@@ -11653,6 +11666,7 @@ window.Modernizr = function (n, e, t) {
                         cache: e,
                         auth: this.authorizationHeader
                     }).then(function (t) {
+                        console.log("this.urlContainer:"+this.urlContainer)
                         if (this.urlContainer && this.urlContainer.validate(t))return this.urlContainer.update(t);
                         for (var i = 0; i < this.containerClasses.length; i++) {
                             var n = this.containerClasses[i], r = new n;

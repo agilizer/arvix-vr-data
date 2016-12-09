@@ -1,8 +1,6 @@
 <!doctype html>
 <html>
 <head>
-<base
-	href="https://static.matterport.com/showcase/2.10.13-0-ga964b80/index.html">
 <meta charset="utf-8">
 <meta name="viewport"
 	content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui">
@@ -11,7 +9,8 @@
 	th:text="${modelData.title+'|唯幻科技'}">title</title>
 <title  th:unless="${modelData.logoShow}" th:text="${modelData.title}">title</title>
 <script th:utext="${modelData.modelData}">
-</script>
+</script> 
+ 
 <link rel="icon" type="image/png" sizes="32x32"
 	href="/resources/images/favicon-32x32.ico" class="keep" />
 <script class="build keep">
@@ -22,7 +21,7 @@
 		window.navigationStart = Date.now() + 300;
 	}
 </script>
-<link rel="stylesheet" href="/resources/static/vr-2.10.13/main.css">
+<link rel="stylesheet" href="/resources/vr-2.10.13/main.css">
 </head>
 <body>
 	<div id="gui-thumb" style="display: none;"></div>
@@ -423,8 +422,8 @@
  <![endif]-->
 	</div>
 	<div id="tag-billboards"></div>
-	<script src="/resources/vr-2.10.13/js/lib/jquery-2.1.1.min.js" class="build keep"></script>
-	<script src="/resources/vr-2.10.13/js/app-preheater.js"></script>
-	<script src="/resources/vr-2.10.13/js/main.js"></script>
+	<script src="/resources/vr-2.10.13/jquery-2.1.1.min.js" class="build keep"></script>
+	<script src="/resources/vr-2.10.13/app-preheater.js"></script>
+	<script src="/resources/vr-2.10.13/main.js"></script>
 </body>
 </html>

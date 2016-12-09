@@ -28,36 +28,36 @@ import org.apache.commons.io.IOUtils
 //.header("Referer","https://my.matterport.com/show/?m=N6HuPecF32y")
 //.timeout(300000).execute().body();
 
-CloseableHttpClient httpclient = HttpClients.createDefault();
-try {
-	HttpGet get = new HttpGet("https://my.matterport.com/api/v1/jsonstore/model/highlights/N6HuPecF32y/active_reel");
-	get.addHeader("Referer","https://my.matterport.com/show/?m=N6HuPecF32y");
-	get.addHeader("Accept-Encoding","gzip, deflate, sdch, br");
-	get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36");
-	get.addHeader("Accept","application/json");
-	get.addHeader("Connection","keep-alive");
-	
-	CloseableHttpResponse response = null;
-	try {
-		response = httpclient.execute(get);
-		int code = response.getStatusLine().getStatusCode()
-		HttpEntity resEntity = response.getEntity();
-		if(code == 200){
-			if (resEntity != null) {
-				
-				String text = IOUtils.toString(resEntity.getContent());
-				println text;				
-			}
-		}		
-		EntityUtils.consume(resEntity);
-		
-	}catch(e){
-		
-		e.printStackTrace()
-	} finally {
-		response.close();
-	}
-} finally {
-	httpclient.close();
-}
-
+//CloseableHttpClient httpclient = HttpClients.createDefault();
+//try {
+//	HttpGet get = new HttpGet("https://my.matterport.com/api/v1/jsonstore/model/highlights/N6HuPecF32y/active_reel");
+//	get.addHeader("Referer","https://my.matterport.com/show/?m=N6HuPecF32y");
+//	get.addHeader("Accept-Encoding","gzip, deflate, sdch, br");
+//	get.addHeader("User-Agent","Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.116 Safari/537.36");
+//	get.addHeader("Accept","application/json");
+//	get.addHeader("Connection","keep-alive");
+//	
+//	CloseableHttpResponse response = null;
+//	try {
+//		response = httpclient.execute(get);
+//		int code = response.getStatusLine().getStatusCode()
+//		HttpEntity resEntity = response.getEntity();
+//		if(code == 200){
+//			if (resEntity != null) {
+//				
+//				String text = IOUtils.toString(resEntity.getContent());
+//				println text;				
+//			}
+//		}		
+//		EntityUtils.consume(resEntity);
+//		
+//	}catch(e){
+//		
+//		e.printStackTrace()
+//	} finally {
+//		response.close();
+//	}
+//} finally {
+//	httpclient.close();
+//}
+println java.util.UUID.randomUUID().toString()

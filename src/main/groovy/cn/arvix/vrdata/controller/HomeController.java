@@ -65,6 +65,9 @@ public class HomeController {
 			log.info("modelData.getOnline()-->"+modelData.getOnline()+" title:"+modelData.getTitle());
 			if(null==modelData.getUseMatterportLink()||true==modelData.getUseMatterportLink()){
 				viewName = "redirect:"+modelData.getSourceUrl();
+				if(!viewName.endsWith("&play=1")){
+					viewName = viewName + "&play=1";
+				}
 			}else{
 				if(null!=modelData.getOnline()&&modelData.getOnline()){
 					model.addAttribute("modelData",modelData );
@@ -84,4 +87,10 @@ public class HomeController {
 	public String show2(Model model, HttpServletRequest request) {
 		return "redirect:/show/?m="+request.getParameter("m");
 	}
+	
+	@RequestMapping("/models/group_1258/job_400c3158-26b8-461b-8c37-ddd2b322a7c4/wf_5465b36db14041d191d36bd4f0719843/mesh/1.1.407.13667/2016-09-09_2039.56/~/{{filename}}")
+	public String aaa(Model model, HttpServletRequest request) {
+		return "redirect:/show/?m="+request.getParameter("m");
+	}
+	
 }

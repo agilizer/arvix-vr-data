@@ -68,6 +68,10 @@ dependencies {
     compile 'org.apache.httpcomponents:httpclient:4.5.1'
     compile 'org.apache.httpcomponents:httpmime:4.5.1'
 	
+	// https://mvnrepository.com/artifact/com.google.protobuf/protobuf-java
+	compile group: 'com.google.protobuf', name: 'protobuf-java', version: '3.1.0'
+	
+	
 }
 
 eclipse {
