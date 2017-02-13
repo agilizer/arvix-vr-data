@@ -62,6 +62,14 @@ public class HomeController {
 		StaticMethod.cros(response);
 		
 		if(modelData!=null){
+			String userAgent = request.getHeader("user-agent");
+			boolean isIphone10_2_1 = false;
+			if(userAgent!=null){
+				//iPhone OS 10_2_1
+				if(userAgent.contains("iPhone OS 10_2_1")||userAgent.contains("iPhone OS 10_0")){
+					isIphone10_2_1 = true ;
+				}
+			}
 			log.info("modelData.getOnline()-->"+modelData.getOnline()+" title:"+modelData.getTitle());
 			if(null==modelData.getUseMatterportLink()||true==modelData.getUseMatterportLink()){
 				viewName = "redirect:"+modelData.getSourceUrl();
@@ -69,15 +77,23 @@ public class HomeController {
 					viewName = viewName + "&play=1";
 				}
 			}else{
-				if(null!=modelData.getOnline()&&modelData.getOnline()){
-					model.addAttribute("modelData",modelData );
-					model.addAttribute("caseId",caseId );
-					model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
-					model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
-					viewName = "show-"+modelData.getJsVersion();
+				if(isIphone10_2_1){
+					viewName = "redirect:"+modelData.getSourceUrl();
+					if(!viewName.endsWith("&play=1")){
+						viewName = viewName + "&play=1";
+					}
 				}else{
-					viewName = "404";
+					if(null!=modelData.getOnline()&&modelData.getOnline()){
+						model.addAttribute("modelData",modelData );
+						model.addAttribute("caseId",caseId );
+						model.addAttribute("siteUrl", configDomainService.getConfig(ArvixDataConstants.SITE_URL));
+						model.addAttribute("teamDesc", configDomainService.getConfig(ArvixDataConstants.TEAM_DESCRIPTION));
+						viewName = "show-"+modelData.getJsVersion();
+					}else{
+						viewName = "404";
+					}
 				}
+				
 			}
 		}
 		return viewName;
